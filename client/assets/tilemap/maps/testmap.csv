@@ -1,5 +1,6 @@
-f1, wb2, wbel, wcul, wtr
-wb2, wb2, wbel, wcul, wcul
-wbel, wb2, wbel, wcul, wbel
-wcul, wb2, wbel, wcul, wb2
-wtr, wb2, wbel, wcul, f1
+wtl,wtm,wtm,wtm,wtm,wtm,wtle
+wbl,wb1,wbm,wbm,wb4,wbr,wcul,wtm,wtle
+f1, f2, f3, f4, f7, f6, wbl, wbr,wber
+f4, f7, f1, f5, f2, f1, f11, f7, wber
+f1, f8, f6, f3, f1, f6, f4, f2, wber
+wal,wcar,f2,wcal,wam,wam,wam,wam,wclu
