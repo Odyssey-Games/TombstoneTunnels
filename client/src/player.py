@@ -6,15 +6,9 @@ from common.src.packets.c2s.PlayerMovePacket import PlayerMovePacket
 class Entity:
     def __init__(self, position: pygame.Vector2 = pygame.Vector2(0, 0)):
         self.position = position
-        self.velocity = pygame.Vector2(0, 0)
-        self.friction = 0.1
-        self.acceleration = 20
+
         self.maxSpeed = 1.7
 
-        self.movingUp = False
-        self.movingDown = False
-        self.movingLeft = False
-        self.movingRight = False
 
         self.sprite = None
 
@@ -26,6 +20,15 @@ class Player(Entity):
     def __init__(self, client, position: pygame.Vector2 = pygame.Vector2(0, 0)):
         Entity.__init__(self, position)
         self.client = client  # todo global client instance?
+        
+        self.velocity = pygame.Vector2(0, 0)
+        self.friction = 0.1
+        self.acceleration = 20
+
+        self.movingUp = False
+        self.movingDown = False
+        self.movingLeft = False
+        self.movingRight = False
 
     def update(self, deltaTime, pygameEvents):
         self.handleEvents(pygameEvents)
