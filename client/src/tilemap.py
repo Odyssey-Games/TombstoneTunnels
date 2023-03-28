@@ -49,6 +49,7 @@ class TileMap:
             for x, tilename in enumerate(row):
                 if tilename == "":
                     continue
+                    
                 surface.blit(
                     self.tileTypeManager.tileTypes[tilename].image,
                     (
