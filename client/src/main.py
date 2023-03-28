@@ -3,8 +3,8 @@ from pygame.locals import *
 
 from tilemap import *
 
-PATHTOTILEIMAGES = "TombstoneTunnels\\client\\assets\\tilemap\\tiles"
-PATHTOTESTMAP = "TombstoneTunnels\\client\\assets\\tilemap\\maps\\testmap.csv"
+PATHTOTILEIMAGES = os.path.join(os.path.dirname(__file__), "..", "assets", "tilemap", "tiles")
+PATHTOTESTMAP = os.path.join(os.path.dirname(__file__), "..", "assets", "tilemap", "maps", "testmap.csv")
 
 pygame.init()
 
