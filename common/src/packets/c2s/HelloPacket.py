@@ -8,6 +8,6 @@ class HelloPacket(Packet):
 
     name = unique? todo name servers/login method?
     """
+
     def __init__(self, name):
         self.name = name
-
