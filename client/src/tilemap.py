@@ -40,7 +40,7 @@ class TileMap:
         except:
             print(f"Failed to load mapfile at {path}")
         for index, line in enumerate(data):
-            data[index] = line.replace(" ", "").replace("\n", "").split(";")
+            data[index] = line.replace(" ", "").replace("\n", "").split(",")
 
         self.tileMap = data
 
