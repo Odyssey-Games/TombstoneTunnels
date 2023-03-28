@@ -1,3 +1,4 @@
+from client_networking import ClientNetworking
 from debug import *
 from player import *
 from tilemap import *
@@ -22,9 +23,12 @@ ofx = 0
 dt = 0  # deltaTime
 
 # class instances
+client_networking = ClientNetworking()
 tileMap = TileMap(16, PATHTOTILEIMAGES, PATHTOTESTMAP, pygame.Vector2(0, 0))
 debugger = Debugger()
-player = Player(pygame.Vector2(100, 100))
+player = Player(client_networking, pygame.Vector2(100, 100))
+
+client_networking.try_login()  # todo login screen / main menu; only do this when the player presses the PLAY button
 
 while running:
     # events
@@ -35,6 +39,9 @@ while running:
             running = False
         elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
             running = False
+
+    # handle available packets from the server
+    client_networking.tick()
 
     # update game logic
     player.update(dt, events)

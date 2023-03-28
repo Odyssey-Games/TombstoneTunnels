@@ -6,8 +6,10 @@ from time import sleep, time
 
 from User import User
 from common.src.common import print_hi
+from common.src.packets.c2s.AuthorizedPacket import AuthorizedPacket
 from common.src.packets.c2s.HelloPacket import *
 from common.src.packets.c2s.PingPacket import PingPacket
+from common.src.packets.c2s.PlayerMovePacket import PlayerMovePacket
 from common.src.packets.c2s.RequestInfoPacket import RequestInfoPacket
 from common.src.packets.s2c.HelloReplyPacket import HelloReplyPacket
 from common.src.packets.s2c.InfoReplyPacket import InfoReplyPacket
@@ -36,6 +38,10 @@ class Server:
         if not isinstance(packet, Packet):
             print(f"Received invalid packet: {packet}")
             return None, None
+        if isinstance(packet, AuthorizedPacket):
+            if packet.token is None or packet.token not in [client.token for client in self.clients]:
+                print(f"Received packet from unauthorized client: {packet}")
+                return None, None
         return packet, addr
 
     def manage_timeouts(self):
@@ -57,6 +63,9 @@ if __name__ == '__main__':
     server = Server(('localhost', 5000))
     while True:
         client_packet, client_addr = server.rcvfrom(1024)
+        if client_packet is None or client_addr is None:
+            continue
+
         print(f"Received {client_packet} from {client_addr}")
         if isinstance(client_packet, HelloPacket):
             if client_packet.name in [client.name for client in server.clients]:
@@ -81,3 +90,6 @@ if __name__ == '__main__':
                 if client.addr == client_addr:
                     client.last_ping = time()
                     break
+
+        elif isinstance(client_packet, PlayerMovePacket):
+            print(f"Received player move from {client_addr} with new position: {client_packet.position}")
