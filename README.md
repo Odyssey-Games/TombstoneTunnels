@@ -13,6 +13,15 @@
 
 ## Testing
 
-1. Create virtual environment (recommended): `python -m venv env`
+<details>
+
+<summary>Setup virtual environment: (recommended):</summary>
+
+1. Create virtual environment: `python -m venv env`
 2. Activate virtual environment: `.\env\Scripts\activate` (Windows) or `source env/bin/activate` (Unix)
-3. Install dependencies: `pip install -r requirements.txt`
+
+</details>
+
+1. Install dependencies: `pip install -r requirements.txt`
+2. Run server: `python server/src/main.py`
+3. Run client: `python client/src/main.py`
