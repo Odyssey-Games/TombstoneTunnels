@@ -10,3 +10,18 @@
 - un-dead mobs (skeletons, zombies)
 - randomly generated levels
 - close-range/melee combat
+
+## Testing
+
+<details>
+
+<summary>Setup virtual environment: (recommended):</summary>
+
+1. Create virtual environment: `python -m venv env`
+2. Activate virtual environment: `.\env\Scripts\activate` (Windows) or `source env/bin/activate` (Unix)
+
+</details>
+
+1. Install dependencies: `pip install -r requirements.txt`
+2. Run server: `python server/src/main.py`
+3. Run client: `python client/src/main.py`
