@@ -1,4 +1,10 @@
-class AuthorizedPacket:
+from common.src.packets.Packet import Packet
+
+
+class AuthorizedPacket(Packet):
+    def __init__(self):
+        self.token = None
+
     """Baseclass for all packets that are sent when the client is already authorized.
 
     Example: PlayerMovePacket, PlayerAttackEntityPacket, etc.

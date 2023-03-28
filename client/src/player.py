@@ -1,5 +1,7 @@
 import pygame
 
+from common.src.packets.c2s.PlayerMovePacket import PlayerMovePacket
+
 
 class Entity:
     def __init__(self, position: pygame.Vector2 = pygame.Vector2(0, 0)):
@@ -21,8 +23,9 @@ class Entity:
 
 
 class Player(Entity):
-    def __init__(self, position: pygame.Vector2 = pygame.Vector2(0, 0)):
+    def __init__(self, client, position: pygame.Vector2 = pygame.Vector2(0, 0)):
         Entity.__init__(self, position)
+        self.client = client  # todo global client instance?
 
     def update(self, deltaTime, pygameEvents):
         self.handleEvents(pygameEvents)
@@ -80,3 +83,8 @@ class Player(Entity):
 
         self.position.x += self.velocity.x
         self.position.y += self.velocity.y
+
+        if self.velocity.x != 0 or self.velocity.y != 0:
+            # Send new position to server
+            move_packet = PlayerMovePacket(self.position)
+            self.client.send_packet(move_packet)
