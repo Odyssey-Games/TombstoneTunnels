@@ -64,15 +64,22 @@ class Player(Entity):
 
         fixedAccel = (self.acceleration * deltaTime)
 
-        if self.movingRight:
-            self.velocity.x = max(min(self.velocity.x+fixedAccel, self.maxSpeed), -self.maxSpeed) 
-        elif self.movingLeft:
-            self.velocity.x = max(min(self.velocity.x-fixedAccel, self.maxSpeed), -self.maxSpeed)
+        # scaler is used to solve the problem of dioganal movement being faster because of two force additions. 
+        scaler = 1
+        if (self.movingDown ^ self.movingUp) and (self.movingLeft ^ self.movingRight):
+            scaler = .71
 
-        if self.movingDown:
-            self.velocity.y = max(min(self.velocity.y+fixedAccel, self.maxSpeed), -self.maxSpeed) 
-        elif self.movingUp:
-            self.velocity.y = max(min(self.velocity.y-fixedAccel, self.maxSpeed), -self.maxSpeed)
+        if self.movingRight:
+            self.velocity.x = max(min(self.velocity.x+fixedAccel, self.maxSpeed * scaler), -self.maxSpeed * scaler) 
+        elif self.movingLeft:  
+            self.velocity.x = max(min(self.velocity.x-fixedAccel, self.maxSpeed * scaler), -self.maxSpeed * scaler)
+  
+        if self.movingDown:  
+            self.velocity.y = max(min(self.velocity.y+fixedAccel, self.maxSpeed * scaler), -self.maxSpeed * scaler) 
+        elif self.movingUp:  
+            self.velocity.y = max(min(self.velocity.y-fixedAccel, self.maxSpeed * scaler), -self.maxSpeed * scaler)
+
+        
 
         self.position.x += self.velocity.x
         self.position.y += self.velocity.y
