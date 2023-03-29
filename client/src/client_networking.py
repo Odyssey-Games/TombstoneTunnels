@@ -2,14 +2,15 @@ import pickle
 from socket import socket, AF_INET, SOCK_DGRAM
 from time import time
 
-from common.src.packets.c2s.PingPacket import PingPacket
-from player import *
 from common.src.packets.Packet import Packet
 from common.src.packets.c2s.AuthorizedPacket import AuthorizedPacket
 from common.src.packets.c2s.HelloPacket import HelloPacket
+from common.src.packets.c2s.PingPacket import PingPacket
 from common.src.packets.s2c.HelloReplyPacket import HelloReplyPacket
+from common.src.packets.s2c.PlayerMovePacket import PlayerMovePacket
 from common.src.packets.s2c.PlayerSpawnPacket import PlayerSpawnPacket
 from common.src.packets.s2c.PongPacket import PongPacket
+from player import *
 
 PING_INTERVAL = 1  # we send a ping packet every second
 PONG_TIMEOUT = 5  # we wait 5 seconds for a pong packet before we assume that the connection to the server is lost
@@ -25,6 +26,7 @@ class ClientNetworking:
         self.token = None  # auth token that we get from the server when it accepts our HelloPacket
         self.player_uuid = None
         self.player = None
+        self.entities = []  # other entities, can also be other players
         self.last_ping = time()
         self.last_server_pong = time()
 
@@ -68,10 +70,16 @@ class ClientNetworking:
             if self.player_uuid == packet.uuid:
                 # this is our player
                 self.player = Player(self, packet.uuid, packet.position)
-                pass
             else:
                 # this is another player, todo add to entities
-                pass
+                self.entities.append(Player(self, packet.uuid, packet.position))
+        elif isinstance(packet, PlayerMovePacket):
+            print("Received player move packet.")
+            # find player in entities and update position
+            for entity in self.entities:
+                if entity.uuid == packet.uuid:
+                    entity.position = packet.position
+                    break
         # todo handle other packets here
 
     def tick(self) -> bool:

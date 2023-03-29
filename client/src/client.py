@@ -1,3 +1,5 @@
+import random
+
 from client_networking import ClientNetworking
 from debug import *
 from player import Player
@@ -23,14 +25,13 @@ ofx = 0
 dt = 0  # deltaTime
 
 # class instances
-client_networking = ClientNetworking()
+client_networking = ClientNetworking(f"Cool Name {random.randint(0, 1000000)}")
 tileMap = TileMap(16, PATHTOTILEIMAGES, PATHTOTESTMAP, pygame.Vector2(0, 0))
 debugger = Debugger()
 # player = Player(client_networking, pygame.Vector2(100, 100))
 
 client_networking.try_login()  # todo login screen / main menu; only do this when the player presses the PLAY button
 
-entities = []  # other players, etc.
 # noinspection PyTypeChecker
 player = None  # our player
 
@@ -49,6 +50,7 @@ while running:
         raise Exception("Disconnected")
 
     # render other entities
+    entities = client_networking.entities
     for entity in entities:
         entity.render(mainSurf)
 
@@ -65,6 +67,7 @@ while running:
 
     debugger.debug(f"player position: {round(player.position.x, 3)}, {round(player.position.y, 3)}")
     debugger.debug(f"player velocity: {round(player.velocity.x, 3)}, {round(player.velocity.y, 3)}")
+    debugger.debug(f"entity count (without own player): {len(entities)}")
 
     debugger.debug(int(clock.get_fps()))
 
