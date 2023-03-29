@@ -74,7 +74,6 @@ class ClientNetworking:
                 # this is another player, todo add to entities
                 self.entities.append(Player(self, packet.uuid, packet.position))
         elif isinstance(packet, PlayerMovePacket):
-            print("Received player move packet.")
             # find player in entities and update position
             for entity in self.entities:
                 if entity.uuid == packet.uuid:

@@ -127,7 +127,7 @@ if __name__ == '__main__':
 
             elif isinstance(client_packet, ClientMovePacket):
                 # noinspection PyUnboundLocalVariable
-                user = next((client for client in server.clients if client.token == token), None)
+                user = next((client for client in server.clients if client.token == client_packet.token), None)
                 user.position = client_packet.position
 
                 # todo broadcast to other clients each tick (not instantly)
