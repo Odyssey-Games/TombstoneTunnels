@@ -5,6 +5,11 @@ from threading import Thread
 from time import sleep, time
 
 from User import User
+
+import os
+import sys
+sys.path.insert(1, os.path.join(sys.path[0], '..\\..'))
+
 from common.src.common import print_hi
 from common.src.packets.c2s.AuthorizedPacket import AuthorizedPacket
 from common.src.packets.c2s.HelloPacket import *
