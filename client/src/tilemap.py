@@ -48,17 +48,16 @@ class TileMap:
 
         self.tileMap = data
 
-    def render(self, surface: pygame.Surface,
-               offset: pygame.Vector2):  # unoptimised rendering, assuming tilemap is relatively small
+    def render(self, camera):  # unoptimised rendering, assuming tilemap is relatively small
         for y, row in enumerate(self.tileMap):
             for x, tilename in enumerate(row):
                 if tilename == "":
                     continue
 
-                surface.blit(
+                camera.renderTexture.blit(
                     self.tileTypeManager.tileTypes[tilename].image,
                     (
-                        self.position.x + (x * self.tileSize) + offset.x,
-                        self.position.y + (y * self.tileSize) + offset.y
+                        self.position.x + (x * self.tileSize) - camera.position.x,
+                        self.position.y + (y * self.tileSize) - camera.position.y
                     )
                 )

@@ -12,8 +12,8 @@ class Entity:
 
         self.sprite = None
 
-    def render(self, surface: pygame.Surface):
-        pygame.draw.circle(surface, (255, 0, 0), self.position, 5)
+    def render(self, camera):
+        pygame.draw.circle(camera.renderTexture, (255, 0, 0), self.position-camera.position, 5)
 
 
 class Player(Entity):
@@ -65,11 +65,6 @@ class Player(Entity):
             self.velocity.x = 0
         if self.velocity.y > -0.001 and self.velocity.y < 0.001:
             self.velocity.y = 0
-
-        if self.velocity.y < 0:
-            self.velocity.y = min(0, self.velocity.y + fixedFrict)
-        elif self.velocity.y > 0:
-            self.velocity.y = max(0, self.velocity.y - fixedFrict)
 
         # scaler is used to solve the problem of dioganal movement being faster because of two force additions. 
         scaler = 1
