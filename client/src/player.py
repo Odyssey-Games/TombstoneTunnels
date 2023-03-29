@@ -1,6 +1,6 @@
 import pygame
 
-from common.src.packets.c2s.PlayerMovePacket import PlayerMovePacket
+from common.src.packets.c2s.ClientMovePacket import ClientMovePacket
 
 
 class Entity:
@@ -17,10 +17,11 @@ class Entity:
 
 
 class Player(Entity):
-    def __init__(self, client, position: pygame.Vector2 = pygame.Vector2(0, 0)):
+    def __init__(self, client, uuid, position: pygame.Vector2 = pygame.Vector2(0, 0)):
         Entity.__init__(self, position)
         self.client = client  # todo global client instance?
-        
+        self.uuid = uuid
+
         self.velocity = pygame.Vector2(0, 0)
         self.friction = 0.1
         self.acceleration = 20
@@ -69,19 +70,19 @@ class Player(Entity):
 
         fixedAccel = (self.acceleration * deltaTime)
 
-        # scaler is used to solve the problem of dioganal movement being faster because of two force additions. 
+        # scaler is used to solve the problem of diagonal movement being faster because of two force additions.
         scaler = 1
         if (self.movingDown ^ self.movingUp) and (self.movingLeft ^ self.movingRight):
             scaler = .71
 
         if self.movingRight:
-            self.velocity.x = max(min(self.velocity.x+fixedAccel, self.maxSpeed * scaler), -self.maxSpeed * scaler) 
-        elif self.movingLeft:  
+            self.velocity.x = max(min(self.velocity.x+fixedAccel, self.maxSpeed * scaler), -self.maxSpeed * scaler)
+        elif self.movingLeft:
             self.velocity.x = max(min(self.velocity.x-fixedAccel, self.maxSpeed * scaler), -self.maxSpeed * scaler)
-  
-        if self.movingDown:  
-            self.velocity.y = max(min(self.velocity.y+fixedAccel, self.maxSpeed * scaler), -self.maxSpeed * scaler) 
-        elif self.movingUp:  
+
+        if self.movingDown:
+            self.velocity.y = max(min(self.velocity.y+fixedAccel, self.maxSpeed * scaler), -self.maxSpeed * scaler)
+        elif self.movingUp:
             self.velocity.y = max(min(self.velocity.y-fixedAccel, self.maxSpeed * scaler), -self.maxSpeed * scaler)
 
         self.position.x += self.velocity.x
@@ -89,5 +90,9 @@ class Player(Entity):
 
         if self.velocity.x != 0 or self.velocity.y != 0:
             # Send new position to server
-            move_packet = PlayerMovePacket(self.position)
-            self.client.send_packet(move_packet)
+            move_packet = ClientMovePacket(self.position)
+            try:
+                self.client.send_packet(move_packet)
+            except Exception as e:
+                print("Error while sending move packet.")
+                print(e)
