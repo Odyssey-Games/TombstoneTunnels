@@ -7,5 +7,6 @@ class HelloReplyPacket(Packet):
     This will be the case if the server/game is not yet full (and has not yet started!).
     """
 
-    def __init__(self, token):
+    def __init__(self, token, player_uuid):
         self.token = token
+        self.player_uuid = player_uuid

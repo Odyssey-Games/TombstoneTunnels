@@ -1,6 +1,8 @@
+import random
+
 from client_networking import ClientNetworking
 from debug import *
-from player import *
+from player import Player
 from tilemap import *
 from camera import *
 
@@ -27,16 +29,19 @@ camera = Camera(
     position=pygame.Vector2(0,0)
     )
 
-client_networking = ClientNetworking()
-player = Player(client_networking, pygame.Vector2(100, 100))
+client_networking = ClientNetworking("Client " + str(random.randint(1, 10000)))
+# player = Player(client_networking, pygame.Vector2(100, 100))
 
 camera.mode = camera.FOLLOWTARGET
-camera.target = player
+#camera.target = player
 
 tileMap = TileMap(16, PATHTOTILEIMAGES, PATHTOTESTMAP, pygame.Vector2(0, 0))
 debugger = Debugger()
 
 client_networking.try_login()  # todo login screen / main menu; only do this when the player presses the PLAY button
+
+# noinspection PyTypeChecker
+player = None  # our player
 
 while running:
     # events
@@ -62,16 +67,32 @@ while running:
             camera.screenshake = not camera.screenshake
             
     # handle available packets from the server
-    client_networking.tick()
+    if not client_networking.tick():
+        raise Exception("Disconnected")
+
+    tileMap.render(camera)  # render entities over tilemap!
+
+    # render other entities
+    entities = client_networking.entities
+    for entity in entities:
+        entity.render(camera)
+
+    player = client_networking.player
+    if player is None:
+        continue
+    camera.target = player  # assign target as soon as player is available
 
 
-    # update game logic
+    # update game logic for our player
+    # in the Player.update() method the PlayerMovePacket is sent if the player's position changed
+    # in the future we probably only want to send this packet every tick (e.g. 20/60 times per second)
     player.update(dt, events)
 
-    # render game
-    tileMap.render(camera)
+    # render player
     player.render(camera)
 
+    # debug output (we want to render this over everything else)
+    debugger.debug(f"entity count (without own player): {len(entities)}")
     debugger.debug(int(clock.get_fps()))
 
     # needs to come last
