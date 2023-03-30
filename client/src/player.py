@@ -1,4 +1,4 @@
-import pygame
+import pygame, math
 
 from common.src.packets.c2s.ClientMovePacket import ClientMovePacket
 
@@ -7,13 +7,13 @@ class Entity:
     def __init__(self, position: pygame.Vector2 = pygame.Vector2(0, 0)):
         self.position = position
 
-        self.maxSpeed = 1.7
+        self.maxSpeed = 120
 
 
         self.sprite = None
 
-    def render(self, surface: pygame.Surface):
-        pygame.draw.circle(surface, (255, 0, 0), self.position, 5)
+    def render(self, camera):
+        pygame.draw.circle(camera.renderTexture, (255, 0, 0), self.position-camera.position, 5)
 
 
 class Player(Entity):
@@ -23,8 +23,8 @@ class Player(Entity):
         self.uuid = uuid
 
         self.velocity = pygame.Vector2(0, 0)
-        self.friction = 0.1
-        self.acceleration = 20
+        self.friction = 0.02
+        self.acceleration = 50
 
         self.movingUp = False
         self.movingDown = False
@@ -58,35 +58,35 @@ class Player(Entity):
                     self.movingDown = False
 
     def updatePosition(self, deltaTime):
-        if self.velocity.x < 0:
-            self.velocity.x = min(0, self.velocity.x + self.friction)
-        elif self.velocity.x > 0:
-            self.velocity.x = max(0, self.velocity.x - self.friction)
+        fixedFrict = pow(self.friction, deltaTime)
+        self.velocity.y *= fixedFrict
+        self.velocity.x *= fixedFrict
 
-        if self.velocity.y < 0:
-            self.velocity.y = min(0, self.velocity.y + self.friction)
-        elif self.velocity.y > 0:
-            self.velocity.y = max(0, self.velocity.y - self.friction)
-
-        fixedAccel = (self.acceleration * deltaTime)
+        if self.velocity.x > -0.001 and self.velocity.x < 0.001:
+            self.velocity.x = 0
+        if self.velocity.y > -0.001 and self.velocity.y < 0.001:
+            self.velocity.y = 0
 
         # scaler is used to solve the problem of diagonal movement being faster because of two force additions.
         scaler = 1
         if (self.movingDown ^ self.movingUp) and (self.movingLeft ^ self.movingRight):
             scaler = .71
 
+        fixedAccel = self.acceleration * deltaTime * 10
+        fixedMaxSpeed = self.maxSpeed
+
         if self.movingRight:
-            self.velocity.x = max(min(self.velocity.x+fixedAccel, self.maxSpeed * scaler), -self.maxSpeed * scaler)
-        elif self.movingLeft:
-            self.velocity.x = max(min(self.velocity.x-fixedAccel, self.maxSpeed * scaler), -self.maxSpeed * scaler)
+            self.velocity.x = max(min(self.velocity.x+fixedAccel, fixedMaxSpeed * scaler), -fixedMaxSpeed * scaler) 
+        elif self.movingLeft:  
+            self.velocity.x = max(min(self.velocity.x-fixedAccel, fixedMaxSpeed * scaler), -fixedMaxSpeed * scaler)
+  
+        if self.movingDown:  
+            self.velocity.y = max(min(self.velocity.y+fixedAccel, fixedMaxSpeed * scaler), -fixedMaxSpeed * scaler) 
+        elif self.movingUp:  
+            self.velocity.y = max(min(self.velocity.y-fixedAccel, fixedMaxSpeed * scaler), -fixedMaxSpeed * scaler)
 
-        if self.movingDown:
-            self.velocity.y = max(min(self.velocity.y+fixedAccel, self.maxSpeed * scaler), -self.maxSpeed * scaler)
-        elif self.movingUp:
-            self.velocity.y = max(min(self.velocity.y-fixedAccel, self.maxSpeed * scaler), -self.maxSpeed * scaler)
-
-        self.position.x += self.velocity.x
-        self.position.y += self.velocity.y
+        self.position.x += self.velocity.x * deltaTime
+        self.position.y += self.velocity.y * deltaTime
 
         if self.velocity.x != 0 or self.velocity.y != 0:
             # Send new position to server
