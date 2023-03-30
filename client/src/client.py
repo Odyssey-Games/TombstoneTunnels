@@ -70,6 +70,8 @@ while running:
     if not client_networking.tick():
         raise Exception("Disconnected")
 
+    tileMap.render(camera)  # render entities over tilemap!
+
     # render other entities
     entities = client_networking.entities
     for entity in entities:
@@ -81,14 +83,16 @@ while running:
     camera.target = player  # assign target as soon as player is available
 
 
-    # update game logic
+    # update game logic for our player
+    # in the Player.update() method the PlayerMovePacket is sent if the player's position changed
+    # in the future we probably only want to send this packet every tick (e.g. 20/60 times per second)
     player.update(dt, events)
 
-    # render game
-    debugger.debug(f"entity count (without own player): {len(entities)}")
-    tileMap.render(camera)
+    # render player
     player.render(camera)
 
+    # debug output (we want to render this over everything else)
+    debugger.debug(f"entity count (without own player): {len(entities)}")
     debugger.debug(int(clock.get_fps()))
 
     # needs to come last
