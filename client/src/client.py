@@ -84,17 +84,9 @@ while running:
     player.update(dt, events)
 
     # render game
-<<<<<<< HEAD
-    # tileMap.render(mainSurf, pygame.Vector2(ofx,ofy))
-    player.render(mainSurf)
-
-    debugger.debug(f"player position: {round(player.position.x, 3)}, {round(player.position.y, 3)}")
-    debugger.debug(f"player velocity: {round(player.velocity.x, 3)}, {round(player.velocity.y, 3)}")
     debugger.debug(f"entity count (without own player): {len(entities)}")
-=======
     tileMap.render(camera)
     player.render(camera)
->>>>>>> 0326b33636e264b80028b30da91bd272055ee318
 
     debugger.debug(int(clock.get_fps()))
 
