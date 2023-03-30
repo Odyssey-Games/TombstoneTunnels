@@ -6,6 +6,10 @@ import os
 import sys
 sys.path.insert(1, os.path.join(sys.path[0], '..\\..'))
 
+import os
+import sys
+sys.path.insert(1, os.path.join(sys.path[0], '..\\..'))
+
 from common.src.packets.Packet import Packet
 from common.src.packets.c2s.AuthorizedPacket import AuthorizedPacket
 from common.src.packets.c2s.HelloPacket import HelloPacket
