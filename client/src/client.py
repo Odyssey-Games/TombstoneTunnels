@@ -29,7 +29,7 @@ camera = Camera(
     position=pygame.Vector2(0,0)
     )
 
-client_networking = ClientNetworking()
+client_networking = ClientNetworking("Client " + random.randint(1, 10000))
 # player = Player(client_networking, pygame.Vector2(100, 100))
 
 camera.mode = camera.FOLLOWTARGET
