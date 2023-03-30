@@ -53,9 +53,9 @@ class Camera:
         self.renderTexture.fill((0,0,0))
         self.display.fill((255,0,0))
     
-    def worldToScr(point:pygame.Vector2):
+    def worldToScr(self, point:pygame.Vector2):
         return point-self.position
         
-    def scrToWorld(point:pygame.Vector2):
+    def scrToWorld(self, point:pygame.Vector2):
         return point+self.position
     
