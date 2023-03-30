@@ -29,7 +29,7 @@ camera = Camera(
     position=pygame.Vector2(0,0)
     )
 
-client_networking = ClientNetworking("Client " + random.randint(1, 10000))
+client_networking = ClientNetworking("Client " + str(random.randint(1, 10000)))
 # player = Player(client_networking, pygame.Vector2(100, 100))
 
 camera.mode = camera.FOLLOWTARGET
@@ -73,7 +73,7 @@ while running:
     # render other entities
     entities = client_networking.entities
     for entity in entities:
-        entity.render(mainSurf)
+        entity.render(camera)
 
     player = client_networking.player
     if player is None:
