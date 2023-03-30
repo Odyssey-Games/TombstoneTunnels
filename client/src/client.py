@@ -33,7 +33,7 @@ client_networking = ClientNetworking()
 # player = Player(client_networking, pygame.Vector2(100, 100))
 
 camera.mode = camera.FOLLOWTARGET
-camera.target = player
+#camera.target = player
 
 tileMap = TileMap(16, PATHTOTILEIMAGES, PATHTOTESTMAP, pygame.Vector2(0, 0))
 debugger = Debugger()
@@ -78,6 +78,7 @@ while running:
     player = client_networking.player
     if player is None:
         continue
+    camera.target = player  # assign target as soon as player is available
 
 
     # update game logic
