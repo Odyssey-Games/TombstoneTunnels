@@ -7,7 +7,7 @@ from time import time
 
 from User import User
 
-sys.path.insert(1, os.path.join(sys.path[0], '..\\..'))
+sys.path.insert(1, os.path.join(sys.path[0], '..', os.sep, '..'))
 
 from common.src.packets.c2s.DisconnectPacket import DisconnectPacket
 from common.src.common import print_hi
