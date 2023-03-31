@@ -1,7 +1,8 @@
-from tilemap import TileMap
-from debug import *
-from camera import *
 import os
+
+from camera import *
+from debug import *
+from tilemap import TileMap
 
 PATHTOTILEIMAGES = os.path.join(os.path.dirname(__file__), "..", "assets", "tilemap", "tiles")
 PATHTOTESTMAP = os.path.join(os.path.dirname(__file__), "..", "assets", "tilemap", "maps", "testmap.csv")
@@ -15,12 +16,14 @@ class ClientRenderer:
         self.dt = 0
         # set camera before tilemap (pygame image mode has to be set for loading images in tilemap)
         self.camera = Camera(
-            screenSize=pygame.Vector2(1000, 800),
+            screenSize=pygame.Vector2(1000, 600),
             virtualScrSizeScaler=4,
-            position=pygame.Vector2(0, 0)
+            position=pygame.Vector2(0, 0),
+            # does pygame.HWACCEL make a difference?
+            display_flags=pygame.HWACCEL | pygame.SCALED,
         )
         self.tilemap = TileMap(16, PATHTOTILEIMAGES, PATHTOTESTMAP, pygame.Vector2(0, 0))
-        self.camera.mode = self.camera.FOLLOWTARGET
+        self.camera.mode = self.camera.FOLLOW_TARGET
         self.debugger = Debugger()
 
     def tick(self, events, dt):
