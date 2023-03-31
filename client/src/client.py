@@ -16,6 +16,13 @@ class Client:
         self.entities = []  # other entities, can also be other players
         self.state = client_state.MAIN_MENU
 
+    def _disconnect(self):
+        """Reset variables. Note that networking.disconnect() has to be called separately (when necessary)."""
+        self.state = client_state.MAIN_MENU
+        self.player = None
+        self.player_uuid = None
+        self.entities.clear()
+
     def run(self):
         while self.running:
             dt = self.clock.tick() / 1000
@@ -24,9 +31,7 @@ class Client:
                 if not self.networking.tick(events, dt):
                     # disconnected from server; go to main menu
                     print("Disconnected from server.")
-                    self.state = client_state.MAIN_MENU
-                    self.player = None
-                    self.player_uuid = None
+                    self._disconnect()
             self.tick(events, dt)
             self.renderer.tick(self.state, events, dt)
 
@@ -41,9 +46,7 @@ class Client:
                 else:
                     print("Disconnecting from server...")
                     self.networking.disconnect()
-                    self.state = client_state.MAIN_MENU
-                    self.player = None
-                    self.player_uuid = None
+                    self._disconnect()
 
         if self.player:
             self.player.update(dt, events)
