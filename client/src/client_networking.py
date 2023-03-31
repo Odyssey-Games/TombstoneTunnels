@@ -18,6 +18,7 @@ from common.src.packets.c2s.PingPacket import PingPacket
 from common.src.packets.s2c.HelloReplyPacket import HelloReplyPacket
 from common.src.packets.s2c.PlayerMovePacket import PlayerMovePacket
 from common.src.packets.s2c.PlayerSpawnPacket import PlayerSpawnPacket
+from common.src.packets.s2c.PlayerRemovePacket import PlayerRemovePacket
 from common.src.packets.s2c.PongPacket import PongPacket
 from player import *
 import client_state
@@ -108,10 +109,16 @@ class ClientNetworking:
                 if entity.uuid == packet.uuid:
                     entity.position = packet.position
                     break
+        elif isinstance(packet, PlayerRemovePacket):
+            # find player in entities and remove it
+            # get entity first to prevent concurrent modification?
+            client_entity = next((entity for entity in self.client.entities if entity.uuid == packet.uuid), None)
+            if client_entity:
+                self.client.entities.remove(client_entity)
         # todo handle other packets here
 
     def tick(self, events, dt) -> bool:
-        """Handle incoming packets and todo send ping packet.
+        """Handle incoming packets and send ping packet.
 
         This will not block the current thread, but will return if there is no packet to receive.
 

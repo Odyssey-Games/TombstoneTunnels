@@ -21,6 +21,7 @@ from common.src.packets.s2c.HelloReplyPacket import HelloReplyPacket
 from common.src.packets.s2c.InfoReplyPacket import InfoReplyPacket
 from common.src.packets.s2c.PlayerMovePacket import PlayerMovePacket
 from common.src.packets.s2c.PlayerSpawnPacket import PlayerSpawnPacket
+from common.src.packets.s2c.PlayerRemovePacket import PlayerRemovePacket
 from common.src.packets.s2c.PongPacket import PongPacket
 
 SERVER_ADDRESS = ('localhost', 5000)
@@ -122,8 +123,11 @@ if __name__ == '__main__':
 
             elif isinstance(client_packet, DisconnectPacket):
                 print(f"Received disconnect packet from {client_addr}")
-                server.clients.remove(
-                    next((client for client in server.clients if client.token == client_packet.token), None))
+                client = next((client for client in server.clients if client.token == client_packet.token), None)
+                server.clients.remove(client)
+                player_remove_packet = PlayerRemovePacket(client.uuid)
+                for other_user in server.clients:
+                    server.send_packet(player_remove_packet, other_user.addr)
 
             elif isinstance(client_packet, PingPacket):
                 print(f"Received ping from {client_addr}")
