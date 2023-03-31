@@ -19,6 +19,8 @@ class Camera:
         self.updatePosition(deltaTime)
     
     def updatePosition(self, deltaTime):
+        if not self.target:
+            return
         if self.mode == self.FREE:
             pass
         elif self.mode == self.FOLLOWTARGET:

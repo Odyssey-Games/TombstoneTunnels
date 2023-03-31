@@ -1,9 +1,9 @@
+import os
 import pickle
+import sys
 from socket import socket, AF_INET, SOCK_DGRAM
 from time import time
 
-import os
-import sys
 sys.path.insert(1, os.path.join(sys.path[0], '..\\..'))
 
 import os
@@ -25,16 +25,14 @@ PONG_TIMEOUT = 5  # we wait 5 seconds for a pong packet before we assume that th
 
 
 class ClientNetworking:
-    def __init__(self, name="John Doe", address=('127.0.0.1', 5000)):
+    def __init__(self, client, name="John Doe", address=('127.0.0.1', 5000)):
+        self.client = client
         self.name = name
         self.socket = socket(AF_INET, SOCK_DGRAM)
         self.address = address
         self.socket.connect(address)
         self.socket.setblocking(False)  # don't block the current thread when receiving packets
         self.token = None  # auth token that we get from the server when it accepts our HelloPacket
-        self.player_uuid = None
-        self.player = None
-        self.entities = []  # other entities, can also be other players
         self.last_ping = time()
         self.last_server_pong = time()
 
@@ -69,36 +67,38 @@ class ClientNetworking:
             else:
                 print("Server accepted our login.")
                 self.token = packet.token
-                self.player_uuid = packet.player_uuid
+                self.client.player_uuid = packet.player_uuid
         elif isinstance(packet, PongPacket):
             print("Received pong packet.")
             self.last_server_pong = time()
         elif isinstance(packet, PlayerSpawnPacket):
             print("Received player spawn packet.")
-            if self.player_uuid == packet.uuid:
+            if self.client.player_uuid == packet.uuid:
                 # this is our player
-                self.player = Player(self, packet.uuid, packet.position)
+                self.client.update_player(Player(self, packet.uuid, packet.position))
             else:
                 # this is another player, todo add to entities
-                self.entities.append(Player(self, packet.uuid, packet.position))
+                self.client.entities.append(Player(self, packet.uuid, packet.position))
         elif isinstance(packet, PlayerMovePacket):
             # find player in entities and update position
-            for entity in self.entities:
+            for entity in self.client.entities:
                 if entity.uuid == packet.uuid:
                     entity.position = packet.position
                     break
         # todo handle other packets here
 
-    def tick(self) -> bool:
+    def tick(self, events, dt) -> bool:
         """Handle incoming packets and todo send ping packet.
 
         This will not block the current thread, but will return if there is no packet to receive.
 
         :return True if the connection to the server is still alive, False otherwise
         """
+        # Check server connection
         if (time() - self.last_server_pong) > PONG_TIMEOUT:
             print("Connection to server lost.")
             return False
+        # Maybe ping server
         if (time() - self.last_ping) > PING_INTERVAL:
             print("Sending ping packet.")
             self.send_packet(PingPacket())

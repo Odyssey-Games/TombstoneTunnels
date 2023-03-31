@@ -10,7 +10,7 @@ class TileType:
     def __init__(self, imgPath: str, solid: bool = False):
         try:
             self.image = pygame.image.load(imgPath).convert_alpha()
-        except:
+        except Exception:
             print(f"failed to load tile from path: {imgPath}")
         self.solid = solid
 
