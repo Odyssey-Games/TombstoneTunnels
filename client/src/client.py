@@ -4,6 +4,10 @@ from client_renderer import ClientRenderer
 
 
 class Client:
+    MAIN_MENU = 0
+    CONNECTING = 1
+    IN_GAME = 2
+
     def __init__(self):
         pygame.init()  # we need to call init() before we can use pygame fonts for rendering
         self.clock = pygame.time.Clock()
@@ -13,15 +17,19 @@ class Client:
         self.player = None  # gets assigned when we "get" our player from the server
         self.player_uuid = None
         self.entities = []  # other entities, can also be other players
+        self.state = self.MAIN_MENU
 
     def run(self):
-        self.networking.try_login()
         while self.running:
             dt = self.clock.tick() / 1000
             events = [event for event in pygame.event.get()]
-            if not self.networking.tick(events, dt):
-                # todo just disconnect from server (go to main menu?)
-                raise Exception("Error while ticking networking.")
+            if self.state == self.IN_GAME:
+                if not self.networking.tick(events, dt):
+                    # disconnected from server; go to main menu
+                    print("Disconnected from server.")
+                    self.state = self.MAIN_MENU
+                    self.player = None
+                    self.player_uuid = None
             self.tick(events, dt)
             self.renderer.tick(events, dt)
 
@@ -30,7 +38,15 @@ class Client:
             if event.type == pygame.QUIT:
                 self.running = False
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                self.running = False
+                if self.state == self.MAIN_MENU:
+                    print("Exiting...")
+                    self.running = False
+                else:
+                    print("Disconnecting from server...")
+                    self.networking.disconnect()
+                    self.state = self.MAIN_MENU
+                    self.player = None
+                    self.player_uuid = None
 
         if self.player:
             self.player.update(dt, events)

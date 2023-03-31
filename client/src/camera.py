@@ -12,6 +12,7 @@ class Camera:
                  position: pygame.Vector2 = pygame.Vector2(0, 0), display_flags=0, vsync=0):
         self.position = position
         self.display = pygame.display.set_mode(screenSize, display_flags, vsync=vsync)
+        pygame.display.set_caption("Tombstone Tunnels")
         self.renderTexture = pygame.Surface((int(screenSize.x / virtualScrSizeScaler + 1), int(screenSize.y / virtualScrSizeScaler + 1)))
         self.zoom = 1
         self.screenshake = False

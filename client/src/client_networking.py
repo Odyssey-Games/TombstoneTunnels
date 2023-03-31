@@ -13,6 +13,7 @@ sys.path.insert(1, os.path.join(sys.path[0], '..\\..'))
 from common.src.packets.Packet import Packet
 from common.src.packets.c2s.AuthorizedPacket import AuthorizedPacket
 from common.src.packets.c2s.HelloPacket import HelloPacket
+from common.src.packets.c2s.DisconnectPacket import DisconnectPacket
 from common.src.packets.c2s.PingPacket import PingPacket
 from common.src.packets.s2c.HelloReplyPacket import HelloReplyPacket
 from common.src.packets.s2c.PlayerMovePacket import PlayerMovePacket
@@ -25,22 +26,38 @@ PONG_TIMEOUT = 5  # we wait 5 seconds for a pong packet before we assume that th
 
 
 class ClientNetworking:
-    def __init__(self, client, name="John Doe", address=('127.0.0.1', 5000)):
+    def __init__(self, client, name="John Doe", address=('localhost', 5000)):
         self.client = client
         self.name = name
         self.socket = socket(AF_INET, SOCK_DGRAM)
         self.address = address
-        self.socket.connect(address)
         self.socket.setblocking(False)  # don't block the current thread when receiving packets
         self.token = None  # auth token that we get from the server when it accepts our HelloPacket
         self.last_ping = time()
         self.last_server_pong = time()
 
     def try_login(self):
+        if not self.socket:
+            self.socket = socket(AF_INET, SOCK_DGRAM)
+        self.socket.connect(self.address)
+        self.socket.setblocking(False)
+
         """Try to send a HelloPacket to the server."""
         packet = HelloPacket(self.name)
         self.send_packet(packet)
+        self.last_server_pong = time()
         print("Sent login packet.")
+
+    def disconnect(self):
+        packet = DisconnectPacket()
+        self.send_packet(packet)
+        self.token = None
+        self.socket.shutdown(2)
+        self.socket = None
+        print("Sent disconnect packet.")
+
+    def set_ip(self, ip):
+        self.address = (ip, self.address[1])
 
     def send_packet(self, packet: Packet):
         """Sends a packet to the server.
