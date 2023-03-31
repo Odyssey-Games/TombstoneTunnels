@@ -4,12 +4,12 @@ import sys
 from socket import socket, AF_INET, SOCK_DGRAM
 from time import time
 
-sys.path.insert(1, os.path.join(sys.path[0], '..', os.sep, '..'))
+sys.path.insert(1, os.path.join(sys.path[0], '..', '..'))
 
 import os
 import sys
 
-sys.path.insert(1, os.path.join(sys.path[0], '..', os.sep, '..'))
+sys.path.insert(1, os.path.join(sys.path[0], '..', '..'))
 
 from common.src.packets.Packet import Packet
 from common.src.packets.c2s.AuthorizedPacket import AuthorizedPacket

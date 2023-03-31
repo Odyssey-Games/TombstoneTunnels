@@ -23,7 +23,7 @@ class TileTypeManager:
     def loadImages(self, path: str):
         for filename in os.listdir(path):
             name = filename[:filename.find(".")]
-            self.tileTypes[name] = TileType(path + os.sep + filename)
+            self.tileTypes[name] = TileType(os.path.join(path, filename))
 
 
 class TileMap:
