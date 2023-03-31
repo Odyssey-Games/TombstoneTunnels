@@ -8,6 +8,7 @@ sys.path.insert(1, os.path.join(sys.path[0], '..\\..'))
 
 import os
 import sys
+
 sys.path.insert(1, os.path.join(sys.path[0], '..\\..'))
 
 from common.src.packets.Packet import Packet
@@ -22,12 +23,15 @@ from common.src.packets.s2c.PlayerRemovePacket import PlayerRemovePacket
 from common.src.packets.s2c.PongPacket import PongPacket
 from player import *
 import client_state
+from srv_manager import SrvManager
 
 PING_INTERVAL = 1  # we send a ping packet every second
 PONG_TIMEOUT = 5  # we wait 5 seconds for a pong packet before we assume that the connection to the server is lost
 
 
 class ClientNetworking:
+    DEFAULT_SERVER_PORT = 5857
+
     def __init__(self, client, name="John Doe", address=('localhost', 5000)):
         self.client = client
         self.name = name
@@ -37,11 +41,22 @@ class ClientNetworking:
         self.token = None  # auth token that we get from the server when it accepts our HelloPacket
         self.last_ping = time()
         self.last_server_pong = time()
+        self.resolved_addresses = {}
+
+        # lookup srv records
+        for server_ip in self.client.server_list:
+            result = SrvManager.lookup(server_ip)
+            if result[0]:
+                self.resolved_addresses[server_ip] = result
 
     def try_login(self):
         if not self.socket:
             self.socket = socket(AF_INET, SOCK_DGRAM)
-        self.socket.connect(self.address)
+        # check if we resolved this address (if this address has a srv record)
+        address = self.address
+        if address[0] in self.resolved_addresses:
+            address = self.resolved_addresses[self.address[0]]
+        self.socket.connect(address)
         self.socket.setblocking(False)
 
         """Try to send a HelloPacket to the server."""

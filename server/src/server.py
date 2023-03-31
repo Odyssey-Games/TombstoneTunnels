@@ -3,7 +3,6 @@ import pickle
 import secrets
 import sys
 from socket import *
-from threading import Thread
 from time import time
 
 from User import User
