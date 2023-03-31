@@ -3,7 +3,9 @@ import os
 from camera import *
 from debug import *
 from tilemap import TileMap
-from ui import UI
+from main_screen import MainScreen
+from connecting_screen import ConnectingScreen
+import client_state
 
 PATHTOTILEIMAGES = os.path.join(os.path.dirname(__file__), "..", "assets", "tilemap", "tiles")
 PATHTOTESTMAP = os.path.join(os.path.dirname(__file__), "..", "assets", "tilemap", "maps", "testmap.csv")
@@ -26,11 +28,15 @@ class ClientRenderer:
         )
         self.tilemap = TileMap(16, PATHTOTILEIMAGES, PATHTOTESTMAP, pygame.Vector2(0, 0))
         self.camera.mode = self.camera.FOLLOW_TARGET
-        self.ui = UI(self, self.camera.display, screen_size)
+        self.main_screen = MainScreen(self, self.camera.display, screen_size)
+        self.connecting_screen = ConnectingScreen(self, self.camera.display, screen_size)
         self.debugger = Debugger()
 
-    def _tick_ui(self, events, dt):
-        self.ui.tick(events, dt)
+    def _tick_ui(self, state, events, dt):
+        if state == client_state.MAIN_MENU:
+            self.main_screen.tick(events, dt)
+        elif state == client_state.CONNECTING:
+            self.connecting_screen.tick(events, dt)
         pygame.display.update()
 
     def _tick_game(self, events, dt):
@@ -60,8 +66,8 @@ class ClientRenderer:
 
         self.camera.update(dt, self.debugger)
 
-    def tick(self, events, dt):
-        if self.client.state == self.client.MAIN_MENU:
-            self._tick_ui(events, dt)
-        elif self.client.state == self.client.IN_GAME:
+    def tick(self, state, events, dt):
+        if self.client.state == client_state.IN_GAME:
             self._tick_game(events, dt)
+        else:
+            self._tick_ui(state, events, dt)

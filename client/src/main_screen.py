@@ -1,8 +1,9 @@
 import pygame
 import pygame_gui
+import client_state
 
 
-class UI:
+class MainScreen:
     def __init__(self, renderer, window_surface, screen_size):
         self.renderer = renderer
         self.window_surface = window_surface
@@ -31,7 +32,7 @@ class UI:
                 if event.ui_element == self.hello_button:
                     print('Logging in...')
                     self.renderer.client.networking.try_login()
-                    self.renderer.client.state = self.renderer.client.IN_GAME
+                    self.renderer.client.state = client_state.CONNECTING
             elif event.type == pygame_gui.UI_DROP_DOWN_MENU_CHANGED:
                 if event.ui_element == self.server_dropdown:
                     print('Changing server address to', event.text)

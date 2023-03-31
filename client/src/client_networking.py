@@ -20,6 +20,7 @@ from common.src.packets.s2c.PlayerMovePacket import PlayerMovePacket
 from common.src.packets.s2c.PlayerSpawnPacket import PlayerSpawnPacket
 from common.src.packets.s2c.PongPacket import PongPacket
 from player import *
+import client_state
 
 PING_INTERVAL = 1  # we send a ping packet every second
 PONG_TIMEOUT = 5  # we wait 5 seconds for a pong packet before we assume that the connection to the server is lost
@@ -49,12 +50,14 @@ class ClientNetworking:
         print("Sent login packet.")
 
     def disconnect(self):
-        packet = DisconnectPacket()
-        self.send_packet(packet)
+        if self.token:
+            # we are connected
+            packet = DisconnectPacket()
+            self.send_packet(packet)
+            print("Sent disconnect packet.")
         self.token = None
         self.socket.shutdown(2)
         self.socket = None
-        print("Sent disconnect packet.")
 
     def set_ip(self, ip):
         self.address = (ip, self.address[1])
@@ -81,10 +84,13 @@ class ClientNetworking:
         if isinstance(packet, HelloReplyPacket):
             if packet.token is None:
                 print("Server rejected our login.")
+                self.disconnect()
+                self.client.state = client_state.MAIN_MENU
             else:
                 print("Server accepted our login.")
                 self.token = packet.token
                 self.client.player_uuid = packet.player_uuid
+                self.client.state = client_state.IN_GAME
         elif isinstance(packet, PongPacket):
             print("Received pong packet.")
             self.last_server_pong = time()
