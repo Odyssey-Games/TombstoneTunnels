@@ -1,0 +1,32 @@
+name: Create client executable with PyInstaller (Linux)
+
+on:
+  push:
+    branches:
+      - "main"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.11'
+    - name: Install dependencies
+      run: pip install -r requirements.txt
+    - name: Install pyinstaller
+      run: pip install -U pyinstaller
+    - name: Create distribution
+      run: pyinstaller client.spec
+    - name: Create pre-release
+      uses: softprops/action-gh-release@v1
+      with:
+        name: "Development Release (Linux)"
+        tag_name: "latest-linux"
+        prerelease: true
+        files: "dist/*"
