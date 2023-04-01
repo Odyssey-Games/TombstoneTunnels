@@ -167,6 +167,7 @@ class ClientNetworking:
                 break  # no more packets to receive
             except Exception as e:
                 print(f"Error while receiving packet: {e}. Disconnecting.")
+                self.socket = None
                 return False
 
         return True
