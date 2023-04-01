@@ -24,10 +24,9 @@ jobs:
     - name: Create distribution
       run: pyinstaller client.spec
     - name: Create pre-release
-      uses: "ncipollo/release-action@v1"
+      uses: softprops/action-gh-release@v1
       with:
-        tag: "latest-windows"
-        replacesArtifacts: true
+        name: "Development Release (Windows)"
+        tag_name: "latest-windows"
         prerelease: true
-        makeLatest: true
-        artifacts: "dist/*.exe"
+        files: "dist/*.exe"
