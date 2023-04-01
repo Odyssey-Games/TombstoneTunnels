@@ -29,8 +29,9 @@ PONG_INTERVAL = 1  # send a pong packet every second
 
 
 class Server:
-    clients: list[User]
-
+    """
+    :type clients: list[User]
+    """
     def __init__(self):
         self.clients = []
         self.socket = socket(AF_INET, SOCK_DGRAM)
