@@ -27,6 +27,7 @@ jobs:
       uses: "ncipollo/release-action@v1"
       with:
         tag: "latest-windows"
+        replacesArtifacts: true
         prerelease: true
         makeLatest: true
         artifacts: "dist/*.exe"
