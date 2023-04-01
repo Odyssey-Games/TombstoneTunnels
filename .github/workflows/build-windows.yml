@@ -1,6 +1,9 @@
 name: Create client.exe with PyInstaller (Windows)
 
-on: [push]
+on:
+  push:
+    branches:
+      - "main"
 
 jobs:
   build:
@@ -18,3 +21,11 @@ jobs:
       run: pip install -U pyinstaller
     - name: Create distribution
       run: pyinstaller client.spec
+    - name: Create pre-release
+      uses: "marvinpinto/action-automatic-releases@latest"
+      with:
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        automatic_release_tag: "latest"
+        prerelease: true
+        title: "Development Build"
+        files: dist/*.exe
