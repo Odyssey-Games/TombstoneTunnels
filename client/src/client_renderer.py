@@ -7,8 +7,12 @@ from main_screen import MainScreen
 from connecting_screen import ConnectingScreen
 import client_state
 
-PATHTOTILEIMAGES = os.path.join(os.path.dirname(__file__), "..", "assets", "tilemap", "tiles")
-PATHTOTESTMAP = os.path.join(os.path.dirname(__file__), "..", "assets", "tilemap", "maps", "testmap.csv")
+if os.path.exists(os.path.join(os.path.dirname(__file__), "assets")):
+    PATH_TO_ASSETS = os.path.join(os.path.dirname(__file__), "assets")
+else:
+    PATH_TO_ASSETS = os.path.join(os.path.dirname(__file__), "..", "assets")
+PATHTOTILEIMAGES = os.path.join(PATH_TO_ASSETS, "tilemap", "tiles")
+PATHTOTESTMAP = os.path.join(PATH_TO_ASSETS, "tilemap", "maps", "testmap.csv")
 
 
 class ClientRenderer:
