@@ -1,36 +1,54 @@
 from camera import *
 from client_networking import ClientNetworking
 from client_renderer import ClientRenderer
+import client_state
 
 
 class Client:
     def __init__(self):
         pygame.init()  # we need to call init() before we can use pygame fonts for rendering
         self.clock = pygame.time.Clock()
+        self.server_list = ["localhost", "odysseygames.de"]
+        self.current_server_ip = self.server_list[0]
         self.networking = ClientNetworking(self, "Client " + str(random.randint(1, 10000)))
         self.renderer = ClientRenderer(self)
         self.running = True
         self.player = None  # gets assigned when we "get" our player from the server
         self.player_uuid = None
         self.entities = []  # other entities, can also be other players
+        self.state = client_state.MAIN_MENU
+
+    def _disconnect(self):
+        """Reset variables. Note that networking.disconnect() has to be called separately (when necessary)."""
+        self.state = client_state.MAIN_MENU
+        self.player = None
+        self.player_uuid = None
+        self.entities.clear()
 
     def run(self):
-        self.networking.try_login()
         while self.running:
             dt = self.clock.tick() / 1000
             events = [event for event in pygame.event.get()]
-            if not self.networking.tick(events, dt):
-                # todo just disconnect from server (go to main menu?)
-                raise Exception("Error while ticking networking.")
+            if self.state == client_state.IN_GAME or self.state == client_state.CONNECTING:
+                if not self.networking.tick(events, dt):
+                    # disconnected from server; go to main menu
+                    print("Disconnected from server.")
+                    self._disconnect()
             self.tick(events, dt)
-            self.renderer.tick(events, dt)
+            self.renderer.tick(self.state, events, dt)
 
     def tick(self, events, dt):
         for event in events:
             if event.type == pygame.QUIT:
                 self.running = False
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                self.running = False
+                if self.state == client_state.MAIN_MENU:
+                    print("Exiting...")
+                    self.running = False
+                else:
+                    print("Disconnecting from server...")
+                    self.networking.disconnect()
+                    self._disconnect()
 
         if self.player:
             self.player.update(dt, events)

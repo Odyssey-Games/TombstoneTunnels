@@ -4,43 +4,85 @@ import sys
 from socket import socket, AF_INET, SOCK_DGRAM
 from time import time
 
-sys.path.insert(1, os.path.join(sys.path[0], '..\\..'))
+sys.path.insert(1, os.path.join(sys.path[0], '..', '..'))
 
 import os
 import sys
-sys.path.insert(1, os.path.join(sys.path[0], '..\\..'))
+
+sys.path.insert(1, os.path.join(sys.path[0], '..', '..'))
 
 from common.src.packets.Packet import Packet
 from common.src.packets.c2s.AuthorizedPacket import AuthorizedPacket
 from common.src.packets.c2s.HelloPacket import HelloPacket
+from common.src.packets.c2s.DisconnectPacket import DisconnectPacket
 from common.src.packets.c2s.PingPacket import PingPacket
 from common.src.packets.s2c.HelloReplyPacket import HelloReplyPacket
 from common.src.packets.s2c.PlayerMovePacket import PlayerMovePacket
 from common.src.packets.s2c.PlayerSpawnPacket import PlayerSpawnPacket
+from common.src.packets.s2c.PlayerRemovePacket import PlayerRemovePacket
 from common.src.packets.s2c.PongPacket import PongPacket
 from player import *
+import client_state
+from srv_manager import SrvManager
 
 PING_INTERVAL = 1  # we send a ping packet every second
 PONG_TIMEOUT = 5  # we wait 5 seconds for a pong packet before we assume that the connection to the server is lost
 
 
 class ClientNetworking:
-    def __init__(self, client, name="John Doe", address=('127.0.0.1', 5000)):
+    DEFAULT_SERVER_PORT = 5857
+
+    def __init__(self, client, name="John Doe", address=('localhost', DEFAULT_SERVER_PORT)):
         self.client = client
         self.name = name
         self.socket = socket(AF_INET, SOCK_DGRAM)
         self.address = address
-        self.socket.connect(address)
         self.socket.setblocking(False)  # don't block the current thread when receiving packets
         self.token = None  # auth token that we get from the server when it accepts our HelloPacket
         self.last_ping = time()
         self.last_server_pong = time()
+        self.resolved_addresses = {}
+
+        # lookup srv records
+        for server_ip in self.client.server_list:
+            result = SrvManager.lookup(server_ip)
+            if result[0]:
+                self.resolved_addresses[server_ip] = result
+
+    def get_address(self):
+        """Get our current address or the resolved address if it has a srv record."""
+        address = self.address
+        if address[0] in self.resolved_addresses:
+            address = self.resolved_addresses[self.address[0]]
+        return address
 
     def try_login(self):
+        if not self.socket:
+            self.socket = socket(AF_INET, SOCK_DGRAM)
+        # check if we resolved this address (if this address has a srv record)
+        address = self.get_address()
+        print("Connecting to address: " + str(address))
+        self.socket.connect(address)
+        self.socket.setblocking(False)
+
         """Try to send a HelloPacket to the server."""
         packet = HelloPacket(self.name)
         self.send_packet(packet)
+        self.last_server_pong = time()
         print("Sent login packet.")
+
+    def disconnect(self):
+        if self.token:
+            # we are connected
+            packet = DisconnectPacket()
+            self.send_packet(packet)
+            print("Sent disconnect packet.")
+        self.token = None
+        self.socket.shutdown(2)
+        self.socket = None
+
+    def set_ip(self, ip):
+        self.address = (ip, self.address[1])
 
     def send_packet(self, packet: Packet):
         """Sends a packet to the server.
@@ -54,7 +96,7 @@ class ClientNetworking:
             packet.token = self.token
 
         data = pickle.dumps(packet)
-        self.socket.sendto(data, self.address)
+        self.socket.sendto(data, self.get_address())
 
     def _handle_packet(self, packet: Packet):
         """Handle a packet that was received from the server.
@@ -64,10 +106,13 @@ class ClientNetworking:
         if isinstance(packet, HelloReplyPacket):
             if packet.token is None:
                 print("Server rejected our login.")
+                self.disconnect()
+                self.client.state = client_state.MAIN_MENU
             else:
                 print("Server accepted our login.")
                 self.token = packet.token
                 self.client.player_uuid = packet.player_uuid
+                self.client.state = client_state.IN_GAME
         elif isinstance(packet, PongPacket):
             print("Received pong packet.")
             self.last_server_pong = time()
@@ -77,7 +122,7 @@ class ClientNetworking:
                 # this is our player
                 self.client.update_player(Player(self, packet.uuid, packet.position))
             else:
-                # this is another player, todo add to entities
+                # this is another player, add to entities
                 self.client.entities.append(Player(self, packet.uuid, packet.position))
         elif isinstance(packet, PlayerMovePacket):
             # find player in entities and update position
@@ -85,10 +130,16 @@ class ClientNetworking:
                 if entity.uuid == packet.uuid:
                     entity.position = packet.position
                     break
+        elif isinstance(packet, PlayerRemovePacket):
+            # find player in entities and remove it
+            # get entity first to prevent concurrent modification?
+            client_entity = next((entity for entity in self.client.entities if entity.uuid == packet.uuid), None)
+            if client_entity:
+                self.client.entities.remove(client_entity)
         # todo handle other packets here
 
     def tick(self, events, dt) -> bool:
-        """Handle incoming packets and todo send ping packet.
+        """Handle incoming packets and send ping packet.
 
         This will not block the current thread, but will return if there is no packet to receive.
 
@@ -116,6 +167,7 @@ class ClientNetworking:
                 break  # no more packets to receive
             except Exception as e:
                 print(f"Error while receiving packet: {e}. Disconnecting.")
+                self.socket = None
                 return False
 
         return True

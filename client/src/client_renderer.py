@@ -3,6 +3,9 @@ import os
 from camera import *
 from debug import *
 from tilemap import TileMap
+from main_screen import MainScreen
+from connecting_screen import ConnectingScreen
+import client_state
 
 PATHTOTILEIMAGES = os.path.join(os.path.dirname(__file__), "..", "assets", "tilemap", "tiles")
 PATHTOTESTMAP = os.path.join(os.path.dirname(__file__), "..", "assets", "tilemap", "maps", "testmap.csv")
@@ -15,8 +18,9 @@ class ClientRenderer:
         self.ofx = 0
         self.dt = 0
         # set camera before tilemap (pygame image mode has to be set for loading images in tilemap)
+        screen_size = pygame.Vector2(1000, 600)
         self.camera = Camera(
-            screenSize=pygame.Vector2(1000, 600),
+            screenSize=screen_size,
             virtualScrSizeScaler=4,
             position=pygame.Vector2(0, 0),
             # does pygame.HWACCEL make a difference?
@@ -24,9 +28,18 @@ class ClientRenderer:
         )
         self.tilemap = TileMap(16, PATHTOTILEIMAGES, PATHTOTESTMAP, pygame.Vector2(0, 0))
         self.camera.mode = self.camera.FOLLOW_TARGET
+        self.main_screen = MainScreen(self, self.camera.display, screen_size)
+        self.connecting_screen = ConnectingScreen(self, self.camera.display, screen_size)
         self.debugger = Debugger()
 
-    def tick(self, events, dt):
+    def _tick_ui(self, state, events, dt):
+        if state == client_state.MAIN_MENU:
+            self.main_screen.tick(events, dt)
+        elif state == client_state.CONNECTING:
+            self.connecting_screen.tick(events, dt)
+        pygame.display.update()
+
+    def _tick_game(self, events, dt):
         self.tilemap.render(self.camera)
 
         for event in events:
@@ -52,3 +65,9 @@ class ClientRenderer:
         self.debugger.debug(int(self.client.clock.get_fps()))
 
         self.camera.update(dt, self.debugger)
+
+    def tick(self, state, events, dt):
+        if self.client.state == client_state.IN_GAME:
+            self._tick_game(events, dt)
+        else:
+            self._tick_ui(state, events, dt)
