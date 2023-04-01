@@ -32,7 +32,7 @@ PONG_TIMEOUT = 5  # we wait 5 seconds for a pong packet before we assume that th
 class ClientNetworking:
     DEFAULT_SERVER_PORT = 5857
 
-    def __init__(self, client, name="John Doe", address=('localhost', 5857)):
+    def __init__(self, client, name="John Doe", address=('localhost', DEFAULT_SERVER_PORT)):
         self.client = client
         self.name = name
         self.socket = socket(AF_INET, SOCK_DGRAM)
@@ -49,13 +49,18 @@ class ClientNetworking:
             if result[0]:
                 self.resolved_addresses[server_ip] = result
 
+    def get_address(self):
+        """Get our current address or the resolved address if it has a srv record."""
+        address = self.address
+        if address[0] in self.resolved_addresses:
+            address = self.resolved_addresses[self.address[0]]
+        return address
+
     def try_login(self):
         if not self.socket:
             self.socket = socket(AF_INET, SOCK_DGRAM)
         # check if we resolved this address (if this address has a srv record)
-        address = self.address
-        if address[0] in self.resolved_addresses:
-            address = self.resolved_addresses[self.address[0]]
+        address = self.get_address()
         print("Connecting to address: " + str(address))
         self.socket.connect(address)
         self.socket.setblocking(False)
@@ -91,7 +96,7 @@ class ClientNetworking:
             packet.token = self.token
 
         data = pickle.dumps(packet)
-        self.socket.sendto(data, self.address)
+        self.socket.sendto(data, self.get_address())
 
     def _handle_packet(self, packet: Packet):
         """Handle a packet that was received from the server.
@@ -117,7 +122,7 @@ class ClientNetworking:
                 # this is our player
                 self.client.update_player(Player(self, packet.uuid, packet.position))
             else:
-                # this is another player, todo add to entities
+                # this is another player, add to entities
                 self.client.entities.append(Player(self, packet.uuid, packet.position))
         elif isinstance(packet, PlayerMovePacket):
             # find player in entities and update position

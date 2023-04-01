@@ -31,8 +31,8 @@ class MainScreen:
             if event.type == pygame_gui.UI_BUTTON_PRESSED:
                 if event.ui_element == self.hello_button:
                     print('Logging in...')
-                    self.renderer.client.networking.try_login()
                     self.renderer.client.state = client_state.CONNECTING
+                    self.renderer.client.networking.try_login()
             elif event.type == pygame_gui.UI_DROP_DOWN_MENU_CHANGED:
                 if event.ui_element == self.server_dropdown:
                     print('Changing server address to', event.text)
