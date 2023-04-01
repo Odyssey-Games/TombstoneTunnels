@@ -30,4 +30,4 @@ jobs:
         prerelease: true
         makeLatest: true
         title: "Development Build"
-        files: dist/*.exe
+        artifacts: "dist/*.exe"
