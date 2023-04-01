@@ -1,5 +1,6 @@
 # TombstoneTunnels
 [![Windows build](https://github.com/Odyssey-Games/TombstoneTunnels/actions/workflows/build-windows.yml/badge.svg?branch=main)](https://github.com/Odyssey-Games/TombstoneTunnels/actions/workflows/build-windows.yml)
+[![Linux build](https://github.com/Odyssey-Games/TombstoneTunnels/actions/workflows/build-linux.yml/badge.svg)](https://github.com/Odyssey-Games/TombstoneTunnels/actions/workflows/build-linux.yml)
 
 ## Ideas
 
