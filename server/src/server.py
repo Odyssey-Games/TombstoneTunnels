@@ -23,7 +23,7 @@ from common.src.packets.s2c.PlayerSpawnPacket import PlayerSpawnPacket
 from common.src.packets.s2c.PlayerRemovePacket import PlayerRemovePacket
 from common.src.packets.s2c.PongPacket import PongPacket
 
-SERVER_ADDRESS = ('localhost', 5000)
+SERVER_ADDRESS = ('0.0.0.0', 5857)
 PING_TIMEOUT = 5  # timeout clients after not pinging for 5 seconds
 PONG_INTERVAL = 1  # send a pong packet every second
 
@@ -31,11 +31,11 @@ PONG_INTERVAL = 1  # send a pong packet every second
 class Server:
     clients: list[User]
 
-    def __init__(self, address: tuple):
+    def __init__(self):
         self.clients = []
         self.socket = socket(AF_INET, SOCK_DGRAM)
         self.socket.setblocking(False)
-        self.socket.bind(address)
+        self.socket.bind(SERVER_ADDRESS)
 
     def send_packet(self, packet, addr: tuple):
         data = pickle.dumps(packet)
@@ -67,7 +67,7 @@ if __name__ == '__main__':
     print_hi('Server')
 
     try:
-        server = Server(('localhost', 5000))
+        server = Server()
     except OSError as e:
         print("Could not start server. Is it already running?")
         raise e
