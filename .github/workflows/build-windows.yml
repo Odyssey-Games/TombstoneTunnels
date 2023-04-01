@@ -29,5 +29,4 @@ jobs:
         tag: "latest-windows"
         prerelease: true
         makeLatest: true
-        title: "Development Build"
         artifacts: "dist/*.exe"
