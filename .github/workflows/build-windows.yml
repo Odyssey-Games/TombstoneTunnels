@@ -1,30 +1,20 @@
-name: Create client.exe with Pyinstaller (Windows)
+name: Create client.exe with PyInstaller (Windows)
 
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+on: [push]
 
 jobs:
   build:
-
-    runs-on: ubuntu-latest
-
+    runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v2
-
-    - name: Package Application
-      uses: JackMcKew/pyinstaller-action-windows@main
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v2
       with:
-        path: .
-        spec: client.spec
-
-    - name: Release
-      uses: "marvinpinto/action-automatic-releases@latest"
-      with:
-        repo_token: "${{ secrets.GITHUB_TOKEN }}"
-        automatic_release_tag: "latest"
-        prerelease: true
-        title: "Development Build"
-        files: dist/*.exe
+        python-version: '3.'
+    - name: Install dependencies
+      run: pip install -r requirements.txt
+    - name: Install pyinstaller
+      run: pip install -U pyinstaller
+    - name: Create distribution
+      run: pyinstaller client.spec
