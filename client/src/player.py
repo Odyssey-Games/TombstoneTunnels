@@ -10,7 +10,7 @@ class Entity:
         self.position = position
         self.hitbox = pygame.Rect(100,100,10,10)
 
-        self.maxSpeed = 120
+        self.maxSpeed = 90
 
 
         self.sprite = None
@@ -118,7 +118,6 @@ class Player(Entity):
                     )
         
     #### check for x movement-collisions:
-       
         self.position.x += self.velocity.x * deltaTime
         
         # -5 to convert circle center pos to rect top-left edge pos with current radius of 5 
@@ -132,12 +131,15 @@ class Player(Entity):
 
         for tile in hitTiles:     
             if self.velocity.x > 0:
-                self.position.x = int(tile.left - 6)
+                self.position.x = int(tile.left - 5)
                 self.velocity.x = 0
 
             elif self.velocity.x < 0:
                 self.position.x = int(tile.right + 5)
                 self.velocity.x = 0
+
+            else:
+                print("you should not be able to read this")
         
     #### check for y movement-collisions:    
         self.position.y += self.velocity.y * deltaTime
@@ -153,12 +155,15 @@ class Player(Entity):
 
         for tile in hitTiles:     
             if self.velocity.y > 0:
-                self.position.y = int(tile.top - 6)
+                self.position.y = int(tile.top - 5)
                 self.velocity.y = 0
 
             elif self.velocity.y < 0:
                 self.position.y = int(tile.bottom + 5)
                 self.velocity.y = 0
+
+            else:
+                print("you should not be able to read this")
         
     #### Apply movement of hitbox to position
 

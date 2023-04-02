@@ -8,32 +8,38 @@ from debug import *
 from tilemap import TileMap
 from main_screen import MainScreen
 from connecting_screen import ConnectingScreen
+from mapGenerator import Room, MapGenerator
 import client_state
 
 if os.path.exists(os.path.join(os.path.dirname(__file__), "assets")):
     PATH_TO_ASSETS = os.path.join(os.path.dirname(__file__), "assets")
 else:
     PATH_TO_ASSETS = os.path.join(os.path.dirname(__file__), "..", "assets")
-PATHTOTILEIMAGES = os.path.join(PATH_TO_ASSETS, "tilemap", "tiles")
-PATHTOTESTMAP = os.path.join(PATH_TO_ASSETS, "tilemap", "maps", "testmap.csv")
+PATH_TO_TILE_IMAGES = os.path.join(PATH_TO_ASSETS, "tilemap", "tiles")
+PATH_TO_TEST_MAP = os.path.join(PATH_TO_ASSETS, "tilemap", "maps", "r_testmap.csv")
+PATH_TO_MAPS = os.path.join(PATH_TO_ASSETS, "tilemap", "maps")
 
+TILESIZE = 16
 
 class ClientRenderer:
     def __init__(self, client):
         self.client = client
-        self.ofx = 0
-        self.ofx = 0
         self.dt = 0
         # set camera before tilemap (pygame image mode has to be set for loading images in tilemap)
         screen_size = pygame.Vector2(1000, 600)
         self.camera = Camera(
             screenSize=screen_size,
-            virtualScrSizeScaler=4,
+            virtualScrSizeScaler=3,
             position=pygame.Vector2(0, 0),
             # does pygame.HWACCEL make a difference?
             display_flags=pygame.HWACCEL | pygame.SCALED,
         )
-        self.tilemap = TileMap(16, PATHTOTILEIMAGES, PATHTOTESTMAP, pygame.Vector2(0, 0))
+        self.mapGenerator = MapGenerator(
+            PATH_TO_MAPS,
+            PATH_TO_TILE_IMAGES,
+            TILESIZE
+        )
+        self.tilemap = TileMap(16, PATH_TO_TILE_IMAGES, PATH_TO_TEST_MAP, pygame.Vector2(0, 0))
         self.camera.mode = self.camera.FOLLOW_TARGET
         self.main_screen = MainScreen(self, self.camera.display, screen_size)
         self.connecting_screen = ConnectingScreen(self, self.camera.display, screen_size)

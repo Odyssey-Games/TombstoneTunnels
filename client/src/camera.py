@@ -20,7 +20,7 @@ class Camera:
         self.zoom = 1
         self.screenshake = False
         self.target = None  # entity with .position member var
-        self.trackingSpeed = .999
+        self.trackingSpeed = 2.5
         self.mode = self.FREE
 
     def update(self, deltaTime, debugger=None):
@@ -33,8 +33,11 @@ class Camera:
         if self.mode == self.FREE:
             pass
         elif self.mode == self.FOLLOW_TARGET:
-            self.position.x += (self.target.position.x - self.position.x - self.renderTexture.get_width() / 2) * self.trackingSpeed * deltaTime
-            self.position.y += (self.target.position.y - self.position.y - self.renderTexture.get_height() / 2) * self.trackingSpeed * deltaTime
+            if self.target:
+                self.position.x += (self.target.position.x - self.position.x - self.renderTexture.get_width() / 2) * self.trackingSpeed * deltaTime
+                self.position.y += (self.target.position.y - self.position.y - self.renderTexture.get_height() / 2) * self.trackingSpeed * deltaTime
+            else:
+                self.mode = self.FREE
 
     def draw(self, debugger=None):
         dpx = self.display.get_size()[0]
