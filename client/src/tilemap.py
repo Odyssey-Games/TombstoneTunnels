@@ -1,3 +1,5 @@
+# This file contains all the functionality for loading, storing and rendering the tilemap
+
 import os
 import pygame
 

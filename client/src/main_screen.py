@@ -1,3 +1,5 @@
+# This File contains the update function for the login screen
+
 import pygame
 import pygame_gui
 import client_state

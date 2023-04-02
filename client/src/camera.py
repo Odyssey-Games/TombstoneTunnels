@@ -1,3 +1,6 @@
+# This file contains the camera. The camera is mainly a data structue storing an offset that can be applied while rendering.
+# The camera also offers features to track a target, scale the rendertexture or add screenshake.
+
 import random
 
 import pygame

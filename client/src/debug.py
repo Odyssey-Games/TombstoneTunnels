@@ -1,3 +1,5 @@
+# This file contains a class that allow you to render debug text on the screen
+
 import pygame
 
 
@@ -5,7 +7,7 @@ class Debugger:
     def __init__(self):
         self.pos = (5, 5)
         self.content = []
-        self.font = pygame.font.SysFont('Comic Sans MS', 30)
+        self.font = pygame.font.SysFont('Comic Sans MS', 24)
 
     def debug(self, info):
         self.content.append(str(info))

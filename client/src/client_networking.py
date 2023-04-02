@@ -1,3 +1,6 @@
+# This file contains all the code for the client to communicate with the server, like login, packet sending, receiving and handeling.
+#
+
 import os
 import pickle
 import sys

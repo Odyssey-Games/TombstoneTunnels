@@ -1,3 +1,5 @@
+# Main entry point of the program
+
 from camera import *
 from client_networking import ClientNetworking
 from client_renderer import ClientRenderer

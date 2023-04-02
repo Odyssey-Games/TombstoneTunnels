@@ -1,3 +1,5 @@
+# This file contains the player object with rendering and physics methods
+
 import pygame, math
 
 from common.src.packets.c2s.ClientMovePacket import ClientMovePacket
@@ -24,8 +26,8 @@ class Player(Entity):
         self.uuid = uuid
 
         self.velocity = pygame.Vector2(0, 0)
-        self.friction = 0.02
-        self.acceleration = 50
+        self.friction = 0.025
+        self.acceleration = 60
 
         self.movingUp = False
         self.movingDown = False

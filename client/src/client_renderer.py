@@ -1,3 +1,6 @@
+# This class stores some of the essential game objects like the Tilemap, camera and screen objects. It also 
+# contains the main loop functions for the game and menus 
+
 import os
 
 from camera import *

@@ -1,3 +1,5 @@
+# This File contains a simple class to handle the screen
+
 import pygame
 import pygame_gui
 
