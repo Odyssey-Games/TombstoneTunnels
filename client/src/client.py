@@ -51,7 +51,9 @@ class Client:
                     self._disconnect()
 
         if self.player:
-            self.player.update(dt, events)
+            self.player.update(dt, self.renderer.tilemap, events)
+            self.renderer.debugger.debug(f"velocity: {self.player.velocity}")
+            self.renderer.debugger.debug(f"position: {self.player.position}")
 
     def update_player(self, player):
         """Set our player and advise the camera to target the player."""

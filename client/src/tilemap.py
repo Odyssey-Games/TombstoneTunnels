@@ -7,12 +7,12 @@ import pygame
 
 # data type to be stored in the tileTypeManager
 class TileType:
-    def __init__(self, imgPath: str, solid: bool = False):
+    def __init__(self, imgPath: str, isSolid: bool = False):
         try:
             self.image = pygame.image.load(imgPath).convert_alpha()
         except Exception:
             print(f"failed to load tile from path: {imgPath}")
-        self.solid = solid
+        self.isSolid = isSolid
 
 
 # contains all possible TileTypes and their names
@@ -23,7 +23,8 @@ class TileTypeManager:
     def loadImages(self, path: str):
         for filename in os.listdir(path):
             name = filename[:filename.find(".")]
-            self.tileTypes[name] = TileType(os.path.join(path, filename))
+            solid = (name[0] == "s")
+            self.tileTypes[name] = TileType(os.path.join(path, filename), solid)
 
 
 class TileMap:
@@ -53,7 +54,7 @@ class TileMap:
             for x, tilename in enumerate(row):
                 if tilename == "":
                     continue
-
+                
                 camera.renderTexture.blit(
                     self.tileTypeManager.tileTypes[tilename].image,
                     (

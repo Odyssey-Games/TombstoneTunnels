@@ -44,7 +44,6 @@ class ClientRenderer:
         pygame.display.update()
 
     def _tick_game(self, events, dt):
-        self.tilemap.render(self.camera)
 
         for event in events:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_q:
