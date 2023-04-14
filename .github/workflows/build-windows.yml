@@ -1,4 +1,4 @@
-name: Create client.exe with PyInstaller (Windows)
+name: Windows Build
 
 on:
   push:
