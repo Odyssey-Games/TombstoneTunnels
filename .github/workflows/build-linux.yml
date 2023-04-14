@@ -1,4 +1,4 @@
-name: Create client executable with PyInstaller (Linux)
+name: Linux Build
 
 on:
   push:
