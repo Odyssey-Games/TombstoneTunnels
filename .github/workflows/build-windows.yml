@@ -21,7 +21,9 @@ jobs:
       run: pip install -r requirements.txt
     - name: Install pyinstaller
       run: pip install -U pyinstaller
-    - name: Create distribution
+    - name: Create client distribution
+      run: pyinstaller client.spec
+    - name: Create server distribution
       run: pyinstaller client.spec
     - name: Create pre-release
       uses: softprops/action-gh-release@v1

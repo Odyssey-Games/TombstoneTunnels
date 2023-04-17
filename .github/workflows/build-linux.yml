@@ -21,12 +21,15 @@ jobs:
       run: pip install -r requirements.txt
     - name: Install pyinstaller
       run: pip install -U pyinstaller
-    - name: Create distribution
+    - name: Create client distribution
       run: pyinstaller client.spec
-    - name: Create pre-release
+    - name: Create server distribution
+      run: pyinstaller server.spec
+    - name: Create pre-release (client and server)
       uses: softprops/action-gh-release@v1
       with:
         name: "Development Release (Linux)"
         tag_name: "latest-linux"
         prerelease: true
         files: "dist/*"
+    
