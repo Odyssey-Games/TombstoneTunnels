@@ -5,7 +5,7 @@ block_cipher = None
 
 
 a = Analysis(
-    ['client/src/server.py'],
+    ['server/src/server.py'],
     pathex=['.'],
     binaries=[],
 )
