@@ -6,33 +6,26 @@ from common.src.packets.c2s.ClientMovePacket import ClientMovePacket
 
 
 class Entity:
-    def __init__(self, position: pygame.Vector2 = pygame.Vector2(0, 0)):
-        self.position = position
-        self.hitbox = pygame.Rect(100,100,10,10)
-
+    def __init__(self, position: pygame.Vector2 = pygame.Vector2(0, 0), tileMap):
+        self.tilePosition = position
+        self.tileMap = tileMap
         self.maxSpeed = 120
-
-
         self.sprite = None
 
     def render(self, camera):
-        pygame.draw.circle(camera.renderTexture, (255, 0, 0), self.position-camera.position, 5)
+        pygame.draw.circle(camera.renderTexture, (255, 0, 0), self.getWorldPos()-camera.position, 5)
+
+    def getWorldPos(self):
+        return pygame.Vector2(self.tilePosition * self.tileMap.tileSize, self.tilePosition * self.tileMap.tileSize)
 
 
 class Player(Entity):
-    def __init__(self, client, uuid, position: pygame.Vector2 = pygame.Vector2(0, 0)):
-        Entity.__init__(self, position)
+    def __init__(self, client, uuid, tilemap, position: pygame.Vector2 = pygame.Vector2(0, 0)):
+        Entity.__init__(self, position, tilemap)
         self.client = client  # todo global client instance?
         self.uuid = uuid
 
-        self.velocity = pygame.Vector2(0, 0)
-        self.friction = 0.025
-        self.acceleration = 60
-
-        self.movingUp = False
-        self.movingDown = False
-        self.movingLeft = False
-        self.movingRight = False
+        self.inputBuffer = []
 
     def update(self, deltaTime, tileMap, pygameEvents):
         self.handleEvents(pygameEvents)
@@ -61,35 +54,11 @@ class Player(Entity):
                 elif event.key in [pygame.K_s, pygame.K_DOWN]:
                     self.movingDown = False
 
+
+
     def updatePosition(self, deltaTime, tileMap):
         fixedFrict = pow(self.friction, deltaTime)
-        self.velocity.y *= fixedFrict
-        self.velocity.x *= fixedFrict
 
-        if self.velocity.x > -0.001 and self.velocity.x < 0.001:
-            self.velocity.x = 0
-        if self.velocity.y > -0.001 and self.velocity.y < 0.001:
-            self.velocity.y = 0
-
-        # scaler is used to solve the problem of diagonal movement being faster because of two force additions.
-        scaler = 1
-        if (self.movingDown ^ self.movingUp) and (self.movingLeft ^ self.movingRight):
-            scaler = .71
-
-        fixedAccel = self.acceleration * deltaTime * 10
-        fixedMaxSpeed = self.maxSpeed
-
-        if self.movingRight:
-            self.velocity.x = max(min(self.velocity.x+fixedAccel, fixedMaxSpeed * scaler), -fixedMaxSpeed * scaler) 
-        elif self.movingLeft:  
-            self.velocity.x = max(min(self.velocity.x-fixedAccel, fixedMaxSpeed * scaler), -fixedMaxSpeed * scaler)
-  
-        if self.movingDown:  
-            self.velocity.y = max(min(self.velocity.y+fixedAccel, fixedMaxSpeed * scaler), -fixedMaxSpeed * scaler) 
-        elif self.movingUp:  
-            self.velocity.y = max(min(self.velocity.y-fixedAccel, fixedMaxSpeed * scaler), -fixedMaxSpeed * scaler)
-
-        self.moveAndCollide(tileMap, deltaTime)
 
 
     def sendPacket(self):
