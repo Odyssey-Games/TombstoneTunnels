@@ -3,12 +3,12 @@
 
 import os
 
-from camera import *
-from debug import *
-from tilemap import TileMap
-from main_screen import MainScreen
-from connecting_screen import ConnectingScreen
 import client_state
+from camera import *
+from connecting_screen import ConnectingScreen
+from debug import *
+from main_screen import MainScreen
+from tilemap import TileMap
 
 if os.path.exists(os.path.join(os.path.dirname(__file__), "assets")):
     PATH_TO_ASSETS = os.path.join(os.path.dirname(__file__), "assets")
@@ -27,7 +27,7 @@ class ClientRenderer:
         # set camera before tilemap (pygame image mode has to be set for loading images in tilemap)
         screen_size = pygame.Vector2(1000, 600)
         self.camera = Camera(
-            screenSize=screen_size,
+            screen_size=screen_size,
             virtualScrSizeScaler=4,
             position=pygame.Vector2(0, 0),
             # does pygame.HWACCEL make a difference?
@@ -47,7 +47,6 @@ class ClientRenderer:
         pygame.display.update()
 
     def _tick_game(self, events, dt):
-
         for event in events:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_q:
                 self.camera.zoom += .1
@@ -70,7 +69,9 @@ class ClientRenderer:
         self.debugger.debug(f"entity count (without own player): {len(self.client.entities)}")
         self.debugger.debug(int(self.client.clock.get_fps()))
 
-        self.camera.update(dt, self.debugger)
+        #self.hud.tick(events, dt)  # render hud elements
+
+        self.camera.update(dt, events, self.debugger)
 
     def tick(self, state, events, dt):
         if self.client.state == client_state.IN_GAME:
