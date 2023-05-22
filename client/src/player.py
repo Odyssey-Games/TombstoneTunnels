@@ -6,12 +6,11 @@ from common.src.packets.c2s.ClientMovePacket import ClientMovePacket
 
 
 class Entity:
-    def __init__(self, position: pygame.Vector2 = pygame.Vector2(0, 0), tileMap):
-        self.tilePosition = position
-        self.tileMap = tileMap
+    def __init__(self, tilePosition: pygame.Vector2 = pygame.Vector2(0, 0)):
+        self.tilePosition = tilePosition
         self.maxSpeed = 120
         self.sprite = None
-
+c
     def render(self, camera):
         pygame.draw.circle(camera.renderTexture, (255, 0, 0), self.getWorldPos()-camera.position, 5)
 
@@ -20,8 +19,8 @@ class Entity:
 
 
 class Player(Entity):
-    def __init__(self, client, uuid, tilemap, position: pygame.Vector2 = pygame.Vector2(0, 0)):
-        Entity.__init__(self, position, tilemap)
+    def __init__(self, client, uuid, tilemap, tilePosition: pygame.Vector2 = pygame.Vector2(0, 0)):
+        Entity.__init__(self, tilePosition)
         self.client = client  # todo global client instance?
         self.uuid = uuid
 
@@ -54,81 +53,24 @@ class Player(Entity):
                 elif event.key in [pygame.K_s, pygame.K_DOWN]:
                     self.movingDown = False
 
-
-
     def updatePosition(self, deltaTime, tileMap):
-        fixedFrict = pow(self.friction, deltaTime)
-
-
-
-    def sendPacket(self):
-        if self.velocity.x != 0 or self.velocity.y != 0:
-            # Send new position to server
-            move_packet = ClientMovePacket(self.position)
-            try:
-                self.client.send_packet(move_packet)
-            except Exception as exeption:
-                print("Error while sending move packet.")
-                print(exeption)
-    
+        pass
 
     def moveAndCollide(self, tilemap, deltaTime):
-        tilesToCheck = []
-        for y, row in enumerate(tilemap.tileMap):
-            for x, tile in enumerate(row):
-                if tilemap.tileTypeManager.tileTypes[tile].isSolid:
-                    tilesToCheck.append(
-                        pygame.Rect(
-                            tilemap.position.x + (x * tilemap.tileSize),
-                            tilemap.position.y + (y * tilemap.tileSize),
-                            tilemap.tileSize,
-                            tilemap.tileSize
-                        )
-                    )
-        
-    #### check for x movement-collisions:
-       
-        self.position.x += self.velocity.x * deltaTime
-        
-        # -5 to convert circle center pos to rect top-left edge pos with current radius of 5 
-        self.hitbox.x = self.position.x-5
-        self.hitbox.y = self.position.y-5
+        pass
 
-        hitTiles = []
-        for tile in tilesToCheck:
-            if self.hitbox.colliderect(tile):
-                hitTiles.append(tile)
 
-        for tile in hitTiles:     
-            if self.velocity.x > 0:
-                self.position.x = int(tile.left - 6)
-                self.velocity.x = 0
 
-            elif self.velocity.x < 0:
-                self.position.x = int(tile.right + 5)
-                self.velocity.x = 0
-        
-    #### check for y movement-collisions:    
-        self.position.y += self.velocity.y * deltaTime
 
-        # -5 to convert circle center pos to rect top-left edge pos with current radius of 5
-        self.hitbox.x = self.position.x-5
-        self.hitbox.y = self.position.y-5
+def sendPacket(self):
+    if self.velocity.x != 0 or self.velocity.y != 0:
+        # Send new position to server
+        move_packet = ClientMovePacket(self.position)
+        try:
+            self.client.send_packet(move_packet)
+        except Exception as exeption:
+            print("Error while sending move packet.")
+            print(exeption)
 
-        hitTiles = []
-        for tile in tilesToCheck:
-            if self.hitbox.colliderect(tile):
-                hitTiles.append(tile)
-
-        for tile in hitTiles:     
-            if self.velocity.y > 0:
-                self.position.y = int(tile.top - 6)
-                self.velocity.y = 0
-
-            elif self.velocity.y < 0:
-                self.position.y = int(tile.bottom + 5)
-                self.velocity.y = 0
-        
-    #### Apply movement of hitbox to position
 
 
