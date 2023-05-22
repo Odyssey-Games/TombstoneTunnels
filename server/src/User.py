@@ -1,10 +1,10 @@
 from time import time
 
-import pygame
+from common.src.vec.Vec2i import Vec2i
 
 
 class User:
-    """Represents a user connected to the *server*."""
+    """Represents a user/client connected to the *server*."""
 
     def __init__(self, name: str, addr, uuid, token):
         """
@@ -18,4 +18,5 @@ class User:
         self.uuid = uuid
         self.token = token
         self.last_ping = time()
-        self.position = pygame.Vector2(0, 0)  # todo move player/entity classes to common?
+        self.position = Vec2i()  # tile position of client - todo move player/entity classes to common?
+        self.direction = Vec2i()  # direction of client input

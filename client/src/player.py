@@ -1,76 +1,67 @@
 # This file contains the player object with rendering and physics methods
+import copy
 
-import pygame, math
+import pygame
 
-from common.src.packets.c2s.ClientMovePacket import ClientMovePacket
+from client.src.camera import Camera
+from common.src.entity.ClientInput import ClientInput
+from common.src.packets.c2s.ChangeInputPacket import ChangeInputPacket
+from common.src.vec.TilePos import TilePos
+from common.src.vec.Vec2i import Vec2i
+from vec.AbsPos import AbsPos
 
 
 class Entity:
-    def __init__(self, tilePosition: pygame.Vector2 = pygame.Vector2(0, 0)):
-        self.tilePosition = tilePosition
-        self.maxSpeed = 120
-        self.sprite = None
-c
-    def render(self, camera):
-        pygame.draw.circle(camera.renderTexture, (255, 0, 0), self.getWorldPos()-camera.position, 5)
+    def __init__(self, tile_position: TilePos = TilePos(), direction=Vec2i()):
+        self.tile_position: TilePos = tile_position
+        self.animated_position: AbsPos = AbsPos.from_tile_pos(tile_position)
+        self.direction = direction
+        self.max_speed: int = 120
+        self.sprite = None  # TODO add custom sprite support
 
-    def getWorldPos(self):
-        return pygame.Vector2(self.tilePosition * self.tileMap.tileSize, self.tilePosition * self.tileMap.tileSize)
+    def render(self, camera: Camera):
+        pygame.draw.circle(camera.renderTexture, (255, 0, 0), self.animated_position - camera.position, 5)
 
 
 class Player(Entity):
-    def __init__(self, client, uuid, tilemap, tilePosition: pygame.Vector2 = pygame.Vector2(0, 0)):
-        Entity.__init__(self, tilePosition)
+    def __init__(self, client, uuid, tile_position: TilePos = TilePos()):
+        Entity.__init__(self, tile_position)
         self.client = client  # todo global client instance?
         self.uuid = uuid
 
         self.inputBuffer = []
 
-    def update(self, deltaTime, tileMap, pygameEvents):
-        self.handleEvents(pygameEvents)
-        self.updatePosition(deltaTime, tileMap)
-        self.sendPacket()
+    def update(self, delta_time, tile_map, pygame_events):
+        self.handle_events(pygame_events)
 
-    def handleEvents(self, pygameEvents):
-        for event in pygameEvents:
+    def handle_events(self, pygame_events):
+        dir = copy.copy(self.direction)
+        for event in pygame_events:
             if event.type == pygame.KEYDOWN:
                 if event.key in [pygame.K_a, pygame.K_LEFT]:
-                    self.movingLeft = True
+                    dir.x -= 1
                 elif event.key in [pygame.K_d, pygame.K_RIGHT]:
-                    self.movingRight = True
+                    dir.x += 1
                 elif event.key in [pygame.K_w, pygame.K_UP]:
-                    self.movingUp = True
+                    dir.y += 1
                 elif event.key in [pygame.K_s, pygame.K_DOWN]:
-                    self.movingDown = True
+                    dir.y -= 1
 
             elif event.type == pygame.KEYUP:
                 if event.key in [pygame.K_a, pygame.K_LEFT]:
-                    self.movingLeft = False
+                    dir.x -= 1
                 elif event.key in [pygame.K_d, pygame.K_RIGHT]:
-                    self.movingRight = False
+                    dir.x += 1
                 elif event.key in [pygame.K_w, pygame.K_UP]:
-                    self.movingUp = False
+                    dir.y -= 1
                 elif event.key in [pygame.K_s, pygame.K_DOWN]:
-                    self.movingDown = False
+                    dir.y += 1
 
-    def updatePosition(self, deltaTime, tileMap):
-        pass
+        # todo only vertical/horizontal movement
+        dir.x = max(min(dir.x, 1), -1)
+        dir.y = max(min(dir.y, 1), -1)
 
-    def moveAndCollide(self, tilemap, deltaTime):
-        pass
-
-
-
-
-def sendPacket(self):
-    if self.velocity.x != 0 or self.velocity.y != 0:
-        # Send new position to server
-        move_packet = ClientMovePacket(self.position)
-        try:
-            self.client.send_packet(move_packet)
-        except Exception as exeption:
-            print("Error while sending move packet.")
-            print(exeption)
-
-
-
+        if dir != self.direction:
+            print("Direction changed; sending packet")
+            packet = ChangeInputPacket(ClientInput(dir))
+            self.client.send_packet(packet)

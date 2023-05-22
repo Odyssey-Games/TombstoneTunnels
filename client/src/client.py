@@ -1,9 +1,10 @@
 # Main entry point of the program
 
+import client_state
 from camera import *
+from player import Entity
 from client_networking import ClientNetworking
 from client_renderer import ClientRenderer
-import client_state
 
 
 class Client:
@@ -17,7 +18,7 @@ class Client:
         self.running = True
         self.player = None  # gets assigned when we "get" our player from the server
         self.player_uuid = None
-        self.entities = []  # other entities, can also be other players
+        self.entities: list[Entity] = []  # other entities, can also be other players
         self.state = client_state.MAIN_MENU
 
     def _disconnect(self):
@@ -54,8 +55,8 @@ class Client:
 
         if self.player:
             self.player.update(dt, self.renderer.tilemap, events)
-            self.renderer.debugger.debug(f"velocity: {self.player.velocity}")
-            self.renderer.debugger.debug(f"position: {self.player.position}")
+            #self.renderer.debugger.debug(f"velocity: {self.player.velocity}")
+            #self.renderer.debugger.debug(f"position: {self.player.position}")
 
     def update_player(self, player):
         """Set our player and advise the camera to target the player."""

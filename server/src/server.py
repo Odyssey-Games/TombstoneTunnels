@@ -12,7 +12,7 @@ sys.path.insert(1, os.path.join(sys.path[0], '..', '..'))
 from common.src.packets.c2s.DisconnectPacket import DisconnectPacket
 from common.src.common import print_hi
 from common.src.packets.c2s.AuthorizedPacket import AuthorizedPacket
-from common.src.packets.c2s.ClientMovePacket import ClientMovePacket
+from common.src.packets.c2s.ChangeInputPacket import ChangeInputPacket
 from common.src.packets.c2s.HelloPacket import *
 from common.src.packets.c2s.PingPacket import PingPacket
 from common.src.packets.c2s.RequestInfoPacket import RequestInfoPacket
@@ -136,10 +136,11 @@ if __name__ == '__main__':
                         other_user.last_ping = time()
                         break
 
-            elif isinstance(client_packet, ClientMovePacket):
-                # noinspection PyUnboundLocalVariable
+            elif isinstance(client_packet, ChangeInputPacket):
                 user = next((client for client in server.clients if client.token == client_packet.token), None)
-                user.position = client_packet.position
+                user.direction = client_packet.client_input.direction
+
+                print("Received ChangeInputPacket from client: " + str(user.direction))
 
                 # todo broadcast to other clients each tick (not instantly)
                 player_move_packet = PlayerMovePacket(user.uuid, user.position)

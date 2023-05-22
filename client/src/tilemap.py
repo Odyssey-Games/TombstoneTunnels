@@ -1,20 +1,23 @@
-# This file contains all the functionality for loading, storing and rendering the tilemap
+"""This file contains all the functionality for loading, storing and rendering the tilemap"""
 
 import os
+
 import pygame
 
 
-# describes a type of Tile, for example a dirt tile
-
-
-# data type to be stored in the tileTypeManager
 class TileType:
-    def __init__(self, imgPath: str, isSolid: bool = False):
+    """
+    Describe a type of tile, for example a dirt tile.
+
+    This is a data type to be stored in the tile type manager.
+    """
+
+    def __init__(self, img_path: str, is_solid: bool = False):
         try:
-            self.image = pygame.image.load(imgPath).convert_alpha()
-        except Exception:
-            print(f"failed to load tile from path: {imgPath}")
-        self.isSolid = isSolid
+            self.image = pygame.image.load(img_path).convert_alpha()
+        except Exception as e:
+            print(f"failed to load tile from path '{img_path}': {e}")
+        self.is_solid = is_solid
 
 
 # contains all possible TileTypes and their names
@@ -22,7 +25,7 @@ class TileTypeManager:
     def __init__(self):
         self.tileTypes = {}
 
-    def loadImages(self, path: str):
+    def load_images(self, path: str):
         for filename in os.listdir(path):
             name = filename[:filename.find(".")]
             solid = (name[0] == "s")
@@ -30,37 +33,42 @@ class TileTypeManager:
 
 
 class TileMap:
-    def __init__(self, tileSize: int, pathToTileImgs: str, pathToMapFile: str,
+    def __init__(self, tile_size: int, path_to_tile_imgs: str, path_to_map_file: str,
                  pos: pygame.Vector2 = pygame.Vector2(0, 0)):
-        self.tileSize = tileSize
-        self.tileTypeManager = TileTypeManager()
-        self.tileTypeManager.loadImages(pathToTileImgs)
+        self.tile_size = tile_size
+        self.type_manager = TileTypeManager()
+        self.type_manager.load_images(path_to_tile_imgs)
         self.position = pos
 
-        self.tileMap = []  # list of tile names
-        self.loadMapFile(pathToMapFile)
+        self.map: list[list[str]] = []  # two-dimensional list of tile names -> tileMap[y][x]
+        self.load_map_file(path_to_map_file)
 
-    def loadMapFile(self, path: str):
+    def load_map_file(self, path: str):
+        """
+        Loads a map from a tile map file. The file should be a csv file with the tile names separated by commas.
+        """
         try:
             with open(path, "r") as fp:
-                data = fp.readlines()
-        except:
-            print(f"Failed to load mapfile at {path}")
-        for index, line in enumerate(data):
-            data[index] = line.replace(" ", "").replace("\n", "").split(",")
+                lines = fp.readlines()
+                data: list[list[str]] = []
 
-        self.tileMap = data
+                for index, line in enumerate(lines):
+                    data[index] = line.replace(" ", "").replace("\n", "").split(",")
+
+                self.map = data
+        except Exception as e:
+            print(f"Failed to load map file at '{path}': {e}")
 
     def render(self, camera):  # unoptimised rendering, assuming tilemap is relatively small
-        for y, row in enumerate(self.tileMap):
-            for x, tilename in enumerate(row):
-                if tilename == "":
+        for y, row in enumerate(self.map):
+            for x, tile_name in enumerate(row):
+                if tile_name == "":  # ignore empty tiles
                     continue
-                
+
                 camera.renderTexture.blit(
-                    self.tileTypeManager.tileTypes[tilename].image,
+                    self.type_manager.tileTypes[tile_name].image,
                     (
-                        self.position.x + (x * self.tileSize) - camera.position.x,
-                        self.position.y + (y * self.tileSize) - camera.position.y
+                        self.position.x + (x * self.tile_size) - camera.position.x,
+                        self.position.y + (y * self.tile_size) - camera.position.y
                     )
                 )
