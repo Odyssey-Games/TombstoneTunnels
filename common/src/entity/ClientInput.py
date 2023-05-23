@@ -1,4 +1,4 @@
-from common.src.vec.Vec2i import Vec2i
+from common.src.vec.Dir2 import Dir2
 
 
 class ClientInput:
@@ -8,7 +8,7 @@ class ClientInput:
     Currently, this contains the direction in which the player is trying to move.
     """
 
-    def __init__(self, direction: Vec2i):
+    def __init__(self, direction: Dir2):
         """
         :param direction: the direction in which the player is trying to move
         """

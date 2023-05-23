@@ -32,13 +32,14 @@ class ClientRenderer:
             virtual_screen_size_scaler=4,
             position=pygame.Vector2(0, 0),
             # does pygame.HWACCEL make a difference?
-            display_flags=pygame.HWACCEL | pygame.SCALED,
+            display_flags=pygame.HWACCEL | pygame.SCALED | pygame.RESIZABLE,
         )
         self.tilemap = TileMap(TILE_SIZE, PATHTOTILEIMAGES, PATHTOTESTMAP, pygame.Vector2(0, 0))
         self.camera.mode = self.camera.FOLLOW_TARGET
         self.main_screen = MainScreen(self, self.camera.display, screen_size)
         self.connecting_screen = ConnectingScreen(self, self.camera.display, screen_size)
         self.debugger = Debugger()
+        self.pressed_keys = set()
 
     def _tick_ui(self, state, events, dt):
         if state == client_state.MAIN_MENU:

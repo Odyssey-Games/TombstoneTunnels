@@ -1,8 +1,8 @@
 from common.src.vec.TilePos import TilePos
 from common.src.vec.Vec2i import Vec2i
 
-
 TILE_SIZE = 16
+
 
 class AbsPos(Vec2i):
     """

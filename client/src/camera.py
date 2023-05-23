@@ -5,6 +5,7 @@ import random
 
 import pygame
 
+from player import Entity
 from common.src.vec.Vec2i import Vec2i
 
 
@@ -23,8 +24,8 @@ class Camera:
             int(screen_size.y / virtual_screen_size_scaler + 1)
         ))
         self.zoom = 1
-        self.screen_shake = False # apply a random screen shake effect every
-        self.target = None  # entity with .position member var (entity that the camera will follow)
+        self.screen_shake = False  # apply a random screen shake effect every
+        self.target: Entity = None  # entity with .position member var (entity that the camera will follow)
         self.tracking_speed = .999
         self.mode = self.FREE
 
@@ -38,8 +39,8 @@ class Camera:
         if self.mode == self.FREE:
             pass
         elif self.mode == self.FOLLOW_TARGET:
-            self.position.x += (self.target.position.x - self.position.x - self.renderTexture.get_width() / 2) * self.tracking_speed * delta_time
-            self.position.y += (self.target.position.y - self.position.y - self.renderTexture.get_height() / 2) * self.tracking_speed * delta_time
+            self.position.x += (self.target.animated_position.x - self.position.x - self.renderTexture.get_width() / 2) * self.tracking_speed * delta_time
+            self.position.y += (self.target.animated_position.y - self.position.y - self.renderTexture.get_height() / 2) * self.tracking_speed * delta_time
 
     def draw(self, debugger=None):
         dpx = self.display.get_size()[0]

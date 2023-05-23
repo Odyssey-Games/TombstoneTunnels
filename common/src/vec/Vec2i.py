@@ -83,3 +83,17 @@ class Vec2i:
         :return: a string representation of the vector
         """
         return f"Vec2i({self.x}, {self.y})"
+
+    def __getitem__(self, index: int) -> int:
+        """
+        Returns the component of the vector at the given index.
+
+        :param index: the index of the component to retrieve (0 for x, 1 for y)
+        :return: the component of the vector at the given index
+        """
+        if index == 0:
+            return self.x
+        elif index == 1:
+            return self.y
+        else:
+            raise IndexError("Vec2i index out of range")
