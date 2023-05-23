@@ -1,6 +1,7 @@
 from time import time
 
-from common.src.vec.Vec2i import Vec2i
+from common.src.vec.Dir2 import Dir2
+from common.src.vec.TilePos import TilePos
 
 
 class User:
@@ -18,5 +19,6 @@ class User:
         self.uuid = uuid
         self.token = token
         self.last_ping = time()
-        self.position = Vec2i()  # tile position of client - todo move player/entity classes to common?
-        self.direction = Vec2i()  # direction of client input
+        self.position: TilePos = TilePos()  # tile position of client - todo move player/entity classes to common?
+        self.last_move_time: float = 0  # last move time of client for handling tile movement speed
+        self.direction: Dir2 = Dir2.ZERO  # direction of client input

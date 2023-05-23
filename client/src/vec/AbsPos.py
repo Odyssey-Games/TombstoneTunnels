@@ -20,8 +20,8 @@ class AbsPos(Vec2i):
 
     @staticmethod
     def from_tile_pos(tile_pos: TilePos):
-        """Converts the given tile position to an absolute position."""
-        return AbsPos(tile_pos.x * TILE_SIZE, tile_pos.y * TILE_SIZE)
+        """Converts the given tile position to an absolute position (in the middle of one tile)."""
+        return AbsPos(tile_pos.x * TILE_SIZE + (TILE_SIZE//2), tile_pos.y * TILE_SIZE + (TILE_SIZE//2))
 
     def __str__(self) -> str:
         """

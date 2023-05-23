@@ -129,9 +129,10 @@ class ClientNetworking:
                 self.client.entities.append(Player(self, packet.uuid, packet.position))
         elif isinstance(packet, PlayerMovePacket):
             # find player in entities and update position
-            for entity in self.client.entities:
+            for entity in (self.client.entities + [self.client.player]):
                 if entity.uuid == packet.uuid:
                     entity.position = packet.position
+                    entity.animated_position = AbsPos.from_tile_pos(packet.position)  # todo smooth animation
                     break
         elif isinstance(packet, PlayerRemovePacket):
             # find player in entities and remove it

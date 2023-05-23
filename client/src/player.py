@@ -1,4 +1,5 @@
 # This file contains the player object with rendering and physics methods
+import random
 
 import pygame
 
@@ -16,10 +17,11 @@ class Entity:
         self.direction = direction
         self.max_speed: int = 120
         self.sprite = None  # TODO add custom sprite support
+        self.color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
 
     def render(self, camera):
         center = self.animated_position - camera.position
-        pygame.draw.circle(camera.renderTexture, (255, 0, 0), (center.x, center.y), 5)
+        pygame.draw.circle(camera.renderTexture, self.color, (center.x, center.y), 5)
 
 
 class Player(Entity):
@@ -40,13 +42,13 @@ class Player(Entity):
             elif event.type == pygame.KEYUP:
                 self.pressed_keys.remove(event.key)
 
-        if pygame.K_d in self.pressed_keys:
+        if pygame.K_d in self.pressed_keys or pygame.K_RIGHT in self.pressed_keys:
             direction = Dir2.RIGHT
-        elif pygame.K_a in self.pressed_keys:
+        elif pygame.K_a in self.pressed_keys or pygame.K_LEFT in self.pressed_keys:
             direction = Dir2.LEFT
-        elif pygame.K_w in self.pressed_keys:
+        elif pygame.K_w in self.pressed_keys or pygame.K_UP in self.pressed_keys:
             direction = Dir2.UP
-        elif pygame.K_s in self.pressed_keys:
+        elif pygame.K_s in self.pressed_keys or pygame.K_DOWN in self.pressed_keys:
             direction = Dir2.DOWN
 
         if direction != self.direction:

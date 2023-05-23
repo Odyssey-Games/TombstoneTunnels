@@ -50,7 +50,7 @@ class TileMap:
         try:
             with open(path, "r") as fp:
                 lines = fp.readlines()
-                data: list[list[str]] = []
+                data: list[list[str]] = [[] for _ in range(len(lines))]
 
                 for index, line in enumerate(lines):
                     data[index] = line.replace(" ", "").replace("\n", "").split(",")
@@ -58,6 +58,7 @@ class TileMap:
                 self.map = data
         except Exception as e:
             print(f"Failed to load map file at '{path}': {e}")
+            raise e
 
     def render(self, camera):  # unoptimised rendering, assuming tilemap is relatively small
         for y, row in enumerate(self.map):

@@ -73,7 +73,6 @@ class ClientRenderer:
         for entity in self.client.entities:
             entity.render(self.camera)
 
-        self.debugger.debug(f"entity count (without own player): {len(self.client.entities)}")
         self.debugger.debug(int(self.client.clock.get_fps()))
 
         self.camera.update(dt, self.debugger)

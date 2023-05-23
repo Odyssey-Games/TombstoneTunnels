@@ -13,7 +13,7 @@ class Client:
         self.clock = pygame.time.Clock()
         self.server_list = ["localhost", "odysseygames.de"]
         self.current_server_ip = self.server_list[0]
-        self.networking = ClientNetworking(self, "Client " + str(random.randint(1, 10000)))
+        self.networking: ClientNetworking = ClientNetworking(self, "Client " + str(random.randint(1, 10000)))
         self.renderer = ClientRenderer(self)
         self.running = True
         self.player = None  # gets assigned when we "get" our player from the server

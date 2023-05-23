@@ -6,6 +6,7 @@ from socket import *
 from time import time
 
 from User import User
+from common.src.vec.Dir2 import Dir2
 
 sys.path.insert(1, os.path.join(sys.path[0], '..', '..'))
 
@@ -26,12 +27,14 @@ from common.src.packets.s2c.PongPacket import PongPacket
 SERVER_ADDRESS = ('0.0.0.0', 5857)
 PING_TIMEOUT = 5  # timeout clients after not pinging for 5 seconds
 PONG_INTERVAL = 1  # send a pong packet every second
+MOVE_TIMEOUT = 0.5
 
 
 class Server:
     """
     :type clients: list[User]
     """
+
     def __init__(self):
         self.clients = []
         self.socket = socket(AF_INET, SOCK_DGRAM)
@@ -61,7 +64,8 @@ class Server:
 
 
 if __name__ == '__main__':
-    """The main server entry point.
+    """
+    The main server entry point.
     
     Currently one server instance means one "game" (one game state, one set of players, one seed/map, etc.).
     """
@@ -82,6 +86,16 @@ if __name__ == '__main__':
                     server.send_packet(PongPacket(), other_user.addr)
                 print(f"Ponged {len(server.clients)} clients.")
                 last_pong = time()
+
+            # maybe move clients
+            for user in server.clients:
+                if user.direction != Dir2.ZERO and time() - user.last_move_time >= MOVE_TIMEOUT:
+                    user.last_move_time = time()
+                    user.position += user.direction.to_vector()
+                    player_move_packet = PlayerMovePacket(user.uuid, user.position)
+                    for moving_user in server.clients:
+                        print(f"Sending move packet to {moving_user.name} with position {user.position}.")
+                        server.send_packet(player_move_packet, moving_user.addr)
 
             # check pings
             for client in server.clients:
@@ -141,12 +155,6 @@ if __name__ == '__main__':
                 user.direction = client_packet.client_input.direction
 
                 print("Received ChangeInputPacket from client: " + str(user.direction))
-
-                # todo broadcast to other clients each tick (not instantly)
-                player_move_packet = PlayerMovePacket(user.uuid, user.position)
-                for other_user in server.clients:
-                    if other_user.addr != client_addr:
-                        server.send_packet(player_move_packet, other_user.addr)
         except KeyboardInterrupt:
             print("Shutting down...")
             break
