@@ -130,8 +130,11 @@ class ClientNetworking:
                 # this is another player, add to entities
                 self.client.entities.append(Player(self, packet.uuid, packet.position))
         elif isinstance(packet, EntityMovePacket):
+            print(f"Received entity move packet to {packet.position} (uuid: {packet.uuid} | {self.client.player_uuid}).")
             # find entity in entities and update position
             for entity in (self.client.entities + [self.client.player]):
+                if not entity:
+                    continue
                 if entity.uuid == packet.uuid:
                     entity.position = packet.position
                     entity.animated_position = AbsPos.from_tile_pos(packet.position)  # todo smooth animation

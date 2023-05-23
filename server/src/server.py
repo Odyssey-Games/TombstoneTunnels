@@ -9,6 +9,7 @@ from User import User
 from common.src.map.map_manager import MapManager
 from common.src.packets.s2c.MapChangePacket import MapChangePacket
 from common.src.vec.Dir2 import Dir2
+from common.src.vec.TilePos import TilePos
 
 sys.path.insert(1, os.path.join(sys.path[0], '..', '..'))
 
@@ -125,7 +126,7 @@ if __name__ == '__main__':
                 print(f"Client with name {client_packet.name} connected.")
                 token = secrets.token_hex(16)
                 player_uuid = secrets.token_hex(16)
-                user = User(client_packet.name, client_addr, player_uuid, token)
+                user = User(client_packet.name, client_addr, player_uuid, token, start_pos=TilePos(1, 2))
                 server.clients.append(user)
                 reply_packet = HelloReplyPacket(token, player_uuid)
                 server.send_packet(reply_packet, client_addr)
@@ -133,6 +134,10 @@ if __name__ == '__main__':
                 # set map for this client
                 map_packet = MapChangePacket(current_map)
                 server.send_packet(map_packet, client_addr)
+
+                # set own position for this client
+                move_packet = EntityMovePacket(player_uuid, user.position)
+                server.send_packet(move_packet, client_addr)
 
                 # spawn other players for this client
                 for other_user in server.clients:
