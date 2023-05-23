@@ -58,7 +58,6 @@ class ClientPlayer(ClientEntity):
             direction = Dir2.DOWN
 
         if direction != self.direction:
-            print("Direction changed; sending packet")
             packet = ChangeInputPacket(ClientInput(direction))
             self.client.send_packet(packet)
 

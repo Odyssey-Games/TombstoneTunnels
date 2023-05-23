@@ -87,11 +87,6 @@ if __name__ == '__main__':
 
     map_manager = MapManager()
     current_map = map_manager.maps[0]
-    print("Current map:", current_map.name)
-    print(f"Current map 0/0: {current_map.tiles[0][0].name}")
-    print(f"Current map 0/1: {current_map.tiles[0][1].name}")
-    print(f"Current map 1/0: {current_map.tiles[1][0].name}")
-    print(f"Current map 1/1: {current_map.tiles[1][1].name}")
 
     last_pong = time()
     while True:
@@ -110,17 +105,15 @@ if __name__ == '__main__':
                     new_position = user.position + user.direction.to_vector()
                     # collision check
                     if current_map.tiles is not None:
-                        if new_position.y < 0 or new_position.x < 0 or new_position.y >= len(current_map.tiles) or new_position.x >= len(current_map.tiles[0]):
-                            print(f"Player {user.name} is colliding with a wall: {new_position} | out of bounds.")
+                        if new_position.y < 0 or new_position.x < 0 or new_position.y >= len(
+                                current_map.tiles) or new_position.x >= len(current_map.tiles[0]):
                             continue
                         tile = current_map.tiles[new_position.y][new_position.x]
                         if tile.is_solid:
-                            print(f"Player {user.name} is colliding with a wall: {new_position} | {tile.name}.")
                             continue
                     user.position += user.direction.to_vector()
                     move_packet = EntityMovePacket(user.uuid, user.position)
                     for moving_user in server.clients:
-                        print(f"Sending move packet to {moving_user.name} with position {user.position}.")
                         server.send_packet(move_packet, moving_user.addr)
 
             # check pings
@@ -189,7 +182,6 @@ if __name__ == '__main__':
                 user = next((client for client in server.clients if client.token == client_packet.token), None)
                 user.direction = client_packet.client_input.direction
 
-                print("Received ChangeInputPacket from client: " + str(user.direction))
         except KeyboardInterrupt:
             print("Shutting down...")
             break
