@@ -66,6 +66,7 @@ class ClientRenderer:
             entity.render(self.camera)
 
         self.debugger.debug(int(self.client.clock.get_fps()))
+        self.debugger.debug(f"Player pos: {self.client.player.tile_position}")
 
         self.camera.update(dt, self.debugger)
 

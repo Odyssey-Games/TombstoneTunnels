@@ -88,6 +88,10 @@ if __name__ == '__main__':
     map_manager = MapManager()
     current_map = map_manager.maps[0]
     print("Current map:", current_map.name)
+    print(f"Current map 0/0: {current_map.tiles[0][0].name}")
+    print(f"Current map 0/1: {current_map.tiles[0][1].name}")
+    print(f"Current map 1/0: {current_map.tiles[1][0].name}")
+    print(f"Current map 1/1: {current_map.tiles[1][1].name}")
 
     last_pong = time()
     while True:
@@ -103,6 +107,16 @@ if __name__ == '__main__':
             for user in server.clients:
                 if user.direction != Dir2.ZERO and time() - user.last_move_time >= MOVE_TIMEOUT:
                     user.last_move_time = time()
+                    new_position = user.position + user.direction.to_vector()
+                    # collision check
+                    if current_map.tiles is not None:
+                        if new_position.y < 0 or new_position.x < 0 or new_position.y >= len(current_map.tiles) or new_position.x >= len(current_map.tiles[0]):
+                            print(f"Player {user.name} is colliding with a wall: {new_position} | out of bounds.")
+                            continue
+                        tile = current_map.tiles[new_position.y][new_position.x]
+                        if tile.is_solid:
+                            print(f"Player {user.name} is colliding with a wall: {new_position} | {tile.name}.")
+                            continue
                     user.position += user.direction.to_vector()
                     move_packet = EntityMovePacket(user.uuid, user.position)
                     for moving_user in server.clients:
@@ -182,4 +196,4 @@ if __name__ == '__main__':
         except Exception as e:
             # we don't want to crash the server because of a client
             print("Exception in main loop:")
-            print(e)
+            raise e
