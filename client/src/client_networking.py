@@ -7,6 +7,8 @@ import sys
 from socket import socket, AF_INET, SOCK_DGRAM
 from time import time
 
+from common.src.packets.s2c.MapChangePacket import MapChangePacket
+
 sys.path.insert(1, os.path.join(sys.path[0], '..', '..'))
 
 import os
@@ -20,7 +22,7 @@ from common.src.packets.c2s.HelloPacket import HelloPacket
 from common.src.packets.c2s.DisconnectPacket import DisconnectPacket
 from common.src.packets.c2s.PingPacket import PingPacket
 from common.src.packets.s2c.HelloReplyPacket import HelloReplyPacket
-from common.src.packets.s2c.PlayerMovePacket import PlayerMovePacket
+from common.src.packets.s2c.EntityMovePacket import EntityMovePacket
 from common.src.packets.s2c.PlayerSpawnPacket import PlayerSpawnPacket
 from common.src.packets.s2c.PlayerRemovePacket import PlayerRemovePacket
 from common.src.packets.s2c.PongPacket import PongPacket
@@ -127,11 +129,15 @@ class ClientNetworking:
             else:
                 # this is another player, add to entities
                 self.client.entities.append(Player(self, packet.uuid, packet.position))
-        elif isinstance(packet, PlayerMovePacket):
-            # find player in entities and update position
-            for entity in self.client.entities:
+        elif isinstance(packet, EntityMovePacket):
+            print(f"Received entity move packet to {packet.position} (uuid: {packet.uuid} | {self.client.player_uuid}).")
+            # find entity in entities and update position
+            for entity in (self.client.entities + [self.client.player]):
+                if not entity:
+                    continue
                 if entity.uuid == packet.uuid:
                     entity.position = packet.position
+                    entity.animated_position = AbsPos.from_tile_pos(packet.position)  # todo smooth animation
                     break
         elif isinstance(packet, PlayerRemovePacket):
             # find player in entities and remove it
@@ -139,6 +145,10 @@ class ClientNetworking:
             client_entity = next((entity for entity in self.client.entities if entity.uuid == packet.uuid), None)
             if client_entity:
                 self.client.entities.remove(client_entity)
+        elif isinstance(packet, MapChangePacket):
+            print(f"Received map change packet with map {packet.new_map}.")
+            self.client.map = packet.new_map
+            # todo animate map change
         # todo handle other packets here
 
     def tick(self, events, dt) -> bool:
@@ -160,7 +170,9 @@ class ClientNetworking:
 
         while True:  # we want to be able to receive multiple packets per tick
             try:
-                data = self.socket.recv(1024)
+                data = self.socket.recv(8192)
+                if len(data) > 512:
+                    print(f"Received big packet of size {len(data)} from {self.address}")
                 packet = pickle.loads(data)
                 if not isinstance(packet, Packet):
                     print(f"Received invalid packet: {packet}")

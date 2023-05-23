@@ -6,19 +6,23 @@ from socket import *
 from time import time
 
 from User import User
+from common.src.map.map_manager import MapManager
+from common.src.packets.s2c.MapChangePacket import MapChangePacket
+from common.src.vec.Dir2 import Dir2
+from common.src.vec.TilePos import TilePos
 
 sys.path.insert(1, os.path.join(sys.path[0], '..', '..'))
 
 from common.src.packets.c2s.DisconnectPacket import DisconnectPacket
 from common.src.common import print_hi
 from common.src.packets.c2s.AuthorizedPacket import AuthorizedPacket
-from common.src.packets.c2s.ClientMovePacket import ClientMovePacket
+from common.src.packets.c2s.ChangeInputPacket import ChangeInputPacket
 from common.src.packets.c2s.HelloPacket import *
 from common.src.packets.c2s.PingPacket import PingPacket
 from common.src.packets.c2s.RequestInfoPacket import RequestInfoPacket
 from common.src.packets.s2c.HelloReplyPacket import HelloReplyPacket
 from common.src.packets.s2c.InfoReplyPacket import InfoReplyPacket
-from common.src.packets.s2c.PlayerMovePacket import PlayerMovePacket
+from common.src.packets.s2c.EntityMovePacket import EntityMovePacket
 from common.src.packets.s2c.PlayerSpawnPacket import PlayerSpawnPacket
 from common.src.packets.s2c.PlayerRemovePacket import PlayerRemovePacket
 from common.src.packets.s2c.PongPacket import PongPacket
@@ -26,12 +30,14 @@ from common.src.packets.s2c.PongPacket import PongPacket
 SERVER_ADDRESS = ('0.0.0.0', 5857)
 PING_TIMEOUT = 5  # timeout clients after not pinging for 5 seconds
 PONG_INTERVAL = 1  # send a pong packet every second
+MOVE_TIMEOUT = 0.5
 
 
 class Server:
     """
     :type clients: list[User]
     """
+
     def __init__(self):
         self.clients = []
         self.socket = socket(AF_INET, SOCK_DGRAM)
@@ -40,11 +46,15 @@ class Server:
 
     def send_packet(self, packet, addr: tuple):
         data = pickle.dumps(packet)
+        if len(data) > 1024:
+            print(f"Sending big packet of size {len(data)} to {addr}")
         self.socket.sendto(data, addr)
 
     def rcvfrom(self, bufsize: int):
         try:
             data, addr = self.socket.recvfrom(bufsize)
+            if len(data) > 512:
+                print(f"Received big packet of size {len(data)} from {addr}")
             packet = pickle.loads(data)
             if not isinstance(packet, Packet):
                 print(f"Received invalid packet: {packet}")
@@ -61,7 +71,9 @@ class Server:
 
 
 if __name__ == '__main__':
-    """The main server entry point.
+    # TODO simplify server code
+    """
+    The main server entry point.
     
     Currently one server instance means one "game" (one game state, one set of players, one seed/map, etc.).
     """
@@ -73,6 +85,10 @@ if __name__ == '__main__':
         print("Could not start server. Is it already running?")
         raise e
 
+    map_manager = MapManager()
+    current_map = map_manager.maps[0]
+    print("Current map:", current_map.name)
+
     last_pong = time()
     while True:
         try:
@@ -82,6 +98,16 @@ if __name__ == '__main__':
                     server.send_packet(PongPacket(), other_user.addr)
                 print(f"Ponged {len(server.clients)} clients.")
                 last_pong = time()
+
+            # maybe move clients
+            for user in server.clients:
+                if user.direction != Dir2.ZERO and time() - user.last_move_time >= MOVE_TIMEOUT:
+                    user.last_move_time = time()
+                    user.position += user.direction.to_vector()
+                    move_packet = EntityMovePacket(user.uuid, user.position)
+                    for moving_user in server.clients:
+                        print(f"Sending move packet to {moving_user.name} with position {user.position}.")
+                        server.send_packet(move_packet, moving_user.addr)
 
             # check pings
             for client in server.clients:
@@ -100,10 +126,19 @@ if __name__ == '__main__':
                 print(f"Client with name {client_packet.name} connected.")
                 token = secrets.token_hex(16)
                 player_uuid = secrets.token_hex(16)
-                user = User(client_packet.name, client_addr, player_uuid, token)
+                user = User(client_packet.name, client_addr, player_uuid, token, start_pos=TilePos(1, 2))
                 server.clients.append(user)
                 reply_packet = HelloReplyPacket(token, player_uuid)
                 server.send_packet(reply_packet, client_addr)
+
+                # set map for this client
+                map_packet = MapChangePacket(current_map)
+                server.send_packet(map_packet, client_addr)
+
+                # set own position for this client
+                move_packet = EntityMovePacket(player_uuid, user.position)
+                server.send_packet(move_packet, client_addr)
+
                 # spawn other players for this client
                 for other_user in server.clients:
                     if other_user.addr != client_addr:
@@ -136,16 +171,11 @@ if __name__ == '__main__':
                         other_user.last_ping = time()
                         break
 
-            elif isinstance(client_packet, ClientMovePacket):
-                # noinspection PyUnboundLocalVariable
+            elif isinstance(client_packet, ChangeInputPacket):
                 user = next((client for client in server.clients if client.token == client_packet.token), None)
-                user.position = client_packet.position
+                user.direction = client_packet.client_input.direction
 
-                # todo broadcast to other clients each tick (not instantly)
-                player_move_packet = PlayerMovePacket(user.uuid, user.position)
-                for other_user in server.clients:
-                    if other_user.addr != client_addr:
-                        server.send_packet(player_move_packet, other_user.addr)
+                print("Received ChangeInputPacket from client: " + str(user.direction))
         except KeyboardInterrupt:
             print("Shutting down...")
             break
