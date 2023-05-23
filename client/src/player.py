@@ -3,6 +3,7 @@ import random
 
 import pygame
 
+from assets import Assets
 from common.src.entity.ClientInput import ClientInput
 from common.src.packets.c2s.ChangeInputPacket import ChangeInputPacket
 from common.src.vec.Dir2 import Dir2
@@ -15,13 +16,18 @@ class ClientEntity:
         self.tile_position: TilePos = tile_position
         self.animated_position: AbsPos = AbsPos.from_tile_pos(tile_position)
         self.direction = direction
+        self.flip_image = (direction == Dir2.LEFT)
         self.max_speed: int = 120
-        self.sprite = None  # TODO add custom sprite support
+        self.image = pygame.image.load(Assets.get("player", "player.png"))
         self.color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
 
     def render(self, camera):
-        center = self.animated_position - camera.position
-        pygame.draw.circle(camera.renderTexture, self.color, (center.x, center.y), 5)
+        pos = self.animated_position - camera.position
+        if self.flip_image:
+            flipped_image = pygame.transform.flip(self.image, True, False)
+            camera.renderTexture.blit(flipped_image, (pos.x, pos.y - 16))
+        else:
+            camera.renderTexture.blit(self.image, (pos.x, pos.y - 16))
 
 
 class ClientPlayer(ClientEntity):
@@ -56,4 +62,10 @@ class ClientPlayer(ClientEntity):
             packet = ChangeInputPacket(ClientInput(direction))
             self.client.send_packet(packet)
 
-        self.direction = direction
+            # only flip image when necessary, we don't want the texture to flip back when the player stops moving
+            if direction == Dir2.LEFT:
+                self.flip_image = True
+            elif direction == Dir2.RIGHT:
+                self.flip_image = False
+
+            self.direction = direction
