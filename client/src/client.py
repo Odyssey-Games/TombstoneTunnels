@@ -5,7 +5,7 @@ from camera import *
 from client_networking import ClientNetworking
 from client_renderer import ClientRenderer
 from common.src.map.map import Map
-from player import Entity
+from player import ClientEntity
 
 
 class Client:
@@ -20,7 +20,7 @@ class Client:
         self.running = True
         self.player = None  # gets assigned when we "get" our player from the server
         self.player_uuid = None
-        self.entities: list[Entity] = []  # other entities, can also be other players
+        self.entities: list[ClientEntity] = []  # other entities, can also be other players
         self.state = client_state.MAIN_MENU
 
     def _disconnect(self):

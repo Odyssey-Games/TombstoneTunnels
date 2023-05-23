@@ -1,4 +1,4 @@
-# This file contains the player object with rendering and physics methods
+# This file contains the client-side entity/player classes with methods for rendering
 import random
 
 import pygame
@@ -10,7 +10,7 @@ from common.src.vec.TilePos import TilePos
 from vec.AbsPos import AbsPos
 
 
-class Entity:
+class ClientEntity:
     def __init__(self, tile_position: TilePos = TilePos(), direction=Dir2.ZERO):
         self.tile_position: TilePos = tile_position
         self.animated_position: AbsPos = AbsPos.from_tile_pos(tile_position)
@@ -24,10 +24,10 @@ class Entity:
         pygame.draw.circle(camera.renderTexture, self.color, (center.x, center.y), 5)
 
 
-class Player(Entity):
+class ClientPlayer(ClientEntity):
     def __init__(self, client, uuid, tile_position: TilePos = TilePos()):
-        Entity.__init__(self, tile_position)
-        self.client = client  # todo global client instance?
+        ClientEntity.__init__(self, tile_position)
+        self.client = client
         self.uuid = uuid
         self.pressed_keys = set()
 

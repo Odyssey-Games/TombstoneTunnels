@@ -5,7 +5,7 @@ import random
 
 import pygame
 
-from player import Entity
+from player import ClientEntity
 from common.src.vec.Vec2i import Vec2i
 
 
@@ -25,7 +25,7 @@ class Camera:
         ))
         self.zoom = 1
         self.screen_shake = False  # apply a random screen shake effect every
-        self.target: Entity = None  # entity with .position member var (entity that the camera will follow)
+        self.target: ClientEntity = None  # entity with .position member var (entity that the camera will follow)
         self.tracking_speed = .999
         self.mode = self.FREE
 
