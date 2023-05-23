@@ -20,7 +20,7 @@ from common.src.packets.c2s.HelloPacket import HelloPacket
 from common.src.packets.c2s.DisconnectPacket import DisconnectPacket
 from common.src.packets.c2s.PingPacket import PingPacket
 from common.src.packets.s2c.HelloReplyPacket import HelloReplyPacket
-from common.src.packets.s2c.PlayerMovePacket import PlayerMovePacket
+from common.src.packets.s2c.EntityMovePacket import EntityMovePacket
 from common.src.packets.s2c.PlayerSpawnPacket import PlayerSpawnPacket
 from common.src.packets.s2c.PlayerRemovePacket import PlayerRemovePacket
 from common.src.packets.s2c.PongPacket import PongPacket
@@ -127,8 +127,8 @@ class ClientNetworking:
             else:
                 # this is another player, add to entities
                 self.client.entities.append(Player(self, packet.uuid, packet.position))
-        elif isinstance(packet, PlayerMovePacket):
-            # find player in entities and update position
+        elif isinstance(packet, EntityMovePacket):
+            # find entity in entities and update position
             for entity in (self.client.entities + [self.client.player]):
                 if entity.uuid == packet.uuid:
                     entity.position = packet.position

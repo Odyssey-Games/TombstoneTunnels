@@ -19,7 +19,7 @@ from common.src.packets.c2s.PingPacket import PingPacket
 from common.src.packets.c2s.RequestInfoPacket import RequestInfoPacket
 from common.src.packets.s2c.HelloReplyPacket import HelloReplyPacket
 from common.src.packets.s2c.InfoReplyPacket import InfoReplyPacket
-from common.src.packets.s2c.PlayerMovePacket import PlayerMovePacket
+from common.src.packets.s2c.EntityMovePacket import EntityMovePacket
 from common.src.packets.s2c.PlayerSpawnPacket import PlayerSpawnPacket
 from common.src.packets.s2c.PlayerRemovePacket import PlayerRemovePacket
 from common.src.packets.s2c.PongPacket import PongPacket
@@ -92,10 +92,10 @@ if __name__ == '__main__':
                 if user.direction != Dir2.ZERO and time() - user.last_move_time >= MOVE_TIMEOUT:
                     user.last_move_time = time()
                     user.position += user.direction.to_vector()
-                    player_move_packet = PlayerMovePacket(user.uuid, user.position)
+                    move_packet = EntityMovePacket(user.uuid, user.position)
                     for moving_user in server.clients:
                         print(f"Sending move packet to {moving_user.name} with position {user.position}.")
-                        server.send_packet(player_move_packet, moving_user.addr)
+                        server.send_packet(move_packet, moving_user.addr)
 
             # check pings
             for client in server.clients:
