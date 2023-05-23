@@ -5,17 +5,15 @@ import os
 
 import client_state
 from camera import *
+from client_tiles import ClientTileMap
 from connecting_screen import ConnectingScreen
 from debug import *
 from main_screen import MainScreen
-from tilemap import TileMap
 
-if os.path.exists(os.path.join(os.path.dirname(__file__), "assets")):  # for pyinstaller; different assets folder loc
-    PATH_TO_ASSETS = os.path.join(os.path.dirname(__file__), "assets")
-else:
-    PATH_TO_ASSETS = os.path.join(os.path.dirname(__file__), "..", "assets")
-PATHTOTILEIMAGES = os.path.join(PATH_TO_ASSETS, "tilemap", "tiles")
-PATHTOTESTMAP = os.path.join(PATH_TO_ASSETS, "tilemap", "maps", "testmap.csv")
+ASSETS_PATH = os.path.join(os.path.dirname(__file__), "assets")
+if not os.path.exists(ASSETS_PATH):  # for pyinstaller; different data folder loc
+    ASSETS_PATH = os.path.join(os.path.dirname(__file__), "..", "assets")
+
 TILE_SIZE = 16  # declaring this twice because of circular imports
 
 
@@ -30,11 +28,11 @@ class ClientRenderer:
         self.camera = Camera(
             screen_size=screen_size,
             virtual_screen_size_scaler=4,
-            position=pygame.Vector2(0, 0),
+            position=Vec2i(0, 0),
             # does pygame.HWACCEL make a difference?
             display_flags=pygame.HWACCEL | pygame.SCALED | pygame.RESIZABLE,
         )
-        self.tilemap = TileMap(TILE_SIZE, PATHTOTILEIMAGES, PATHTOTESTMAP, pygame.Vector2(0, 0))
+        self.tilemap = ClientTileMap(self.client, TILE_SIZE, ASSETS_PATH)
         self.camera.mode = self.camera.FOLLOW_TARGET
         self.main_screen = MainScreen(self, self.camera.display, screen_size)
         self.connecting_screen = ConnectingScreen(self, self.camera.display, screen_size)

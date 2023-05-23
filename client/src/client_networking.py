@@ -7,6 +7,8 @@ import sys
 from socket import socket, AF_INET, SOCK_DGRAM
 from time import time
 
+from common.src.packets.s2c.MapChangePacket import MapChangePacket
+
 sys.path.insert(1, os.path.join(sys.path[0], '..', '..'))
 
 import os
@@ -140,6 +142,10 @@ class ClientNetworking:
             client_entity = next((entity for entity in self.client.entities if entity.uuid == packet.uuid), None)
             if client_entity:
                 self.client.entities.remove(client_entity)
+        elif isinstance(packet, MapChangePacket):
+            print(f"Received map change packet with map {packet.new_map}.")
+            self.client.map = packet.new_map
+            # todo animate map change
         # todo handle other packets here
 
     def tick(self, events, dt) -> bool:
@@ -161,7 +167,9 @@ class ClientNetworking:
 
         while True:  # we want to be able to receive multiple packets per tick
             try:
-                data = self.socket.recv(1024)
+                data = self.socket.recv(8192)
+                if len(data) > 512:
+                    print(f"Received big packet of size {len(data)} from {self.address}")
                 packet = pickle.loads(data)
                 if not isinstance(packet, Packet):
                     print(f"Received invalid packet: {packet}")

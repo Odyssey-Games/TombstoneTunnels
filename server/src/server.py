@@ -6,6 +6,8 @@ from socket import *
 from time import time
 
 from User import User
+from common.src.map.map_manager import MapManager
+from common.src.packets.s2c.MapChangePacket import MapChangePacket
 from common.src.vec.Dir2 import Dir2
 
 sys.path.insert(1, os.path.join(sys.path[0], '..', '..'))
@@ -43,11 +45,15 @@ class Server:
 
     def send_packet(self, packet, addr: tuple):
         data = pickle.dumps(packet)
+        if len(data) > 1024:
+            print(f"Sending big packet of size {len(data)} to {addr}")
         self.socket.sendto(data, addr)
 
     def rcvfrom(self, bufsize: int):
         try:
             data, addr = self.socket.recvfrom(bufsize)
+            if len(data) > 512:
+                print(f"Received big packet of size {len(data)} from {addr}")
             packet = pickle.loads(data)
             if not isinstance(packet, Packet):
                 print(f"Received invalid packet: {packet}")
@@ -64,6 +70,7 @@ class Server:
 
 
 if __name__ == '__main__':
+    # TODO simplify server code
     """
     The main server entry point.
     
@@ -76,6 +83,10 @@ if __name__ == '__main__':
     except OSError as e:
         print("Could not start server. Is it already running?")
         raise e
+
+    map_manager = MapManager()
+    current_map = map_manager.maps[0]
+    print("Current map:", current_map.name)
 
     last_pong = time()
     while True:
@@ -118,6 +129,11 @@ if __name__ == '__main__':
                 server.clients.append(user)
                 reply_packet = HelloReplyPacket(token, player_uuid)
                 server.send_packet(reply_packet, client_addr)
+
+                # set map for this client
+                map_packet = MapChangePacket(current_map)
+                server.send_packet(map_packet, client_addr)
+
                 # spawn other players for this client
                 for other_user in server.clients:
                     if other_user.addr != client_addr:

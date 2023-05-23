@@ -2,9 +2,10 @@
 
 import client_state
 from camera import *
-from player import Entity
 from client_networking import ClientNetworking
 from client_renderer import ClientRenderer
+from common.src.map.map import Map
+from player import Entity
 
 
 class Client:
@@ -13,8 +14,9 @@ class Client:
         self.clock = pygame.time.Clock()
         self.server_list = ["localhost", "odysseygames.de"]
         self.current_server_ip = self.server_list[0]
-        self.networking: ClientNetworking = ClientNetworking(self, "Client " + str(random.randint(1, 10000)))
+        self.networking = ClientNetworking(self, "Client " + str(random.randint(1, 10000)))
         self.renderer = ClientRenderer(self)
+        self.map: Map = None
         self.running = True
         self.player = None  # gets assigned when we "get" our player from the server
         self.player_uuid = None
