@@ -6,7 +6,7 @@ from socket import *
 from time import time
 
 from User import User
-from common.src.map.map_manager import MapManager
+from map_manager import MapManager
 from common.src.packets.s2c.MapChangePacket import MapChangePacket
 from common.src.vec.Dir2 import Dir2
 from common.src.vec.TilePos import TilePos

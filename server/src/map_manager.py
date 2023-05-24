@@ -1,13 +1,11 @@
 import os
-from typing import Dict
 
 from common.src.map.map import Map
 from common.src.map.tile import Tile
-from common.src.vec.TilePos import TilePos
 
-DATA_PATH = os.path.join(os.path.dirname(__file__), "data")
-if not os.path.exists(DATA_PATH):  # for pyinstaller; different data folder loc
-    DATA_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "data")
+DATA_PATH = os.path.join(os.path.dirname(__file__), "data")  # for pyinstaller; different data folder loc
+if not os.path.exists(DATA_PATH):
+    DATA_PATH = os.path.join(os.path.dirname(__file__), "..", "data")
 
 
 class MapManager:
