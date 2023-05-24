@@ -12,8 +12,6 @@ class Client:
     def __init__(self):
         pygame.init()  # we need to call init() before we can use pygame fonts for rendering
         self.clock = pygame.time.Clock()
-        self.server_list = ["localhost", "odysseygames.de"]
-        self.current_server_ip = self.server_list[0]
         self.networking = ClientNetworking(self, "Client " + str(random.randint(1, 10000)))
         self.renderer = ClientRenderer(self)
         self.map: Map = None

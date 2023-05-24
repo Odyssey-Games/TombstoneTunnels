@@ -7,6 +7,8 @@ import sys
 from socket import socket, AF_INET, SOCK_DGRAM
 from time import time
 
+import requests as requests
+
 from common.src.packets.s2c.MapChangePacket import MapChangePacket
 
 sys.path.insert(1, os.path.join(sys.path[0], '..', '..'))
@@ -28,7 +30,6 @@ from common.src.packets.s2c.PlayerRemovePacket import PlayerRemovePacket
 from common.src.packets.s2c.PongPacket import PongPacket
 from player import *
 import client_state
-from srv_manager import SrvManager
 
 PING_INTERVAL = 1  # we send a ping packet every second
 PONG_TIMEOUT = 5  # we wait 5 seconds for a pong packet before we assume that the connection to the server is lost
@@ -37,37 +38,50 @@ PONG_TIMEOUT = 5  # we wait 5 seconds for a pong packet before we assume that th
 class ClientNetworking:
     DEFAULT_SERVER_PORT = 5857
 
-    def __init__(self, client, name="John Doe", address=('localhost', DEFAULT_SERVER_PORT)):
+    def __init__(self, client, name="John Doe"):
         self.client = client
         self.name = name
         self.socket = socket(AF_INET, SOCK_DGRAM)
-        self.address = address
+        self.global_address = self.get_public_address()
+        self.custom_address = ("localhost", self.DEFAULT_SERVER_PORT)
+        self.current_address = self.global_address
         self.socket.setblocking(False)  # don't block the current thread when receiving packets
         self.token = None  # auth token that we get from the server when it accepts our HelloPacket
         self.last_ping = time()
         self.last_server_pong = time()
-        self.resolved_addresses = {}
 
-        # lookup srv records
-        for server_ip in self.client.server_list:
-            result = SrvManager.lookup(server_ip)
-            if result[0]:
-                self.resolved_addresses[server_ip] = result
+    @staticmethod
+    def get_public_address():
+        """Gets the address of the public server."""
+        try:
+            address = requests.get("https://api.odysseygames.de/server").text
+            return address.split(":")[0], int(address.split(":")[1])
+        except Exception as e:
+            print("Could not get server address from api.odysseygames.de. Using localhost instead.")
+            print(e)
+            return "localhost"
 
-    def get_address(self):
-        """Get our current address or the resolved address if it has a srv record."""
-        address = self.address
-        if address[0] in self.resolved_addresses:
-            address = self.resolved_addresses[self.address[0]]
-        return address
+    def set_custom_address(self, address: str):
+        """Sets the address of the server to connect to."""
+        split = address.split(":")
+        if len(split) == 1:
+            # we have no port
+            port = self.DEFAULT_SERVER_PORT
+        else:
+            port = split[1]
 
-    def try_login(self):
+        self.custom_address = (split[0], int(port))
+
+    def try_login(self, custom: bool = False):
         if not self.socket:
             self.socket = socket(AF_INET, SOCK_DGRAM)
-        # check if we resolved this address (if this address has a srv record)
-        address = self.get_address()
-        print("Connecting to address: " + str(address))
-        self.socket.connect(address)
+
+        if custom:
+            self.current_address = self.custom_address
+        else:
+            self.current_address = self.global_address
+        print(f"Connecting to address: {self.current_address}")
+        self.socket.connect(self.current_address)
         self.socket.setblocking(False)
 
         """Try to send a HelloPacket to the server."""
@@ -86,9 +100,6 @@ class ClientNetworking:
         self.socket.shutdown(2)
         self.socket = None
 
-    def set_ip(self, ip):
-        self.address = (ip, self.address[1])
-
     def send_packet(self, packet: Packet):
         """Sends a packet to the server.
 
@@ -101,7 +112,7 @@ class ClientNetworking:
             packet.token = self.token
 
         data = pickle.dumps(packet)
-        self.socket.sendto(data, self.get_address())
+        self.socket.sendto(data, self.current_address)
 
     def _handle_packet(self, packet: Packet):
         """Handle a packet that was received from the server.
@@ -171,7 +182,7 @@ class ClientNetworking:
             try:
                 data = self.socket.recv(8192)
                 if len(data) > 512:
-                    print(f"Received big packet of size {len(data)} from {self.address}")
+                    print(f"Received big packet of size {len(data)} from {self.global_address}")
                 packet = pickle.loads(data)
                 if not isinstance(packet, Packet):
                     print(f"Received invalid packet: {packet}")
