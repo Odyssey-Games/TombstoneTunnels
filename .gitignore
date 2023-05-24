@@ -2,6 +2,7 @@
 client/assets/tilemap/tiles/split.py
 client/assets/tilemap/tiles/tilemap.png
 .idea
+linux_env
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
