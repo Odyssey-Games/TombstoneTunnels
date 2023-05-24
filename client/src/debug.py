@@ -8,11 +8,15 @@ class Debugger:
         self.pos = (5, 5)
         self.content = []
         self.font = pygame.font.SysFont('Comic Sans MS', 24)
+        self.enabled = False
 
     def debug(self, info):
         self.content.append(str(info))
 
     def renderDebug(self):
+        if not self.enabled:
+            return
+
         surf = pygame.display.get_surface()
         for index, item in enumerate(self.content):
             itemText = self.font.render(item, 2, (200, 200, 200))

@@ -44,14 +44,19 @@ class Client:
         for event in events:
             if event.type == pygame.QUIT:
                 self.running = False
-            elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                if self.state == client_state.MAIN_MENU:
-                    print("Exiting...")
-                    self.running = False
-                else:
-                    print("Disconnecting from server...")
-                    self.networking.disconnect()
-                    self._disconnect()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_F11:
+                    pygame.display.toggle_fullscreen()
+                elif event.key == pygame.K_F3:
+                    self.renderer.debugger.enabled = not self.renderer.debugger.enabled
+                elif event.key == pygame.K_ESCAPE:
+                    if self.state == client_state.MAIN_MENU:
+                        print("Exiting...")
+                        self.running = False
+                    else:
+                        print("Disconnecting from server...")
+                        self.networking.disconnect()
+                        self._disconnect()
 
         if self.player:
             self.player.update(dt, self.renderer.tilemap, events)

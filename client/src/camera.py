@@ -73,3 +73,8 @@ class Camera:
     def screen_to_world(self, point: pygame.Vector2):
         """Converts a point from screen coordinates to world coordinates"""
         return point + self.position
+
+    @staticmethod
+    def toggle_fullscreen():
+        """Toggles fullscreen mode"""
+        pygame.display.toggle_fullscreen()

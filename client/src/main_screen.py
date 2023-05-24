@@ -14,15 +14,21 @@ class MainScreen:
 
         self.manager = pygame_gui.UIManager(screen_size, Assets.get("menu", "theme.json"))
         self.manager.add_font_paths("dungeon", Assets.get("fonts", "dungeon.ttf"))
-        self.ui_background = pygame.Surface(screen_size)
-        self.play_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((0, 0), (500, 200)),
+        self.ui_background = pygame.image.load(Assets.get("menu", "background.png"))
+        self.logo = pygame.image.load(Assets.get("menu", "logo_big.png"))
+
+        self.logo_image = pygame_gui.elements.UIImage(relative_rect=pygame.Rect((0, -100), (600, 300)),
+                                                      image_surface=self.logo,
+                                                      anchors={'center': 'center'},
+                                                      )
+        self.play_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((0, 140), (450, 130)),
                                                         text='PLAY ONLINE',
                                                         manager=self.manager,
                                                         anchors={'center': 'center'},
                                                         object_id="#play_button")
 
         self.version_label = pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, 0), (-1, -1)),
-                                                         text=f' TT {VERSION}',
+                                                         text=f' {VERSION}',
                                                          manager=self.manager)
 
         bottom_right = pygame.Rect(0, 0, 200, 50)
@@ -47,6 +53,13 @@ class MainScreen:
             text='X',
             manager=self.manager,
             anchors={'right': 'right', 'top': 'top'},
+            object_id="#quit_button"
+        )
+        self.fullscreen_button = pygame_gui.elements.UIButton(
+            relative_rect=top_right,
+            text='[]',
+            manager=self.manager,
+            anchors={'right': 'right', 'top': 'top', 'right_target': self.quit_button},
         )
 
     def tick(self, events, dt):
@@ -61,6 +74,9 @@ class MainScreen:
                     print('Logging in (custom)...')
                     self.renderer.client.state = client_state.CONNECTING
                     self.renderer.client.networking.try_login(True)
+                elif event.ui_element == self.fullscreen_button:
+                    print('Toggling fullscreen...')
+                    pygame.display.toggle_fullscreen()
                 elif event.ui_element == self.quit_button:
                     print('Quitting...')
                     self.renderer.client.running = False
