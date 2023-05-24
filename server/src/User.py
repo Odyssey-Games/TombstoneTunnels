@@ -1,4 +1,8 @@
+import os
+import sys
 from time import time
+
+sys.path.insert(1, os.path.join(sys.path[0], '..', '..'))
 
 from common.src.vec.Dir2 import Dir2
 from common.src.vec.TilePos import TilePos
