@@ -35,9 +35,8 @@
       "size": "15"
     },
     "misc": {
-      "border_width": "1",
-      "shape": "rounded_rectangle",
-      "shape_corner_radius": "3"
+      "border_width": "2",
+      "shape": "rectangle"
     }
   },
   "text_entry_line": {
@@ -46,9 +45,8 @@
       "size": "15"
     },
     "misc": {
-      "border_width": "1",
-      "shape": "rounded_rectangle",
-      "shape_corner_radius": "3"
+      "border_width": "2",
+      "shape": "rectangle"
     },
     "colours": {
       "normal_background": "#33102e",
@@ -59,9 +57,6 @@
     "font": {
       "name": "fira_code",
       "size": "60"
-    },
-    "misc": {
-      "shape_corner_radius": "5"
     }
   },
   "#quit_button": {
