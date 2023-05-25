@@ -42,7 +42,6 @@ class ClientNetworking:
         self.client = client
         self.socket = socket(AF_INET, SOCK_DGRAM)
         self.global_address = self.get_public_address()
-        self.custom_address = ("localhost", self.DEFAULT_SERVER_PORT)
         self.current_address = self.global_address
         self.socket.setblocking(False)  # don't block the current thread when receiving packets
         self.token = None  # auth token that we get from the server when it accepts our HelloPacket
@@ -60,34 +59,29 @@ class ClientNetworking:
             print(e)
             return "localhost"
 
-    def set_custom_address(self, address: str):
-        """Sets the address of the server to connect to."""
-        split = address.split(":")
-        if len(split) == 1:
-            # we have no port
-            port = self.DEFAULT_SERVER_PORT
-        else:
-            port = split[1]
-
-        self.custom_address = (split[0], int(port))
-
     def try_login(self, custom: bool = False):
+        # todo try connect in thread + fix multiple connection tries when clicking fast
         if not self.socket:
             self.socket = socket(AF_INET, SOCK_DGRAM)
 
         if custom:
-            self.current_address = self.custom_address
+            self.current_address = tuple(self.client.config.custom_server_address)
         else:
             self.current_address = self.global_address
         print(f"Connecting to address: {self.current_address}")
-        self.socket.connect(self.current_address)
-        self.socket.setblocking(False)
+        try:
+            self.socket.connect(self.current_address)
+            self.socket.setblocking(False)
 
-        """Try to send a HelloPacket to the server."""
-        packet = HelloPacket(self.client.player_name)
-        self.send_packet(packet)
-        self.last_server_pong = time()
-        print("Sent login packet.")
+            """Try to send a HelloPacket to the server."""
+            packet = HelloPacket(self.client.config.player_name)
+            self.send_packet(packet)
+            self.last_server_pong = time()
+            print("Sent login packet.")
+        except Exception as e:
+            print(e)
+            print("Could not connect to server.")
+            self.client.state = client_state.MAIN_MENU
 
     def disconnect(self):
         if self.token:
@@ -174,7 +168,12 @@ class ClientNetworking:
         # Maybe ping server
         if (time() - self.last_ping) > PING_INTERVAL:
             print("Sending ping packet.")
-            self.send_packet(PingPacket())
+            try:
+                self.send_packet(PingPacket())
+            except Exception as e:
+                print(f"Error while sending ping packet: {e}. Disconnecting.")
+                self.socket = None
+                return False
             self.last_ping = time()
 
         while True:  # we want to be able to receive multiple packets per tick

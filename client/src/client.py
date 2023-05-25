@@ -1,7 +1,10 @@
 # Main entry point of the program
+import json
+import os
 
 import client_state
 from camera import *
+from config import ClientConfig
 from client_networking import ClientNetworking
 from client_renderer import ClientRenderer
 from common.src.map.map import Map
@@ -13,7 +16,7 @@ class Client:
         pygame.init()  # we need to call init() before we can use pygame fonts for rendering
         self.clock = pygame.time.Clock()
         self.networking = ClientNetworking(self)
-        self.player_name: str = self.get_player_name()  # gets changed when the user enters a name in the main menu
+        self.config: ClientConfig = self._get_config()
         self.renderer = ClientRenderer(self)
         self.map: Map | None = None
         self.running = True
@@ -22,8 +25,50 @@ class Client:
         self.entities: list[ClientEntity] = []  # other entities, can also be other players
         self.state = client_state.MAIN_MENU
 
-    def get_player_name(self):
-        return f"Player{random.randrange(1000)}"  # todo get/save from/to file
+    @staticmethod
+    def get_config_file():
+        config_dir = os.getenv("localappdata")
+        if not os.path.exists(config_dir):  # we're probably on linux
+            config_dir = os.getenv("HOME")
+        config_dir = os.path.join(config_dir, "TombstoneTunnels")
+        if not os.path.exists(config_dir):
+            os.makedirs(config_dir)
+        return os.path.join(config_dir, "config.json")
+
+    @staticmethod
+    def _get_config():
+        """Load the client config from config.json."""
+        config_file = Client.get_config_file()
+        try:
+            with open(config_file) as f:
+                # load as ClientConfig object
+                return json.load(f, object_hook=lambda d: ClientConfig(**d))
+        except FileNotFoundError:
+            print("config.json not found. Creating default config...")
+            config = ClientConfig()
+            with open(config_file, "w") as f:
+                json.dump(config.__dict__, f, indent=4)
+            return config
+
+    def save_config(self):
+        """Save the current client config to config.json."""
+        config_file = Client.get_config_file()
+        with open(config_file, "w") as f:
+            json.dump(self.config.__dict__, f, indent=4)
+
+    def set_custom_address(self, address: str):
+        """Sets the address of the custom server to connect to."""
+        split = address.split(":")
+        if len(split) == 1:
+            # we have no port
+            port = self.networking.DEFAULT_SERVER_PORT
+        else:
+            port = split[1]
+
+        try:
+            self.config.custom_server_address = (split[0], int(port))
+        except ValueError:
+            pass
 
     def _disconnect(self):
         """Reset variables. Note that networking.disconnect() has to be called separately (when necessary)."""
@@ -76,3 +121,5 @@ class Client:
 if __name__ == "__main__":
     client = Client()
     client.run()
+    client.save_config()
+    print("Saved config.")

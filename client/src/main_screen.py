@@ -1,8 +1,8 @@
 # This File contains the update function for the login screen
-import random
 
 import pygame
 import pygame_gui
+
 import client_state
 from assets import Assets
 from common.src.common import VERSION
@@ -31,7 +31,7 @@ class MainScreen:
         self.name_entry = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((0, 70), (450, 50)),
                                                               manager=self.manager,
                                                               anchors={'center': 'center'},
-                                                              initial_text=self.renderer.client.player_name)
+                                                              initial_text=self.renderer.client.config.player_name)
 
         self.version_label = pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, 0), (-1, -1)),
                                                          text=f' {VERSION}',
@@ -45,11 +45,15 @@ class MainScreen:
             manager=self.manager,
             anchors={'right': 'right', 'bottom': 'bottom'},
         )
+        custom_addr = self.renderer.client.config.custom_server_address
+        custom_server_text = f"{custom_addr[0]}:{custom_addr[1]}"
+        if custom_addr[1] == self.renderer.client.networking.DEFAULT_SERVER_PORT:
+            custom_server_text = custom_addr[0]
         self.custom_server_edit = pygame_gui.elements.UITextEntryLine(
             relative_rect=bottom_right,
             manager=self.manager,
             anchors={'right': 'right', 'bottom': 'bottom', 'bottom_target': self.custom_server_button},
-            initial_text="localhost",
+            initial_text=custom_server_text
         )
 
         top_right = pygame.Rect(0, 0, 50, 50)
@@ -91,10 +95,10 @@ class MainScreen:
                     name = event.text[:20]
                     print('Changing name to', name)
                     self.name_entry.text = name
-                    self.renderer.client.player_name = name
+                    self.renderer.client.config.player_name = name
                 elif event.ui_element == self.custom_server_edit:
                     print('Changing custom server address to', event.text)
-                    self.renderer.client.networking.set_custom_address(event.text)
+                    self.renderer.client.set_custom_address(event.text)
 
         self.manager.update(dt)
 
