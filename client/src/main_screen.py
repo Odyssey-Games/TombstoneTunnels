@@ -1,4 +1,5 @@
 # This File contains the update function for the login screen
+import random
 
 import pygame
 import pygame_gui
@@ -21,11 +22,16 @@ class MainScreen:
                                                       image_surface=self.logo,
                                                       anchors={'center': 'center'},
                                                       )
-        self.play_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((0, 140), (450, 130)),
+        self.play_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((0, 160), (450, 130)),
                                                         text='PLAY ONLINE',
                                                         manager=self.manager,
                                                         anchors={'center': 'center'},
                                                         object_id="#play_button")
+
+        self.name_entry = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((0, 70), (450, 50)),
+                                                              manager=self.manager,
+                                                              anchors={'center': 'center'},
+                                                              initial_text=self.renderer.client.player_name)
 
         self.version_label = pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, 0), (-1, -1)),
                                                          text=f' {VERSION}',
@@ -81,7 +87,12 @@ class MainScreen:
                     print('Quitting...')
                     self.renderer.client.running = False
             elif event.type == pygame_gui.UI_TEXT_ENTRY_CHANGED:
-                if event.ui_element == self.custom_server_edit:
+                if event.ui_element == self.name_entry:
+                    name = event.text[:20]
+                    print('Changing name to', name)
+                    self.name_entry.text = name
+                    self.renderer.client.player_name = name
+                elif event.ui_element == self.custom_server_edit:
                     print('Changing custom server address to', event.text)
                     self.renderer.client.networking.set_custom_address(event.text)
 

@@ -12,14 +12,18 @@ class Client:
     def __init__(self):
         pygame.init()  # we need to call init() before we can use pygame fonts for rendering
         self.clock = pygame.time.Clock()
-        self.networking = ClientNetworking(self, "Client " + str(random.randint(1, 10000)))
+        self.networking = ClientNetworking(self)
+        self.player_name: str = self.get_player_name()  # gets changed when the user enters a name in the main menu
         self.renderer = ClientRenderer(self)
-        self.map: Map = None
+        self.map: Map | None = None
         self.running = True
         self.player = None  # gets assigned when we "get" our player from the server
         self.player_uuid = None
         self.entities: list[ClientEntity] = []  # other entities, can also be other players
         self.state = client_state.MAIN_MENU
+
+    def get_player_name(self):
+        return f"Player{random.randrange(1000)}"  # todo get/save from/to file
 
     def _disconnect(self):
         """Reset variables. Note that networking.disconnect() has to be called separately (when necessary)."""

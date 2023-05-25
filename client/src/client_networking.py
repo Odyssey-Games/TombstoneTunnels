@@ -38,9 +38,8 @@ PONG_TIMEOUT = 5  # we wait 5 seconds for a pong packet before we assume that th
 class ClientNetworking:
     DEFAULT_SERVER_PORT = 5857
 
-    def __init__(self, client, name="John Doe"):
+    def __init__(self, client):
         self.client = client
-        self.name = name
         self.socket = socket(AF_INET, SOCK_DGRAM)
         self.global_address = self.get_public_address()
         self.custom_address = ("localhost", self.DEFAULT_SERVER_PORT)
@@ -85,7 +84,7 @@ class ClientNetworking:
         self.socket.setblocking(False)
 
         """Try to send a HelloPacket to the server."""
-        packet = HelloPacket(self.name)
+        packet = HelloPacket(self.client.player_name)
         self.send_packet(packet)
         self.last_server_pong = time()
         print("Sent login packet.")
