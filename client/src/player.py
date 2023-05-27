@@ -12,14 +12,19 @@ from vec.AbsPos import AbsPos
 
 
 class ClientEntity:
+    ANIMATION_SPEED = 30
+
     def __init__(self, tile_position: TilePos = TilePos(), direction=Dir2.ZERO):
         self.tile_position: TilePos = tile_position
         self.animated_position: AbsPos = AbsPos.from_tile_pos(tile_position)
         self.direction = direction
         self.flip_image = (direction == Dir2.LEFT)
-        self.max_speed: int = 120
         self.image = pygame.image.load(Assets.get("player", "player.png"))
         self.color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+
+    def tick(self, delta_time, events):
+        if self.animated_position != AbsPos.from_tile_pos(self.tile_position):
+            self.animated_position = self.animated_position.lerp(self.tile_position, delta_time * self.ANIMATION_SPEED)
 
     def render(self, camera):
         pos = self.animated_position - camera.position

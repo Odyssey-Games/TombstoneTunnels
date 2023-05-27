@@ -30,3 +30,14 @@ class AbsPos(Vec2i):
         :return: a string representation of the vector
         """
         return f"AbsPos({self.x}, {self.y})"
+
+    def lerp(self, tile_position, param):
+        """
+        Linearly interpolates between this absolute position and the given tile position.
+
+        :param tile_position: the tile position to interpolate to
+        :param param: the interpolation parameter
+        :return: the interpolated absolute position
+        """
+        return AbsPos(self.x + (tile_position.x * TILE_SIZE - self.x) * param,
+                      self.y + (tile_position.y * TILE_SIZE - self.y) * param)

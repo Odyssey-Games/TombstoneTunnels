@@ -109,8 +109,10 @@ class Client:
 
         if self.player:
             self.player.update(dt, self.renderer.tilemap, events)
-            # self.renderer.debugger.debug(f"velocity: {self.player.velocity}")
-            # self.renderer.debugger.debug(f"position: {self.player.position}")
+
+        for entity in (self.entities + [self.player]):
+            if entity:
+                entity.tick(dt, events)
 
     def update_player(self, player):
         """Set our player and advise the camera to target the player."""

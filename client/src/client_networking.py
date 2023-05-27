@@ -140,7 +140,6 @@ class ClientNetworking:
                     continue
                 if entity.uuid == packet.uuid:
                     entity.tile_position = packet.position
-                    entity.animated_position = AbsPos.from_tile_pos(packet.position)  # todo smooth animation
                     break
         elif isinstance(packet, PlayerRemovePacket):
             # find player in entities and remove it
