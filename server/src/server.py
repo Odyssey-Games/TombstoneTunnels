@@ -5,13 +5,14 @@ import sys
 from socket import *
 from time import time
 
+sys.path.insert(1, os.path.join(sys.path[0], '..', '..'))
+
 from User import User
+from common.src.packets.s2c.EntityDirectionPacket import EntityDirectionPacket
 from map_manager import MapManager
 from common.src.packets.s2c.MapChangePacket import MapChangePacket
 from common.src.vec.Dir2 import Dir2
 from common.src.vec.TilePos import TilePos
-
-sys.path.insert(1, os.path.join(sys.path[0], '..', '..'))
 
 from common.src.packets.c2s.DisconnectPacket import DisconnectPacket
 from common.src.common import print_hi
@@ -181,6 +182,11 @@ if __name__ == '__main__':
             elif isinstance(client_packet, ChangeInputPacket):
                 user = next((client for client in server.clients if client.token == client_packet.token), None)
                 user.direction = client_packet.client_input.direction
+                # update direction for other clients
+                direction_packet = EntityDirectionPacket(user.uuid, user.direction)
+                for client in server.clients:
+                    if client.addr != client_addr:
+                        server.send_packet(direction_packet, client.addr)
 
         except KeyboardInterrupt:
             print("Shutting down...")

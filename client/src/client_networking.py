@@ -1,5 +1,4 @@
 # This file contains all the code for the client to communicate with the server, like login, packet sending, receiving and handeling.
-#
 
 import os
 import pickle
@@ -8,8 +7,6 @@ from socket import socket, AF_INET, SOCK_DGRAM
 from time import time
 
 import requests as requests
-
-from common.src.packets.s2c.MapChangePacket import MapChangePacket
 
 sys.path.insert(1, os.path.join(sys.path[0], '..', '..'))
 
@@ -28,6 +25,8 @@ from common.src.packets.s2c.EntityMovePacket import EntityMovePacket
 from common.src.packets.s2c.PlayerSpawnPacket import PlayerSpawnPacket
 from common.src.packets.s2c.PlayerRemovePacket import PlayerRemovePacket
 from common.src.packets.s2c.PongPacket import PongPacket
+from common.src.packets.s2c.EntityDirectionPacket import EntityDirectionPacket
+from common.src.packets.s2c.MapChangePacket import MapChangePacket
 from player import *
 import client_state
 
@@ -140,6 +139,18 @@ class ClientNetworking:
                     continue
                 if entity.uuid == packet.uuid:
                     entity.tile_position = packet.position
+                    break
+        elif isinstance(packet, EntityDirectionPacket):
+            # find entity in entities and update direction
+            for entity in (self.client.entities + [self.client.player]):
+                if not entity:
+                    continue
+                if entity.uuid == packet.uuid:
+                    entity.direction = packet.direction
+                    if entity.direction == Dir2.LEFT:
+                        entity.flip_image = True
+                    elif entity.direction == Dir2.RIGHT:
+                        entity.flip_image = False
                     break
         elif isinstance(packet, PlayerRemovePacket):
             # find player in entities and remove it
