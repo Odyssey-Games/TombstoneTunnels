@@ -128,10 +128,10 @@ class ClientNetworking:
             print("Received player spawn packet.")
             if self.client.player_uuid == packet.uuid:
                 # this is our player
-                self.client.update_player(ClientPlayer(self, packet.uuid, packet.position))
+                self.client.update_player(ClientPlayer(self, packet.name, packet.uuid, packet.position))
             else:
                 # this is another player, add to entities
-                self.client.entities.append(ClientPlayer(self, packet.uuid, packet.position))
+                self.client.entities.append(ClientPlayer(self, packet.name, packet.uuid, packet.position))
         elif isinstance(packet, EntityMovePacket):
             # find entity in entities and update position
             for entity in (self.client.entities + [self.client.player]):

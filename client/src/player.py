@@ -36,9 +36,10 @@ class ClientEntity:
 
 
 class ClientPlayer(ClientEntity):
-    def __init__(self, client, uuid, tile_position: TilePos = TilePos()):
+    def __init__(self, client, name, uuid, tile_position: TilePos = TilePos()):
         ClientEntity.__init__(self, tile_position)
         self.client = client
+        self.name = name
         self.uuid = uuid
         self.pressed_keys = set()
 
@@ -73,3 +74,13 @@ class ClientPlayer(ClientEntity):
                 self.flip_image = False
 
             self.direction = direction
+
+    def render(self, camera):
+        super().render(camera)
+
+        # render nametag
+        pos = self.animated_position - camera.position
+        font = pygame.font.SysFont("Arial", 10)
+        text = font.render(self.name, True, (255, 255, 255))
+        camera.renderTexture.blit(text, (pos.x - text.get_width()/2 + 8, pos.y - 20))
+

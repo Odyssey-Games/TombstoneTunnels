@@ -150,11 +150,11 @@ if __name__ == '__main__':
                 # spawn other players for this client
                 for other_user in server.clients:
                     if other_user.addr != client_addr:
-                        player_spawn_packet = PlayerSpawnPacket(other_user.uuid, other_user.position)
+                        player_spawn_packet = PlayerSpawnPacket(other_user.name, other_user.uuid, other_user.position)
                         server.send_packet(player_spawn_packet, client_addr)
 
                 # spawn player for all clients
-                player_spawn_packet = PlayerSpawnPacket(player_uuid, user.position)
+                player_spawn_packet = PlayerSpawnPacket(user.name, player_uuid, user.position)
                 for other_user in server.clients:
                     server.send_packet(player_spawn_packet, other_user.addr)
 
