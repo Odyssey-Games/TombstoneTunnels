@@ -1,7 +1,11 @@
 # This file contains the client-side entity/player classes with methods for rendering
+import os
 import random
+import sys
 
 import pygame
+
+sys.path.insert(1, os.path.join(sys.path[0], '..', '..'))
 
 from assets import Assets
 from common.src.entity.ClientInput import ClientInput
