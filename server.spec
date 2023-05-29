@@ -6,8 +6,9 @@ block_cipher = None
 
 a = Analysis(
     ['server/src/server.py'],
-    pathex=['.'],
+    pathex=['.', 'server/src'],
     binaries=[],
+    datas=[('server/data', 'data')],
 )
 pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 

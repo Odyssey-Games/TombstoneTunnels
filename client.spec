@@ -6,7 +6,7 @@ block_cipher = None
 
 a = Analysis(
     ['client/src/client.py'],
-    pathex=['.'],
+    pathex=['.', 'client/src'],
     binaries=[],
     datas=[('client/assets', 'assets')],
 )
