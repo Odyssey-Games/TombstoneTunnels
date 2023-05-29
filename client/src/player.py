@@ -27,12 +27,12 @@ class ClientEntity:
             self.animated_position = self.animated_position.lerp(self.tile_position, delta_time * self.ANIMATION_SPEED)
 
     def render(self, camera):
-        pos = self.animated_position - camera.position
+        pos = self.animated_position
         if self.flip_image:
             flipped_image = pygame.transform.flip(self.image, True, False)
-            camera.renderTexture.blit(flipped_image, (pos.x, pos.y - 16))
+            camera.render_texture.blit(flipped_image, (pos.x, pos.y - 16))
         else:
-            camera.renderTexture.blit(self.image, (pos.x, pos.y - 16))
+            camera.render_texture.blit(self.image, (pos.x, pos.y - 16))
 
 
 class ClientPlayer(ClientEntity):
@@ -78,9 +78,9 @@ class ClientPlayer(ClientEntity):
     def render(self, camera):
         super().render(camera)
 
-        # render nametag
-        pos = self.animated_position - camera.position
-        font = pygame.font.SysFont("Arial", 10)
+        # render nametag - todo higher res?
+        pos = pygame.Vector2(self.animated_position.x, self.animated_position.y)
+        font = pygame.font.SysFont("Arial", 12)
         text = font.render(self.name, True, (255, 255, 255))
-        camera.renderTexture.blit(text, (pos.x - text.get_width()/2 + 8, pos.y - 20))
+        camera.render_texture.blit(text, (pos.x - text.get_width() / 2 + 8, pos.y - 20))
 

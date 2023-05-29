@@ -95,7 +95,7 @@ class Client:
                 self.running = False
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_F11:
-                    pygame.display.toggle_fullscreen()
+                    self.renderer.camera.toggle_fullscreen()
                 elif event.key == pygame.K_F3:
                     self.renderer.debugger.enabled = not self.renderer.debugger.enabled
                 elif event.key == pygame.K_ESCAPE:

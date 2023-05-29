@@ -18,18 +18,20 @@ class ClientRenderer:
         self.ofx = 0
         self.dt = 0
         # set camera before tilemap (pygame image mode has to be set for loading images in tilemap)
-        screen_size = pygame.Vector2(960, 540)
+        monitor_info = pygame.display.Info()
+        self.screen_size = pygame.Vector2(1280, 720)
+        self.texture_size = pygame.Vector2(200, 200)
         self.camera = Camera(
-            screen_size=screen_size,
-            virtual_screen_size_scaler=4,
-            position=Vec2i(0, 0),
+            screen_size=self.screen_size,  # todo dynamic screen size
+            texture_size=self.texture_size,
+            offset=pygame.Vector2(0, 0),
             # does pygame.HWACCEL make a difference?
-            display_flags=pygame.HWACCEL | pygame.SCALED,
+            display_flags=pygame.HWACCEL,
         )
-        self.tilemap = ClientTileMap(self.client, TILE_SIZE)
+        self.tilemap = ClientTileMap(self, TILE_SIZE)
         self.camera.mode = self.camera.FOLLOW_TARGET
-        self.main_screen = MainScreen(self, self.camera.display, screen_size)
-        self.connecting_screen = ConnectingScreen(self, self.camera.display, screen_size)
+        self.main_screen = MainScreen(self, self.camera.display, self.screen_size)
+        self.connecting_screen = ConnectingScreen(self, self.camera.display, self.screen_size)
         self.debugger = Debugger()
         self.pressed_keys = set()
 

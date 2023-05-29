@@ -31,24 +31,30 @@ class ClientTileManager:
 class ClientTileMap:
     """Client side tile map class for rendering the current map."""
 
-    def __init__(self, client, tile_size: int, pos: pygame.Vector2 = pygame.Vector2(0, 0)):
-        self.client = client
+    def __init__(self, renderer, tile_size: int, pos: pygame.Vector2 = pygame.Vector2(0, 0)):
+        self.renderer = renderer
         self.tile_size = tile_size
         self.position = pos
         self.tiles = ClientTileManager()
 
-    def render(self, camera):  # unoptimised rendering, assuming tilemap is relatively small
-        if not self.client.map:
+    def render(self, camera):
+        if not self.renderer.client.map:
             return
-        for y, row in enumerate(self.client.map.tiles):
+
+        for y, row in enumerate(self.renderer.client.map.tiles):
             for x, tile in enumerate(row):
                 if tile.name == "":  # ignore empty tiles
                     continue
                 abs_pos = AbsPos.from_tile_pos(TilePos(x, y))
-                camera.renderTexture.blit(
-                    self.tiles.get_image(tile),
-                    (
-                        self.position.x + abs_pos.x - camera.position.x,
-                        self.position.y + abs_pos.y - camera.position.y
+                screen_pos = self.renderer.camera.world_to_screen(abs_pos)
+                if screen_pos.x + 16 * 8 > 0 \
+                        and screen_pos.y + 16 * 8 > 0 \
+                        and screen_pos.x < self.renderer.screen_size.x \
+                        and screen_pos.y < self.renderer.screen_size.y:
+                    camera.render_texture.blit(
+                        self.tiles.get_image(tile),
+                        (
+                            self.position.x + abs_pos.x,
+                            self.position.y + abs_pos.y
+                        )
                     )
-                )

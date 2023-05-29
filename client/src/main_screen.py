@@ -86,7 +86,7 @@ class MainScreen:
                     self.renderer.client.networking.try_login(True)
                 elif event.ui_element == self.fullscreen_button:
                     print('Toggling fullscreen...')
-                    pygame.display.toggle_fullscreen()
+                    self.renderer.camera.toggle_fullscreen()
                 elif event.ui_element == self.quit_button:
                     print('Quitting...')
                     self.renderer.client.running = False

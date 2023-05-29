@@ -1,3 +1,6 @@
+import math
+
+
 class Vec2i:
     """
     Class representing any 2D vector with integer components (x and y).
@@ -97,3 +100,19 @@ class Vec2i:
             return self.y
         else:
             raise IndexError("Vec2i index out of range")
+
+    def length(self) -> float:
+        """
+        Returns the length of this vector.
+
+        :return: the length of the vector
+        """
+        return math.sqrt(self.x ** 2 + self.y ** 2)
+
+    def __neg__(self) -> 'Vec2i':
+        """
+        Returns the negation of this vector.
+
+        :return: the negation of the vector
+        """
+        return Vec2i(-self.x, -self.y)
