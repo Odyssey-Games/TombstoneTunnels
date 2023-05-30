@@ -20,22 +20,19 @@ class Camera:
         self.screen_size = screen_size
         self.display_flags = display_flags
         self.vsync = vsync
-        self.display = None
-        self.update_display()
+        self.display = pygame.display.set_mode(screen_size, display_flags, vsync)
         self.texture_size = texture_size
         pygame.display.set_caption("Tombstone Tunnels")
         # Everything is rendered on the render_texture surface. This surface is then scaled and blitted to the display
         # surface with a specific offset to simulate a camera effect. That way, the camera can be moved around smoothly
         # while the rendering remains pixel-perfect (we don't need to upscale every single texture).
         self.render_texture = pygame.Surface(texture_size)
+        self.rendered_texture = pygame.Surface(texture_size)
         self.zoom = 1
         self.screen_shake = False  # apply a random screen shake effect every
         self.target: ClientEntity | None = None  # entity with .position member var (entity that the camera will follow)
         self.tracking_speed = .8
         self.mode = self.FREE
-
-    def update_display(self):
-        self.display = pygame.display.set_mode(self.screen_size, self.display_flags, self.vsync)
 
     def update(self, delta_time, debugger=None):
         self.draw(debugger)
@@ -56,7 +53,7 @@ class Camera:
             self.zoom = max(self.zoom, 1.1)
 
         scaled_texture = pygame.transform.scale_by(
-            self.render_texture,
+            self.rendered_texture,
             self.SCALE_FACTOR,
         )
         self.display.blit(
@@ -67,7 +64,7 @@ class Camera:
         if debugger:
             debugger.renderDebug()
         pygame.display.flip()
-        self.render_texture.fill((0, 0, 0))
+        self.rendered_texture = self.render_texture.copy()
         self.display.fill((0, 0, 0))
 
     def world_to_screen(self, point: AbsPos):

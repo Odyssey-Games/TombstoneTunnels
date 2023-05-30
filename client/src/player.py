@@ -30,9 +30,9 @@ class ClientEntity:
         pos = self.animated_position
         if self.flip_image:
             flipped_image = pygame.transform.flip(self.image, True, False)
-            camera.render_texture.blit(flipped_image, (pos.x, pos.y - 16))
+            camera.rendered_texture.blit(flipped_image, (pos.x, pos.y - 16))
         else:
-            camera.render_texture.blit(self.image, (pos.x, pos.y - 16))
+            camera.rendered_texture.blit(self.image, (pos.x, pos.y - 16))
 
 
 class ClientPlayer(ClientEntity):
@@ -82,5 +82,5 @@ class ClientPlayer(ClientEntity):
         pos = pygame.Vector2(self.animated_position.x, self.animated_position.y)
         font = pygame.font.SysFont("Arial", 12)
         text = font.render(self.name, True, (255, 255, 255))
-        camera.render_texture.blit(text, (pos.x - text.get_width() / 2 + 8, pos.y - 20))
+        camera.rendered_texture.blit(text, (pos.x - text.get_width() / 2 + 8, pos.y - 20))
 
