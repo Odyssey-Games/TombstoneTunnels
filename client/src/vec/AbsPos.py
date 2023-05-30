@@ -1,3 +1,8 @@
+import os
+import sys
+
+sys.path.insert(1, os.path.join(sys.path[0], '..', '..'))
+
 from common.src.vec.TilePos import TilePos
 from common.src.vec.Vec2i import Vec2i
 
