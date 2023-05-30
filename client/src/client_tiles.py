@@ -55,7 +55,7 @@ class ClientTileMap:
                         and screen_pos.y + 16 * 8 > 0 \
                         and screen_pos.x < self.renderer.screen_size.x \
                         and screen_pos.y < self.renderer.screen_size.y:
-                    camera.render_texture.blit(
+                    camera.tilemap_surface.blit(
                         self.tiles.get_image(tile),
                         (
                             self.position.x + abs_pos.x,

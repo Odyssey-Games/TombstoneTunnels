@@ -15,8 +15,8 @@ class MainScreen:
 
         self.manager = pygame_gui.UIManager(screen_size, Assets.get("menu", "theme.json"))
         self.manager.add_font_paths("dungeon", Assets.get("fonts", "dungeon.ttf"))
-        self.ui_background = pygame.image.load(Assets.get("menu", "background.png"))
-        self.logo = pygame.image.load(Assets.get("menu", "logo_big.png"))
+        self.ui_background = pygame.image.load(Assets.get("menu", "background.png")).convert()
+        self.logo = pygame.image.load(Assets.get("menu", "logo_big.png")).convert_alpha()
 
         self.logo_image = pygame_gui.elements.UIImage(relative_rect=pygame.Rect((0, -100), (600, 300)),
                                                       image_surface=self.logo,

@@ -23,7 +23,7 @@ class ClientEntity:
         self.animated_position: AbsPos = AbsPos.from_tile_pos(tile_position)
         self.direction = direction
         self.flip_image = (direction == Dir2.LEFT)
-        self.image = pygame.image.load(Assets.get("player", "player.png"))
+        self.image = pygame.image.load(Assets.get("player", "player.png")).convert_alpha()
         self.color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
 
     def tick(self, delta_time, events):
@@ -34,9 +34,9 @@ class ClientEntity:
         pos = self.animated_position
         if self.flip_image:
             flipped_image = pygame.transform.flip(self.image, True, False)
-            camera.rendered_texture.blit(flipped_image, (pos.x, pos.y - 16))
+            camera.main_surface.blit(flipped_image, (pos.x, pos.y - 16))
         else:
-            camera.rendered_texture.blit(self.image, (pos.x, pos.y - 16))
+            camera.main_surface.blit(self.image, (pos.x, pos.y - 16))
 
 
 class ClientPlayer(ClientEntity):
@@ -86,5 +86,5 @@ class ClientPlayer(ClientEntity):
         pos = pygame.Vector2(self.animated_position.x, self.animated_position.y)
         font = pygame.font.SysFont("Arial", 12)
         text = font.render(self.name, True, (255, 255, 255))
-        camera.rendered_texture.blit(text, (pos.x - text.get_width() / 2 + 8, pos.y - 20))
+        camera.main_surface.blit(text, (pos.x - text.get_width() / 2 + 8, pos.y - 20))
 

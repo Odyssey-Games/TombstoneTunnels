@@ -26,6 +26,8 @@ class Client:
         self.entities: list[ClientEntity] = []  # other entities, can also be other players
         self.state = client_state.MAIN_MENU
 
+        self.networking.start()
+
     @staticmethod
     def get_config_file():
         config_dir = os.getenv("localappdata")
@@ -73,7 +75,7 @@ class Client:
         except ValueError:
             pass
 
-    def _disconnect(self):
+    def disconnect(self):
         """Reset variables. Note that networking.disconnect() has to be called separately (when necessary)."""
         self.state = client_state.MAIN_MENU
         self.player = None
@@ -84,13 +86,9 @@ class Client:
         while self.running:
             dt = self.clock.tick() / 1000
             events = [event for event in pygame.event.get()]
-            if self.state == client_state.IN_GAME or self.state == client_state.CONNECTING:
-                if not self.networking.tick(events, dt):
-                    # disconnected from server; go to main menu
-                    print("Disconnected from server.")
-                    self._disconnect()
             self.tick(events, dt)
             self.renderer.tick(self.state, events, dt)
+        print("Shutting down...")
 
     def tick(self, events, dt):
         for event in events:
@@ -103,12 +101,11 @@ class Client:
                     self.renderer.debugger.enabled = not self.renderer.debugger.enabled
                 elif event.key == pygame.K_ESCAPE:
                     if self.state == client_state.MAIN_MENU:
-                        print("Exiting...")
                         self.running = False
                     else:
                         print("Disconnecting from server...")
                         self.networking.disconnect()
-                        self._disconnect()
+                        self.disconnect()
 
         if self.player:
             self.player.update(dt, self.renderer.tilemap, events)

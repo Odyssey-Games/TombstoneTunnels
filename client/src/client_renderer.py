@@ -18,14 +18,13 @@ class ClientRenderer:
         self.ofx = 0
         self.dt = 0
         # set camera before tilemap (pygame image mode has to be set for loading images in tilemap)
-        self.screen_size = pygame.Vector2(1920, 1080)
-        self.texture_size = pygame.Vector2(200, 200)
+        self.screen_size = pygame.Vector2(1280, 720)
+        self.texture_size = pygame.Vector2(500, 500)
         self.camera = Camera(
-            screen_size=self.screen_size,  # todo dynamic screen size
             texture_size=self.texture_size,
             offset=pygame.Vector2(0, 0),
             # does pygame.HWACCEL make a difference?
-            display_flags=pygame.HWACCEL | pygame.SCALED | pygame.DOUBLEBUF,
+            display_flags=pygame.HWACCEL | pygame.SCALED | pygame.DOUBLEBUF | pygame.HWSURFACE,
         )
         self.tilemap = ClientTileMap(self, TILE_SIZE)
         self.camera.mode = self.camera.FOLLOW_TARGET
@@ -58,6 +57,7 @@ class ClientRenderer:
 
         # render tilemap
         self.tilemap.render(self.camera)
+
         # render player
         if self.client.player:
             self.client.player.render(self.camera)
@@ -67,9 +67,8 @@ class ClientRenderer:
         for entity in self.client.entities:
             entity.render(self.camera)
 
-        self.debugger.debug(int(self.client.clock.get_fps()))
-
         self.camera.update(dt, self.debugger)
+        self.debugger.debug(int(self.client.clock.get_fps()))
 
     def tick(self, state, events, dt):
         if self.client.state == client_state.IN_GAME:

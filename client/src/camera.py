@@ -14,20 +14,24 @@ class Camera:
 
     SCALE_FACTOR = 8
 
-    def __init__(self, screen_size: pygame.Vector2, texture_size: pygame.Vector2,
+    def __init__(self, texture_size: pygame.Vector2,
                  offset: pygame.Vector2 = pygame.Vector2(), display_flags=0, vsync=0):
         self.offset = offset
-        self.screen_size = screen_size
         self.display_flags = display_flags
         self.vsync = vsync
-        self.display = pygame.display.set_mode(screen_size, display_flags, vsync)
+
+        self.monitor_res = pygame.Vector2(pygame.display.Info().current_w, pygame.display.Info().current_h)
+        print(self.monitor_res)
+        self.screen_size = self.monitor_res / 2
+
+        self.display = pygame.display.set_mode(self.screen_size, display_flags, vsync)
         self.texture_size = texture_size
         pygame.display.set_caption("Tombstone Tunnels")
         # Everything is rendered on the render_texture surface. This surface is then scaled and blitted to the display
         # surface with a specific offset to simulate a camera effect. That way, the camera can be moved around smoothly
         # while the rendering remains pixel-perfect (we don't need to upscale every single texture).
-        self.render_texture = pygame.Surface(texture_size)
-        self.rendered_texture = pygame.Surface(texture_size)
+        self.tilemap_surface = pygame.Surface(texture_size)
+        self.main_surface = pygame.Surface(texture_size)
         self.zoom = 1
         self.screen_shake = False  # apply a random screen shake effect every
         self.target: ClientEntity | None = None  # entity with .position member var (entity that the camera will follow)
@@ -46,14 +50,11 @@ class Camera:
             self.offset.y += target_vector.y * self.tracking_speed * delta_time
 
     def draw(self, debugger=None):
-        dpx = self.display.get_size()[0]
-        dpy = self.display.get_size()[1]
-
         if self.screen_shake:  # Increase zoom to a minimum of 1.1 to avoid black borders when applying screen shake
             self.zoom = max(self.zoom, 1.1)
 
         scaled_texture = pygame.transform.scale_by(
-            self.rendered_texture,
+            self.main_surface,
             self.SCALE_FACTOR,
         )
         self.display.blit(
@@ -64,7 +65,9 @@ class Camera:
         if debugger:
             debugger.renderDebug()
         pygame.display.flip()
-        self.rendered_texture = self.render_texture.copy()
+        self.main_surface.fill((0, 0, 0))
+        #self.main_surface = self.tilemap_surface.copy()
+        self.main_surface.blit(self.tilemap_surface, (0, 0))
         self.display.fill((0, 0, 0))
 
     def world_to_screen(self, point: AbsPos):
@@ -74,4 +77,14 @@ class Camera:
     def toggle_fullscreen(self):
         # todo fix fullscreen res
         """Toggles fullscreen mode"""
-        pygame.display.toggle_fullscreen()
+        if not pygame.display.is_fullscreen():
+            self.screen_size = self.monitor_res
+            self.display = pygame.display.set_mode(self.screen_size, self.display_flags, self.vsync)
+            pygame.display.toggle_fullscreen()
+        else:
+            pygame.display.toggle_fullscreen()
+            self.screen_size = self.monitor_res / 2
+            self.display = pygame.display.set_mode(self.screen_size, self.display_flags, self.vsync)
+
+        print(f"Toggled fullscreen to {pygame.display.is_fullscreen()}. Set screen size to {self.screen_size}")
+

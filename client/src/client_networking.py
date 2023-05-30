@@ -3,8 +3,9 @@
 import os
 import pickle
 import sys
+import threading
 from socket import socket, AF_INET, SOCK_DGRAM
-from time import time
+from time import time, sleep
 
 import requests as requests
 
@@ -159,12 +160,27 @@ class ClientNetworking:
             # todo animate map change
         # todo handle other packets here
 
-    def tick(self, events, dt) -> bool:
+    def start(self):
+        """Starts the networking loop in a new thread."""
+        threading.Thread(target=self.networking_loop).start()
+
+    def networking_loop(self):
+        """The networking loop that is run in a separate thread."""
+        print("Networking loop started.")
+        while self.client.running:
+            if self.client.state == client_state.IN_GAME or self.client.state == client_state.CONNECTING:
+                if not self.tick():
+                    self.client.disconnect()
+                    break
+            sleep(0.01)
+        print("Networking loop stopped.")
+
+    def tick(self) -> bool:
         """Handle incoming packets and send ping packet.
 
         This will not block the current thread, but will return if there is no packet to receive.
 
-        :return True if the connection to the server is still alive, False otherwise
+        :return: True if the connection to the server is still alive, False otherwise
         """
         # Check server connection
         if (time() - self.last_server_pong) > PONG_TIMEOUT:
