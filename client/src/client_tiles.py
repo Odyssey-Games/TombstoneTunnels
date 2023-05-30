@@ -50,15 +50,15 @@ class ClientTileMap:
                 if tile.name == "":  # ignore empty tiles
                     continue
                 abs_pos = AbsPos.from_tile_pos(TilePos(x, y))
-                screen_pos = self.renderer.camera.world_to_screen(abs_pos)
-                if screen_pos.x + 16 * 8 > 0 \
-                        and screen_pos.y + 16 * 8 > 0 \
-                        and screen_pos.x < self.renderer.screen_size.x \
-                        and screen_pos.y < self.renderer.screen_size.y:
-                    camera.tilemap_surface.blit(
-                        self.tiles.get_image(tile),
-                        (
-                            self.position.x + abs_pos.x,
-                            self.position.y + abs_pos.y
-                        )
+#                screen_pos = self.renderer.camera.world_to_screen(abs_pos)
+#                if screen_pos.x + 16 * 8 > 0 \
+#                        and screen_pos.y + 16 * 8 > 0 \
+#                        and screen_pos.x < self.renderer.screen_size.x \
+#                        and screen_pos.y < self.renderer.screen_size.y:
+                camera.tilemap_surface.blit(
+                    self.tiles.get_image(tile),
+                    (
+                        self.position.x + abs_pos.x,
+                        self.position.y + abs_pos.y
                     )
+                )

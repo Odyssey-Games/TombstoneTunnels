@@ -55,7 +55,7 @@ class Camera:
 
         scaled_texture = pygame.transform.scale_by(
             self.main_surface,
-            self.SCALE_FACTOR,
+            self.SCALE_FACTOR
         )
         self.display.blit(
             scaled_texture,
