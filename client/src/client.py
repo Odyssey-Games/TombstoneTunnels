@@ -3,12 +3,13 @@ import json
 import os
 from pathlib import Path
 
+import pygame
+
 import client_state
-from camera import *
-from config import ClientConfig
 from client_networking import ClientNetworking
 from client_renderer import ClientRenderer
 from common.src.map.map import Map
+from config import ClientConfig
 from player import ClientEntity
 
 
@@ -27,6 +28,10 @@ class Client:
         self.state = client_state.MAIN_MENU
 
         self.networking.start()
+
+    def get_all_entities(self):
+        """Returns a list of all entities, including the player."""
+        return [self.player] + self.entities
 
     @staticmethod
     def get_config_file():
@@ -87,16 +92,17 @@ class Client:
             dt = self.clock.tick() / 1000
             events = [event for event in pygame.event.get()]
             self.tick(events, dt)
-            self.renderer.tick(self.state, events, dt)
+            self.renderer.render(self.state, events, dt)
         print("Shutting down...")
 
     def tick(self, events, dt):
+        """Handle events and tick all entities (move them etc., but don't render them)."""
         for event in events:
             if event.type == pygame.QUIT:
                 self.running = False
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_F11:
-                    self.renderer.camera.toggle_fullscreen()
+                    self.renderer.toggle_fullscreen()
                 elif event.key == pygame.K_F3:
                     self.renderer.debugger.enabled = not self.renderer.debugger.enabled
                 elif event.key == pygame.K_ESCAPE:
@@ -107,17 +113,14 @@ class Client:
                         self.networking.disconnect()
                         self.disconnect()
 
-        if self.player:
-            self.player.update(dt, self.renderer.tilemap, events)
-
-        for entity in (self.entities + [self.player]):
+        for entity in (self.get_all_entities()):
             if entity:
                 entity.tick(dt, events)
 
     def update_player(self, player):
         """Set our player and advise the camera to target the player."""
         self.player = player
-        self.renderer.camera.target = player
+        self.renderer.camera_target = player
 
 
 if __name__ == "__main__":

@@ -13,14 +13,13 @@ class Debugger:
     def debug(self, info):
         self.content.append(str(info))
 
-    def renderDebug(self):
+    def render(self, surf):
         if not self.enabled:
             return
 
-        surf = pygame.display.get_surface()
         for index, item in enumerate(self.content):
-            itemText = self.font.render(item, 2, (200, 200, 200))
-            pygame.draw.rect(surf, (0, 0, 0), pygame.Rect((4, index * itemText.get_height()),
-                                                          (itemText.get_width(), itemText.get_height())))
-            surf.blit(itemText, (4, index * itemText.get_height()))
+            text = self.font.render(item, 2, (200, 200, 200))
+            pygame.draw.rect(surf, (0, 0, 0), pygame.Rect((4, index * text.get_height()),
+                                                          (text.get_width(), text.get_height())))
+            surf.blit(text, (4, index * text.get_height()))
         self.content = []

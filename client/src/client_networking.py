@@ -130,7 +130,7 @@ class ClientNetworking:
                 self.client.entities.append(ClientPlayer(self, packet.name, packet.uuid, packet.position))
         elif isinstance(packet, EntityMovePacket):
             # find entity in entities and update position
-            for entity in (self.client.entities + [self.client.player]):
+            for entity in (self.client.get_all_entities()):
                 if not entity:
                     continue
                 if entity.uuid == packet.uuid:
@@ -138,7 +138,7 @@ class ClientNetworking:
                     break
         elif isinstance(packet, EntityDirectionPacket):
             # find entity in entities and update direction
-            for entity in (self.client.entities + [self.client.player]):
+            for entity in (self.client.get_all_entities()):
                 if not entity:
                     continue
                 if entity.uuid == packet.uuid:

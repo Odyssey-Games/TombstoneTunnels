@@ -20,8 +20,7 @@ class MainScreen:
 
         self.logo_image = pygame_gui.elements.UIImage(relative_rect=pygame.Rect((0, -100), (600, 300)),
                                                       image_surface=self.logo,
-                                                      anchors={'center': 'center'},
-                                                      )
+                                                      anchors={'center': 'center'})
         self.play_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((0, 160), (450, 130)),
                                                         text='PLAY ONLINE',
                                                         manager=self.manager,
@@ -72,7 +71,7 @@ class MainScreen:
             anchors={'right': 'right', 'top': 'top', 'right_target': self.quit_button},
         )
 
-    def tick(self, events, dt):
+    def tick(self, events, dt):  # todo 2 methods for logic + rendering?
         for event in events:
             self.manager.process_events(event)
             if event.type == pygame_gui.UI_BUTTON_PRESSED:
@@ -86,7 +85,7 @@ class MainScreen:
                     self.renderer.client.networking.try_login(True)
                 elif event.ui_element == self.fullscreen_button:
                     print('Toggling fullscreen...')
-                    self.renderer.camera.toggle_fullscreen()
+                    self.renderer.toggle_fullscreen()
                 elif event.ui_element == self.quit_button:
                     print('Quitting...')
                     self.renderer.client.running = False

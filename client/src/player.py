@@ -30,13 +30,13 @@ class ClientEntity:
         if self.animated_position != AbsPos.from_tile_pos(self.tile_position):
             self.animated_position = self.animated_position.lerp(self.tile_position, delta_time * self.ANIMATION_SPEED)
 
-    def render(self, camera):
+    def render(self, surface):
         pos = self.animated_position
         if self.flip_image:
             flipped_image = pygame.transform.flip(self.image, True, False)
-            camera.main_surface.blit(flipped_image, (pos.x, pos.y - 16))
+            surface.blit(flipped_image, (pos.x, pos.y - 16))
         else:
-            camera.main_surface.blit(self.image, (pos.x, pos.y - 16))
+            surface.blit(self.image, (pos.x, pos.y - 16))
 
 
 class ClientPlayer(ClientEntity):
@@ -47,12 +47,9 @@ class ClientPlayer(ClientEntity):
         self.uuid = uuid
         self.pressed_keys = set()
 
-    def update(self, delta_time, tile_map, pygame_events):
-        self.handle_events(pygame_events)
-
-    def handle_events(self, pygame_events):
+    def handle_events(self, events):
         direction = Dir2.ZERO
-        for event in pygame_events:
+        for event in events:
             if event.type == pygame.KEYDOWN:
                 self.pressed_keys.add(event.key)
             elif event.type == pygame.KEYUP:
@@ -79,12 +76,16 @@ class ClientPlayer(ClientEntity):
 
             self.direction = direction
 
-    def render(self, camera):
-        super().render(camera)
+    def tick(self, delta_time, events):
+        super().tick(delta_time, events)
+        self.handle_events(events)
+
+    def render(self, surface):
+        super().render(surface)
 
         # render nametag - todo higher res?
         pos = pygame.Vector2(self.animated_position.x, self.animated_position.y)
         font = pygame.font.SysFont("Arial", 12)
         text = font.render(self.name, True, (255, 255, 255))
-        camera.main_surface.blit(text, (pos.x - text.get_width() / 2 + 8, pos.y - 20))
+        surface.blit(text, (pos.x - text.get_width() / 2 + 8, pos.y - 20))
 

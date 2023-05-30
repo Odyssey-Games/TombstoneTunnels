@@ -1,77 +1,88 @@
-# This class stores some of the essential game objects like the Tilemap, camera and screen objects. It also
-# contains the main loop functions for the game and menus
+from time import time
+
+import pygame
 
 import client_state
-from camera import *
 from client_tiles import ClientTileMap
 from connecting_screen import ConnectingScreen
-from debug import *
+from debug import Debugger
 from main_screen import MainScreen
-
-TILE_SIZE = 16  # declaring this twice because of circular imports
 
 
 class ClientRenderer:
+    """Client side renderer class for rendering the game."""
+    TILE_SIZE = 16  # declaring this twice because of circular imports
+    SCALE_FACTOR = 8
+
     def __init__(self, client):
         self.client = client
-        self.ofx = 0
-        self.ofx = 0
-        self.dt = 0
-        # set camera before tilemap (pygame image mode has to be set for loading images in tilemap)
-        self.screen_size = pygame.Vector2(1280, 720)
-        self.texture_size = pygame.Vector2(500, 500)
-        self.camera = Camera(
-            texture_size=self.texture_size,
-            offset=pygame.Vector2(0, 0),
-            # does pygame.HWACCEL make a difference?
-            display_flags=pygame.HWACCEL | pygame.SCALED | pygame.DOUBLEBUF | pygame.HWSURFACE,
-        )
-        self.tilemap = ClientTileMap(self, TILE_SIZE)
-        self.camera.mode = self.camera.FOLLOW_TARGET
-        self.main_screen = MainScreen(self, self.camera.display, self.screen_size)
-        self.connecting_screen = ConnectingScreen(self, self.camera.display, self.screen_size)
-        self.debugger = Debugger()
-        self.pressed_keys = set()
 
-    def _tick_ui(self, state, events, dt):
+        # window
+        self.monitor_size = pygame.Vector2(pygame.display.Info().current_w, pygame.display.Info().current_h)
+        self.window_size = self.monitor_size / 2
+        self.window_flags = pygame.HWACCEL | pygame.HWSURFACE | pygame.DOUBLEBUF
+        self.window_surface = pygame.display.set_mode(self.window_size, flags=self.window_flags)
+
+        # ui
+        self.main_screen = MainScreen(self, self.window_surface, self.window_size)
+        self.connecting_screen = ConnectingScreen(self, self.window_surface, self.window_size)
+
+        # camera
+        self.camera_offset = pygame.Vector2(0, 0)
+        self.camera_target = None
+
+        # game
+        self.tilemap_surface = pygame.Surface((self.TILE_SIZE * 16, self.TILE_SIZE * 16))
+        self.tilemap = ClientTileMap(self, self.TILE_SIZE)
+        self.main_surface = self.tilemap_surface.copy()
+        self.debugger = Debugger()
+
+    def _render_ui(self, state, events, dt):
         if state == client_state.MAIN_MENU:
             self.main_screen.tick(events, dt)
         elif state == client_state.CONNECTING:
             self.connecting_screen.tick(events, dt)
         pygame.display.update()
 
-    def _tick_game(self, events, dt):
-        # handle key events
-        for event in events:
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_q:
-                    self.camera.zoom += .1
-                elif event.key == pygame.K_e:
-                    self.camera.zoom = max(self.camera.zoom - .1, 1)
-                elif event.key == pygame.K_l:
-                    self.camera.position.x += 10
-                elif event.key == pygame.K_j:
-                    self.camera.position.x -= 10
-                elif event.key == pygame.K_SPACE:
-                    self.camera.screen_shake = not self.camera.screen_shake
+    def _render_game(self, dt):
+        # tile map
+        self.tilemap.render()
 
-        # render tilemap
-        self.tilemap.render(self.camera)
+        # entities (main surface)
+        for entity in self.client.get_all_entities():
+            if entity:
+                entity.render(self.main_surface)
 
-        # render player
-        if self.client.player:
-            self.client.player.render(self.camera)
-            self.debugger.debug(f"Player pos: {self.client.player.tile_position}")
+        dest_surface = self.tilemap_surface.copy()
+        scaled_main_surface = pygame.transform.scale_by(self.main_surface, self.SCALE_FACTOR)
+        dest_surface.blit(scaled_main_surface.convert_alpha(), (0, 0))
+        self.window_surface.blit(dest_surface, -self.camera_offset)
 
-        # render other entities
-        for entity in self.client.entities:
-            entity.render(self.camera)
+        # debug text
+        if dt != 0:
+            self.debugger.debug(f"FPS: {int(1 / dt)}")
+        self.debugger.render(self.window_surface)
 
-        self.camera.update(dt, self.debugger)
-        self.debugger.debug(int(self.client.clock.get_fps()))
+        pygame.display.flip()
+        self.window_surface.fill((0, 0, 0))
+        self.main_surface.fill((0, 0, 0))
 
-    def tick(self, state, events, dt):
+    def render(self, state, events, dt):
+        """Render the game. This should not carry out any (game) logic, only rendering."""
         if self.client.state == client_state.IN_GAME:
-            self._tick_game(events, dt)
+            self._render_game(dt)
         else:
-            self._tick_ui(state, events, dt)
+            self._render_ui(state, events, dt)
+
+    def toggle_fullscreen(self):
+        """Toggles fullscreen mode."""
+        if pygame.display.is_fullscreen():
+            # we are in fullscreen mode
+            pygame.display.toggle_fullscreen()
+            self.window_size = self.monitor_size / 2
+            self.window_surface = pygame.display.set_mode(self.window_size, flags=self.window_flags)
+        else:
+            # we are in windowed mode
+            self.window_size = self.monitor_size
+            self.window_surface = pygame.display.set_mode(self.window_size, flags=self.window_flags)
+            pygame.display.toggle_fullscreen()
