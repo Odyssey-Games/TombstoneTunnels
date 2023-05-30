@@ -1,6 +1,7 @@
 # Main entry point of the program
 import json
 import os
+from pathlib import Path
 
 import client_state
 from camera import *
@@ -28,9 +29,11 @@ class Client:
     @staticmethod
     def get_config_file():
         config_dir = os.getenv("localappdata")
-        if not os.path.exists(config_dir):  # we're probably on linux
-            config_dir = os.getenv("HOME")
-        config_dir = os.path.join(config_dir, "TombstoneTunnels")
+        if not config_dir or not os.path.exists(config_dir):  # we're probably on linux - todo macos support?
+            print(Path.home())
+            config_dir = os.path.join(Path.home(), ".TombstoneTunnels")
+        else:
+            config_dir = os.path.join(config_dir, "TombstoneTunnels")
         if not os.path.exists(config_dir):
             os.makedirs(config_dir)
         return os.path.join(config_dir, "config.json")
