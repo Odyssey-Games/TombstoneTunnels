@@ -5,7 +5,6 @@ import pygame.image
 from pygame import Surface
 
 from assets import Assets
-from common.src.map.tile import Tile
 from common.src.vec.TilePos import TilePos
 from vec.AbsPos import AbsPos
 
@@ -24,8 +23,8 @@ class ClientTileManager:
         print(f"Loaded {len(images)} tiles")
         return images
 
-    def get_image(self, tile: Tile) -> Surface:
-        return self.images[tile.name]
+    def get_image(self, tile: str) -> Surface:
+        return self.images[tile]
 
 
 class ClientTileMap:
@@ -42,7 +41,7 @@ class ClientTileMap:
             return
         for y, row in enumerate(self.client.map.tiles):
             for x, tile in enumerate(row):
-                if tile.name == "":  # ignore empty tiles
+                if tile == "":  # ignore empty tiles
                     continue
                 abs_pos = AbsPos.from_tile_pos(TilePos(x, y))
                 camera.renderTexture.blit(

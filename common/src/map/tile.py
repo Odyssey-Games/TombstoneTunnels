@@ -3,3 +3,7 @@ class Tile:
         self.name = name
         self.is_empty = (name == '')
         self.is_solid = (name[0] == 's') if not self.is_empty else False
+
+    @staticmethod
+    def from_name(name: str):
+        return Tile(name)

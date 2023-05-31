@@ -1,0 +1,65 @@
+import json
+
+
+class Packet:
+    def __init__(self):
+        pass
+
+
+class OtherPacket(Packet):
+    def __init__(self, other_arg: str):
+        super().__init__()
+        self.other_arg = other_arg
+
+
+class MovePacket(Packet):
+    def __init__(self, uuid: str, pos: (int, int)):
+        super().__init__()
+        self.uuid = uuid
+        self.pos = pos
+
+
+class HelloPacket(Packet):
+    def __init__(self, name: str, age: int):
+        super().__init__()
+        self.name = name
+        self.age = age
+
+
+# Used for deserialization so that we don't have to hardcode the packet types
+packet_classes = [(key, value) for key, value in locals().copy().items() if key.endswith("Packet") and key != "Packet"]
+
+
+def serialize(packet: Packet) -> str:
+    packet_type = packet.__class__.__name__
+    print("type:", packet_type)
+    # add type to dict
+    packet.__dict__["type"] = packet_type
+    data = json.dumps(packet.__dict__)
+    print(data)
+    return data
+
+
+def deserialize(data: str) -> Packet:
+    packet_dict = json.loads(data)
+    # print("packet_dict:", packet_dict)
+    packet_type = packet_dict["type"]
+    clazz = [clazz for name, clazz in packet_classes if name == packet_type][0]
+    del packet_dict["type"]
+    # print("args:", packet_dict)
+    return clazz(**packet_dict)
+
+
+def main():
+    move_packet = MovePacket("123", (1, 2))
+    print("move_packet:", move_packet)
+    print("move_packet.pos:", move_packet.pos)
+    serialized = serialize(move_packet)
+    print("serialized:", serialized)
+    deserialized = deserialize(serialized)
+    print("deserialized:", deserialized)
+    print("deserialized.pos:", deserialized.pos)
+
+
+if __name__ == "__main__":
+    main()

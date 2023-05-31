@@ -17,12 +17,12 @@ class MapManager:
         maps = []
         for filename in os.listdir(os.path.join(DATA_PATH, "maps")):
             if filename.endswith(".csv"):
-                tiles: list[list[Tile]] = []
+                tiles: list[list[str]] = []
                 with open(os.path.join(DATA_PATH, "maps", filename)) as f:
                     for line in f:
-                        tiles_in_line: list[Tile] = []
+                        tiles_in_line: list[str] = []
                         for tile_name in line.replace(" ", "").replace("\n", "").split(","):
-                            tiles_in_line.append(Tile(tile_name))
+                            tiles_in_line.append(tile_name)
                         tiles.append(tiles_in_line)
                 map_name = filename.removesuffix(".csv")
                 maps.append(Map(map_name, tiles))

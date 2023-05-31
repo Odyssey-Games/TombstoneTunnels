@@ -8,8 +8,7 @@ import pygame
 sys.path.insert(1, os.path.join(sys.path[0], '..', '..'))
 
 from assets import Assets
-from common.src.entity.ClientInput import ClientInput
-from common.src.packets.c2s.ChangeInputPacket import ChangeInputPacket
+from common.src.packets import *
 from common.src.vec.Dir2 import Dir2
 from common.src.vec.TilePos import TilePos
 from vec.AbsPos import AbsPos
@@ -68,7 +67,7 @@ class ClientPlayer(ClientEntity):
             direction = Dir2.DOWN
 
         if direction != self.direction:
-            packet = ChangeInputPacket(ClientInput(direction))
+            packet = ChangeInputPacket(direction.value)
             self.client.send_packet(packet)
 
             # only flip image when necessary, we don't want the texture to flip back when the player stops moving
@@ -86,5 +85,4 @@ class ClientPlayer(ClientEntity):
         pos = self.animated_position - camera.position
         font = pygame.font.SysFont("Arial", 10)
         text = font.render(self.name, True, (255, 255, 255))
-        camera.renderTexture.blit(text, (pos.x - text.get_width()/2 + 8, pos.y - 20))
-
+        camera.renderTexture.blit(text, (pos.x - text.get_width() / 2 + 8, pos.y - 20))
