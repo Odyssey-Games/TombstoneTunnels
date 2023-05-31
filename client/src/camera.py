@@ -4,9 +4,9 @@
 import random
 
 import pygame
+from pygame import Vector2
 
 from player import ClientEntity
-from common.src.vec.Vec2i import Vec2i
 
 
 class Camera:
@@ -14,8 +14,8 @@ class Camera:
     FREE = 0
     FOLLOW_TARGET = 1
 
-    def __init__(self, screen_size: pygame.Vector2, virtual_screen_size_scaler: int,
-                 position: Vec2i = Vec2i(), display_flags=0, vsync=0):
+    def __init__(self, screen_size: Vector2, virtual_screen_size_scaler: int,
+                 position: Vector2 = Vector2(), display_flags=0, vsync=0):
         self.position = position
         self.display = pygame.display.set_mode(screen_size, display_flags, vsync=vsync)
         pygame.display.set_caption("Tombstone Tunnels")

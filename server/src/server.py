@@ -1,20 +1,19 @@
 import os
-import secrets
 import sys
-from socket import *
-from time import time
 
 sys.path.insert(1, os.path.join(sys.path[0], '..', '..'))
 
+import secrets
+from socket import *
+from time import time
+
+from pygame import Vector2
+
 from User import User
 from map_manager import MapManager
-from common.src.vec.Dir2 import Dir2
-from common.src.vec.TilePos import TilePos
+from common.src.direction import Dir2
 from common.src import networking
 from common.src.map.tile import Tile
-
-
-from common.src.common import print_hi
 from common.src.packets import *
 
 SERVER_ADDRESS = ('0.0.0.0', 5857)
@@ -50,7 +49,7 @@ class Server:
                 print(f"Received invalid packet: {packet}")
                 return None, None
             if isinstance(packet, AuthorizedPacket):
-                if packet.token is None or packet.token not in [client.token for client in self.clients]:
+                if packet.token is None or packet.token not in [other_client.token for other_client in self.clients]:
                     print(f"Received packet from unauthorized client: {packet}")
                     return None, None
             return packet, addr
@@ -67,7 +66,7 @@ if __name__ == '__main__':
     
     Currently one server instance means one "game" (one game state, one set of players, one seed/map, etc.).
     """
-    print_hi('Server')
+    print("Booting...")
 
     try:
         server = Server()
@@ -92,16 +91,16 @@ if __name__ == '__main__':
             for user in server.clients:
                 if user.direction != Dir2.ZERO and time() - user.last_move_time >= MOVE_TIMEOUT:
                     user.last_move_time = time()
-                    new_position = user.position + Dir2(user.direction).to_vector()
+                    new_position = user.position + Dir2(user.direction).to_tile_vector()
                     # collision check
                     if current_map.tiles is not None:
                         if new_position.y < 0 or new_position.x < 0 or new_position.y >= len(
                                 current_map.tiles) or new_position.x >= len(current_map.tiles[0]):
                             continue
-                        tile = Tile.from_name(current_map.tiles[new_position.y][new_position.x])
+                        tile = Tile.from_name(current_map.tiles[int(new_position.y)][int(new_position.x)])
                         if tile.is_solid:
                             continue
-                    user.position += Dir2(user.direction).to_vector()
+                    user.position = new_position
                     move_packet = EntityMovePacket(user.uuid, (user.position.x, user.position.y))
                     for moving_user in server.clients:
                         server.send_packet(move_packet, moving_user.addr)
@@ -126,7 +125,7 @@ if __name__ == '__main__':
                 print(f"Client with name {client_packet.name} connected.")
                 token = secrets.token_hex(16)
                 player_uuid = secrets.token_hex(16)
-                user = User(client_packet.name, client_addr, player_uuid, token, start_pos=TilePos(1, 2))
+                user = User(client_packet.name, client_addr, player_uuid, token, start_pos=Vector2(1, 2))
                 server.clients.append(user)
                 reply_packet = HelloReplyPacket(token, player_uuid)
                 server.send_packet(reply_packet, client_addr)
@@ -188,4 +187,5 @@ if __name__ == '__main__':
         except Exception as e:
             # we don't want to crash the server because of a client
             print("Exception in main loop:")
+            raise e
             print(e)

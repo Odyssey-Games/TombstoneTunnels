@@ -1,4 +1,4 @@
-from common.src.vec.Dir2 import Dir2
+from common.src.direction import Dir2
 
 
 class ClientInput:

@@ -1,19 +1,17 @@
-# This file contains all the code for the client to communicate with the server, like login, packet sending, receiving and handeling.
+"""
+This file contains all the code for the client to communicate with the server,
+like login, packet sending, receiving and handling.
+"""
 
-import os
-import sys
 from socket import socket, AF_INET, SOCK_DGRAM
 from time import time
 
 import requests as requests
 
-sys.path.insert(1, os.path.join(sys.path[0], '..', '..'))
-
-from player import *
 import client_state
 from common.src import networking
 from common.src.map.map import Map
-
+from player import *
 
 PING_INTERVAL = 1  # we send a ping packet every second
 PONG_TIMEOUT = 5  # we wait 5 seconds for a pong packet before we assume that the connection to the server is lost
@@ -111,20 +109,19 @@ class ClientNetworking:
             self.last_server_pong = time()
         elif isinstance(packet, PlayerSpawnPacket):
             print("Received player spawn packet.")
-            tile_pos = TilePos(packet.tile_position[0], packet.tile_position[1])
             if self.client.player_uuid == packet.uuid:
                 # this is our player
-                self.client.update_player(ClientPlayer(self, packet.name, packet.uuid, tile_pos))
+                self.client.update_player(ClientPlayer(self, packet.name, packet.uuid, packet.tile_position))
             else:
                 # this is another player, add to entities
-                self.client.entities.append(ClientPlayer(self, packet.name, packet.uuid, tile_posdddd))
+                self.client.entities.append(ClientPlayer(self, packet.name, packet.uuid, packet.tile_position))
         elif isinstance(packet, EntityMovePacket):
             # find entity in entities and update position
             for entity in (self.client.entities + [self.client.player]):
                 if not entity:
                     continue
                 if entity.uuid == packet.uuid:
-                    entity.tile_position = TilePos(packet.tile_position[0], packet.tile_position[1])
+                    entity.tile_position = Vector2(packet.tile_position[0], packet.tile_position[1])
                     break
         elif isinstance(packet, EntityDirectionPacket):
             # find entity in entities and update direction
@@ -187,6 +184,7 @@ class ClientNetworking:
             except Exception as e:
                 print(f"Error while receiving packet: {e}. Disconnecting.")
                 self.socket = None
+                raise e
                 return False
 
         return True

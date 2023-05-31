@@ -1,33 +1,31 @@
 # This file contains the client-side entity/player classes with methods for rendering
-import os
 import random
-import sys
 
 import pygame
-
-sys.path.insert(1, os.path.join(sys.path[0], '..', '..'))
+from pygame import Vector2
 
 from assets import Assets
+from common.src.direction import Dir2
 from common.src.packets import *
-from common.src.vec.Dir2 import Dir2
-from common.src.vec.TilePos import TilePos
-from vec.AbsPos import AbsPos
+from pos import abs_from_tile_pos
 
 
 class ClientEntity:
     ANIMATION_SPEED = 30
 
-    def __init__(self, tile_position: TilePos = TilePos(), direction=Dir2.ZERO):
-        self.tile_position: TilePos = tile_position
-        self.animated_position: AbsPos = AbsPos.from_tile_pos(tile_position)
+    def __init__(self, tile_position: Vector2 = Vector2(), direction=Dir2.ZERO):
+        self.tile_position: Vector2 = tile_position
+        self.animated_position: Vector2 = abs_from_tile_pos(tile_position)
         self.direction = direction
         self.flip_image = (direction == Dir2.LEFT)
         self.image = pygame.image.load(Assets.get("player", "player.png"))
         self.color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
 
     def tick(self, delta_time, events):
-        if self.animated_position != AbsPos.from_tile_pos(self.tile_position):
-            self.animated_position = self.animated_position.lerp(self.tile_position, delta_time * self.ANIMATION_SPEED)
+        target_position = abs_from_tile_pos(self.tile_position)
+        animation_factor = delta_time * self.ANIMATION_SPEED
+        if self.animated_position != target_position and 0 < animation_factor < 1:
+            self.animated_position = self.animated_position.lerp(target_position, delta_time * self.ANIMATION_SPEED)
 
     def render(self, camera):
         pos = self.animated_position - camera.position
@@ -39,7 +37,7 @@ class ClientEntity:
 
 
 class ClientPlayer(ClientEntity):
-    def __init__(self, client, name, uuid, tile_position: TilePos = TilePos()):
+    def __init__(self, client, name, uuid, tile_position: Vector2 = Vector2()):
         ClientEntity.__init__(self, tile_position)
         self.client = client
         self.name = name

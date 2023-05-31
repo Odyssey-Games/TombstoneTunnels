@@ -2,18 +2,18 @@ import os
 from typing import Dict
 
 import pygame.image
-from pygame import Surface
+from pygame import Surface, Vector2
 
 from assets import Assets
-from common.src.vec.TilePos import TilePos
-from vec.AbsPos import AbsPos
+from pos import abs_from_tile_pos
 
 
 class ClientTileManager:
     def __init__(self):
-        self.images: Dict[str, Surface] = self.load_tiles()
+        self.images: Dict[str, Surface] = self._load_tiles()
 
-    def load_tiles(self) -> Dict[str, Surface]:
+    @staticmethod
+    def _load_tiles() -> Dict[str, Surface]:
         images = {}
         for filename in os.listdir(Assets.get("tilemap", "tiles")):
             if filename.endswith(".png"):
@@ -30,7 +30,7 @@ class ClientTileManager:
 class ClientTileMap:
     """Client side tile map class for rendering the current map."""
 
-    def __init__(self, client, tile_size: int, pos: pygame.Vector2 = pygame.Vector2(0, 0)):
+    def __init__(self, client, tile_size: int, pos: Vector2 = Vector2(0, 0)):
         self.client = client
         self.tile_size = tile_size
         self.position = pos
@@ -43,7 +43,7 @@ class ClientTileMap:
             for x, tile in enumerate(row):
                 if tile == "":  # ignore empty tiles
                     continue
-                abs_pos = AbsPos.from_tile_pos(TilePos(x, y))
+                abs_pos = abs_from_tile_pos(Vector2(x, y))
                 camera.renderTexture.blit(
                     self.tiles.get_image(tile),
                     (

@@ -1,6 +1,10 @@
 # Main entry point of the program
-import json
 import os
+import sys
+
+sys.path.insert(1, os.path.join(sys.path[0], '..', '..'))  # fix common imports
+
+import json
 from pathlib import Path
 
 import client_state

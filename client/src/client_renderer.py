@@ -14,15 +14,13 @@ TILE_SIZE = 16  # declaring this twice because of circular imports
 class ClientRenderer:
     def __init__(self, client):
         self.client = client
-        self.ofx = 0
-        self.ofx = 0
         self.dt = 0
         # set camera before tilemap (pygame image mode has to be set for loading images in tilemap)
         screen_size = pygame.Vector2(960, 540)
         self.camera = Camera(
             screen_size=screen_size,
             virtual_screen_size_scaler=4,
-            position=Vec2i(0, 0),
+            position=Vector2(0, 0),
             # does pygame.HWACCEL make a difference?
             display_flags=pygame.HWACCEL | pygame.SCALED,
         )
@@ -60,7 +58,6 @@ class ClientRenderer:
         # render player
         if self.client.player:
             self.client.player.render(self.camera)
-            self.debugger.debug(f"Player pos: {self.client.player.tile_position}")
 
         # render other entities
         for entity in self.client.entities:
