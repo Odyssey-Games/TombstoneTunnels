@@ -9,6 +9,7 @@ import client_state
 from client_networking import ClientNetworking
 from client_renderer import ClientRenderer
 from common.src.map.map import Map
+from common.src.vec.Vec2i import Vec2i
 from config import ClientConfig
 from player import ClientEntity
 
@@ -88,6 +89,12 @@ class Client:
         self.entities.clear()
 
     def run(self):
+        test1 = Vec2i(5.53, 5.53)
+        test2 = pygame.Vector2(5.53, 5.53)
+        import pickle
+        print()
+        print(pickle.dumps(test1))
+        print(pickle.dumps(test2))
         while self.running:
             dt = self.clock.tick() / 1000
             events = [event for event in pygame.event.get()]

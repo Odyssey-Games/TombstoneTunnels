@@ -40,14 +40,19 @@ class ClientEntity:
 
 
 class ClientPlayer(ClientEntity):
-    def __init__(self, client, name, uuid, tile_position: TilePos = TilePos()):
+    def __init__(self, client, name, uuid, tile_position: TilePos = TilePos(), is_local=False):
         ClientEntity.__init__(self, tile_position)
         self.client = client
         self.name = name
         self.uuid = uuid
-        self.pressed_keys = set()
+        self.is_local = is_local
+        if self.is_local:
+            self.pressed_keys = set()
 
     def handle_events(self, events):
+        if not self.is_local:
+            return
+
         direction = Dir2.ZERO
         for event in events:
             if event.type == pygame.KEYDOWN:

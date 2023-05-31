@@ -42,10 +42,6 @@ class ClientTileMap:
     def render(self, surf: Surface):
         if not self.renderer.client.map:
             return
-        # if self.rendered_tiles:
-        #     return
-        #
-        # self.rendered_tiles = True
         for y, row in enumerate(self.renderer.client.map.tiles):
             for x, tile in enumerate(row):
                 if tile.name == "":  # ignore empty tiles
