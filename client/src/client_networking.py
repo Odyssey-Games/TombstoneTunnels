@@ -1,7 +1,6 @@
 # This file contains all the code for the client to communicate with the server, like login, packet sending, receiving and handeling.
 
 import os
-import pickle
 import sys
 from socket import socket, AF_INET, SOCK_DGRAM
 from time import time
@@ -10,20 +9,11 @@ import requests as requests
 
 sys.path.insert(1, os.path.join(sys.path[0], '..', '..'))
 
-from common.src.packets.Packet import Packet
-from common.src.packets.c2s.AuthorizedPacket import AuthorizedPacket
-from common.src.packets.c2s.HelloPacket import HelloPacket
-from common.src.packets.c2s.DisconnectPacket import DisconnectPacket
-from common.src.packets.c2s.PingPacket import PingPacket
-from common.src.packets.s2c.HelloReplyPacket import HelloReplyPacket
-from common.src.packets.s2c.EntityMovePacket import EntityMovePacket
-from common.src.packets.s2c.PlayerSpawnPacket import PlayerSpawnPacket
-from common.src.packets.s2c.PlayerRemovePacket import PlayerRemovePacket
-from common.src.packets.s2c.PongPacket import PongPacket
-from common.src.packets.s2c.EntityDirectionPacket import EntityDirectionPacket
-from common.src.packets.s2c.MapChangePacket import MapChangePacket
 from player import *
 import client_state
+from common.src import networking
+from common.src.map.map import Map
+
 
 PING_INTERVAL = 1  # we send a ping packet every second
 PONG_TIMEOUT = 5  # we wait 5 seconds for a pong packet before we assume that the connection to the server is lost
@@ -73,8 +63,8 @@ class ClientNetworking:
             self.last_server_pong = time()
             print("Sent login packet.")
         except Exception as e:
+            print("Could not connect to server:")
             print(e)
-            print("Could not connect to server.")
             self.client.state = client_state.MAIN_MENU
 
     def disconnect(self):
@@ -90,15 +80,15 @@ class ClientNetworking:
     def send_packet(self, packet: Packet):
         """Sends a packet to the server.
 
-        Here we use pickle to create a byte array from the packet object. Additionally, we check if the packet is of
-        type AuthorizedPacket. If this is the case, we require the token variable to be set and add it to the packet.
+        Here we check if the packet is of type AuthorizedPacket. If this is the case,
+        we require the token variable to be set and add it to the packet.
         """
         if isinstance(packet, AuthorizedPacket):
             if self.token is None:
                 raise Exception("Token is not set but required for this packet.")
             packet.token = self.token
 
-        data = pickle.dumps(packet)
+        data = networking.serialize(packet)
         self.socket.sendto(data, self.current_address)
 
     def _handle_packet(self, packet: Packet):
@@ -121,19 +111,20 @@ class ClientNetworking:
             self.last_server_pong = time()
         elif isinstance(packet, PlayerSpawnPacket):
             print("Received player spawn packet.")
+            tile_pos = TilePos(packet.tile_position[0], packet.tile_position[1])
             if self.client.player_uuid == packet.uuid:
                 # this is our player
-                self.client.update_player(ClientPlayer(self, packet.name, packet.uuid, packet.position))
+                self.client.update_player(ClientPlayer(self, packet.name, packet.uuid, tile_pos))
             else:
                 # this is another player, add to entities
-                self.client.entities.append(ClientPlayer(self, packet.name, packet.uuid, packet.position))
+                self.client.entities.append(ClientPlayer(self, packet.name, packet.uuid, tile_posdddd))
         elif isinstance(packet, EntityMovePacket):
             # find entity in entities and update position
             for entity in (self.client.entities + [self.client.player]):
                 if not entity:
                     continue
                 if entity.uuid == packet.uuid:
-                    entity.tile_position = packet.position
+                    entity.tile_position = TilePos(packet.tile_position[0], packet.tile_position[1])
                     break
         elif isinstance(packet, EntityDirectionPacket):
             # find entity in entities and update direction
@@ -141,7 +132,7 @@ class ClientNetworking:
                 if not entity:
                     continue
                 if entity.uuid == packet.uuid:
-                    entity.direction = packet.direction
+                    entity.direction = Dir2(packet.direction)
                     if entity.direction == Dir2.LEFT:
                         entity.flip_image = True
                     elif entity.direction == Dir2.RIGHT:
@@ -154,10 +145,10 @@ class ClientNetworking:
             if client_entity:
                 self.client.entities.remove(client_entity)
         elif isinstance(packet, MapChangePacket):
-            print(f"Received map change packet with map {packet.new_map}.")
-            self.client.map = packet.new_map
+            new_map = Map(packet.name, packet.tiles)
+            print(f"Received map change packet with map {new_map}.")
+            self.client.map = new_map
             # todo animate map change
-        # todo handle other packets here
 
     def tick(self, events, dt) -> bool:
         """Handle incoming packets and send ping packet.
@@ -186,7 +177,7 @@ class ClientNetworking:
                 data = self.socket.recv(8192)
                 if len(data) > 512:
                     print(f"Received big packet of size {len(data)} from {self.global_address}")
-                packet = pickle.loads(data)
+                packet = networking.deserialize(data)
                 if not isinstance(packet, Packet):
                     print(f"Received invalid packet: {packet}")
                     continue

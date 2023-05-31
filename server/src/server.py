@@ -1,5 +1,4 @@
 import os
-import pickle
 import secrets
 import sys
 from socket import *
@@ -8,25 +7,15 @@ from time import time
 sys.path.insert(1, os.path.join(sys.path[0], '..', '..'))
 
 from User import User
-from common.src.packets.s2c.EntityDirectionPacket import EntityDirectionPacket
 from map_manager import MapManager
-from common.src.packets.s2c.MapChangePacket import MapChangePacket
 from common.src.vec.Dir2 import Dir2
 from common.src.vec.TilePos import TilePos
+from common.src import networking
+from common.src.map.tile import Tile
 
-from common.src.packets.c2s.DisconnectPacket import DisconnectPacket
+
 from common.src.common import print_hi
-from common.src.packets.c2s.AuthorizedPacket import AuthorizedPacket
-from common.src.packets.c2s.ChangeInputPacket import ChangeInputPacket
-from common.src.packets.c2s.HelloPacket import *
-from common.src.packets.c2s.PingPacket import PingPacket
-from common.src.packets.c2s.RequestInfoPacket import RequestInfoPacket
-from common.src.packets.s2c.HelloReplyPacket import HelloReplyPacket
-from common.src.packets.s2c.InfoReplyPacket import InfoReplyPacket
-from common.src.packets.s2c.EntityMovePacket import EntityMovePacket
-from common.src.packets.s2c.PlayerSpawnPacket import PlayerSpawnPacket
-from common.src.packets.s2c.PlayerRemovePacket import PlayerRemovePacket
-from common.src.packets.s2c.PongPacket import PongPacket
+from common.src.packets import *
 
 SERVER_ADDRESS = ('0.0.0.0', 5857)
 PING_TIMEOUT = 5  # timeout clients after not pinging for 5 seconds
@@ -46,7 +35,7 @@ class Server:
         self.socket.bind(SERVER_ADDRESS)
 
     def send_packet(self, packet, addr: tuple):
-        data = pickle.dumps(packet)
+        data = networking.serialize(packet)
         if len(data) > 1024:
             print(f"Sending big packet of size {len(data)} to {addr}")
         self.socket.sendto(data, addr)
@@ -56,7 +45,7 @@ class Server:
             data, addr = self.socket.recvfrom(bufsize)
             if len(data) > 512:
                 print(f"Received big packet of size {len(data)} from {addr}")
-            packet = pickle.loads(data)
+            packet = networking.deserialize(data)
             if not isinstance(packet, Packet):
                 print(f"Received invalid packet: {packet}")
                 return None, None
@@ -103,17 +92,17 @@ if __name__ == '__main__':
             for user in server.clients:
                 if user.direction != Dir2.ZERO and time() - user.last_move_time >= MOVE_TIMEOUT:
                     user.last_move_time = time()
-                    new_position = user.position + user.direction.to_vector()
+                    new_position = user.position + Dir2(user.direction).to_vector()
                     # collision check
                     if current_map.tiles is not None:
                         if new_position.y < 0 or new_position.x < 0 or new_position.y >= len(
                                 current_map.tiles) or new_position.x >= len(current_map.tiles[0]):
                             continue
-                        tile = current_map.tiles[new_position.y][new_position.x]
+                        tile = Tile.from_name(current_map.tiles[new_position.y][new_position.x])
                         if tile.is_solid:
                             continue
-                    user.position += user.direction.to_vector()
-                    move_packet = EntityMovePacket(user.uuid, user.position)
+                    user.position += Dir2(user.direction).to_vector()
+                    move_packet = EntityMovePacket(user.uuid, (user.position.x, user.position.y))
                     for moving_user in server.clients:
                         server.send_packet(move_packet, moving_user.addr)
 
@@ -143,21 +132,23 @@ if __name__ == '__main__':
                 server.send_packet(reply_packet, client_addr)
 
                 # set map for this client
-                map_packet = MapChangePacket(current_map)
+                map_packet = MapChangePacket(current_map.name, current_map.tiles)
                 server.send_packet(map_packet, client_addr)
 
                 # set own position for this client
-                move_packet = EntityMovePacket(player_uuid, user.position)
+                move_packet = EntityMovePacket(player_uuid, (user.position.x, user.position.y))
                 server.send_packet(move_packet, client_addr)
 
                 # spawn other players for this client
                 for other_user in server.clients:
                     if other_user.addr != client_addr:
-                        player_spawn_packet = PlayerSpawnPacket(other_user.name, other_user.uuid, other_user.position)
+                        player_spawn_packet = PlayerSpawnPacket(other_user.name,
+                                                                other_user.uuid,
+                                                                (other_user.position.x, other_user.position.y))
                         server.send_packet(player_spawn_packet, client_addr)
 
                 # spawn player for all clients
-                player_spawn_packet = PlayerSpawnPacket(user.name, player_uuid, user.position)
+                player_spawn_packet = PlayerSpawnPacket(user.name, player_uuid, (user.position.x, user.position.y))
                 for other_user in server.clients:
                     server.send_packet(player_spawn_packet, other_user.addr)
 
@@ -184,9 +175,9 @@ if __name__ == '__main__':
 
             elif isinstance(client_packet, ChangeInputPacket):
                 user = next((client for client in server.clients if client.token == client_packet.token), None)
-                user.direction = client_packet.client_input.direction
+                user.direction = Dir2(client_packet.direction)
                 # update direction for other clients
-                direction_packet = EntityDirectionPacket(user.uuid, user.direction)
+                direction_packet = EntityDirectionPacket(user.uuid, user.direction.value)
                 for client in server.clients:
                     if client.addr != client_addr:
                         server.send_packet(direction_packet, client.addr)
@@ -197,4 +188,4 @@ if __name__ == '__main__':
         except Exception as e:
             # we don't want to crash the server because of a client
             print("Exception in main loop:")
-            raise e
+            print(e)
