@@ -29,7 +29,7 @@ class Client:
 
         self.networking.start()
 
-    def get_all_entities(self):
+    def get_all_entities(self) -> list[ClientEntity]:
         """Returns a list of all entities, including the player."""
         return [self.player] + self.entities
 

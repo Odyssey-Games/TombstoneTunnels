@@ -32,9 +32,9 @@ class ClientRenderer:
         self.camera_target = None
 
         # game
-        self.tilemap_surface = pygame.Surface((self.TILE_SIZE * 16, self.TILE_SIZE * 16))
+        #self.tilemap_surface = pygame.Surface((self.TILE_SIZE * 16, self.TILE_SIZE * 16))
         self.tilemap = ClientTileMap(self, self.TILE_SIZE)
-        self.main_surface = self.tilemap_surface.copy()
+        #self.main_surface = pygame.Surface((self.TILE_SIZE * 8, self.TILE_SIZE * 4.5))
         self.debugger = Debugger()
 
     def _render_ui(self, state, events, dt):
@@ -46,26 +46,25 @@ class ClientRenderer:
 
     def _render_game(self, dt):
         # tile map
-        self.tilemap.render()
+        self.tilemap.render(self.window_surface)
 
         # entities (main surface)
+        from player import ClientEntity
+        entity: ClientEntity
         for entity in self.client.get_all_entities():
             if entity:
-                entity.render(self.main_surface)
-
-        dest_surface = self.tilemap_surface.copy()
-        scaled_main_surface = pygame.transform.scale_by(self.main_surface, self.SCALE_FACTOR)
-        dest_surface.blit(scaled_main_surface.convert_alpha(), (0, 0))
-        self.window_surface.blit(dest_surface, -self.camera_offset)
+                entity.render(self.window_surface)
 
         # debug text
         if dt != 0:
             self.debugger.debug(f"FPS: {int(1 / dt)}")
+        else:
+            self.debugger.debug("FPS: ∞")
         self.debugger.render(self.window_surface)
 
         pygame.display.flip()
+
         self.window_surface.fill((0, 0, 0))
-        self.main_surface.fill((0, 0, 0))
 
     def render(self, state, events, dt):
         """Render the game. This should not carry out any (game) logic, only rendering."""

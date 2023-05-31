@@ -18,9 +18,10 @@ class ClientTileManager:
         images = {}
         for filename in os.listdir(Assets.get("tilemap", "tiles")):
             if filename.endswith(".png"):
-                images[filename.removesuffix(".png")] = pygame.image \
+                unscaled = pygame.image \
                     .load(Assets.get("tilemap", "tiles", filename)) \
                     .convert_alpha()
+                images[filename.removesuffix(".png")] = pygame.transform.scale_by(unscaled, 8)
         print(f"Loaded {len(images)} tiles")
         return images
 
@@ -38,25 +39,23 @@ class ClientTileMap:
         self.tiles = ClientTileManager()
         self.rendered_tiles = False
 
-    def render(self):
+    def render(self, surf: Surface):
         if not self.renderer.client.map:
             return
-        if self.rendered_tiles:
-            return
-
-        self.rendered_tiles = True
-        unscaled_surface = pygame.Surface((300, 300))
+        # if self.rendered_tiles:
+        #     return
+        #
+        # self.rendered_tiles = True
         for y, row in enumerate(self.renderer.client.map.tiles):
             for x, tile in enumerate(row):
                 if tile.name == "":  # ignore empty tiles
                     continue
-                abs_pos = AbsPos.from_tile_pos(TilePos(x, y))
-                unscaled_surface.blit(
+                abs_pos = AbsPos.from_tile_pos(TilePos(x*8, y*8))
+                surf.blit(
                     self.tiles.get_image(tile),
                     (
                         self.position.x + abs_pos.x,
                         self.position.y + abs_pos.y
                     )
                 )
-        self.renderer.tilemap_surface = pygame.transform.scale_by(unscaled_surface, self.renderer.SCALE_FACTOR)
 

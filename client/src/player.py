@@ -23,7 +23,8 @@ class ClientEntity:
         self.animated_position: AbsPos = AbsPos.from_tile_pos(tile_position)
         self.direction = direction
         self.flip_image = (direction == Dir2.LEFT)
-        self.image = pygame.image.load(Assets.get("player", "player.png")).convert_alpha()
+        self.image = pygame.transform.scale_by(pygame.image.load(Assets.get("player", "player.png")).convert_alpha(), 8)
+        self.flipped_image = pygame.transform.flip(self.image, True, False)
         self.color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
 
     def tick(self, delta_time, events):
@@ -31,10 +32,9 @@ class ClientEntity:
             self.animated_position = self.animated_position.lerp(self.tile_position, delta_time * self.ANIMATION_SPEED)
 
     def render(self, surface):
-        pos = self.animated_position
+        pos = (self.animated_position - AbsPos(0, 1) * 16) * 8
         if self.flip_image:
-            flipped_image = pygame.transform.flip(self.image, True, False)
-            surface.blit(flipped_image, (pos.x, pos.y - 16))
+            surface.blit(self.flipped_image, (pos.x, pos.y - 16))
         else:
             surface.blit(self.image, (pos.x, pos.y - 16))
 
@@ -83,9 +83,9 @@ class ClientPlayer(ClientEntity):
     def render(self, surface):
         super().render(surface)
 
-        # render nametag - todo higher res?
-        pos = pygame.Vector2(self.animated_position.x, self.animated_position.y)
-        font = pygame.font.SysFont("Arial", 12)
+        # render nametag
+        pos = pygame.Vector2(self.animated_position.x * 8, self.animated_position.y * 8 - 16*8)
+        font = pygame.font.SysFont("Arial", 50)
         text = font.render(self.name, True, (255, 255, 255))
-        surface.blit(text, (pos.x - text.get_width() / 2 + 8, pos.y - 20))
+        surface.blit(text, (pos.x - text.get_width()/2 + 8*8, pos.y))
 
