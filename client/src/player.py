@@ -18,7 +18,7 @@ class ClientEntity:
         self.animated_position: Vector2 = abs_from_tile_pos(tile_position)
         self.direction = direction
         self.flip_image = (direction == Dir2.LEFT)
-        self.image = pygame.image.load(Assets.get("player", "player.png"))
+        self.image = pygame.image.load(Assets.get("player", "player.png")).convert_alpha()
         self.color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
 
     def tick(self, delta_time, events):
