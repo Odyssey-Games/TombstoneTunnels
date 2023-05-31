@@ -32,16 +32,23 @@ class ClientRenderer:
         self.camera_target = None
 
         # game
-        #self.tilemap_surface = pygame.Surface((self.TILE_SIZE * 16, self.TILE_SIZE * 16))
         self.tilemap = ClientTileMap(self, self.TILE_SIZE)
-        #self.main_surface = pygame.Surface((self.TILE_SIZE * 8, self.TILE_SIZE * 4.5))
         self.debugger = Debugger()
 
-    def _render_ui(self, state, events, dt):
+    def _update_camera(self, events, dt):
+        pass
+
+    def _update_ui(self, state, events, dt):
         if state == client_state.MAIN_MENU:
-            self.main_screen.tick(events, dt)
+            self.main_screen.update(events, dt)
         elif state == client_state.CONNECTING:
-            self.connecting_screen.tick(events, dt)
+            self.connecting_screen.update(events, dt)
+
+    def _render_ui(self, state):
+        if state == client_state.MAIN_MENU:
+            self.main_screen.render()
+        elif state == client_state.CONNECTING:
+            self.connecting_screen.render()
         pygame.display.update()
 
     def _render_game(self, dt):
@@ -66,12 +73,19 @@ class ClientRenderer:
 
         self.window_surface.fill((0, 0, 0))
 
-    def render(self, state, events, dt):
+    def update(self, state, events, dt):
+        """Update the game. This doesn't render anything, but e.g. moves the camera or updates the ui."""
+        if self.client.state == client_state.IN_GAME:
+            self._update_camera(events, dt)
+        else:
+            self._update_ui(state, events, dt)
+
+    def render(self, state, dt):
         """Render the game. This should not carry out any (game) logic, only rendering."""
         if self.client.state == client_state.IN_GAME:
             self._render_game(dt)
         else:
-            self._render_ui(state, events, dt)
+            self._render_ui(state)
 
     def toggle_fullscreen(self):
         """Toggles fullscreen mode."""

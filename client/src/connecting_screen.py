@@ -18,11 +18,12 @@ class ConnectingScreen:
                                                        html_text="<strong>Connecting...</strong>",
                                                        manager=self.manager)
 
-    def tick(self, events, dt):
+    def update(self, events, dt):
         for event in events:
             self.manager.process_events(event)
 
         self.manager.update(dt)
 
+    def render(self):
         self.window_surface.blit(self.ui_background, (0, 0))
         self.manager.draw_ui(self.window_surface)

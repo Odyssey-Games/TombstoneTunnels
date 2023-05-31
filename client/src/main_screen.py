@@ -71,7 +71,7 @@ class MainScreen:
             anchors={'right': 'right', 'top': 'top', 'right_target': self.quit_button},
         )
 
-    def tick(self, events, dt):  # todo 2 methods for logic + rendering?
+    def update(self, events, dt):
         for event in events:
             self.manager.process_events(event)
             if event.type == pygame_gui.UI_BUTTON_PRESSED:
@@ -101,5 +101,6 @@ class MainScreen:
 
         self.manager.update(dt)
 
+    def render(self):  # todo scale ui
         self.window_surface.blit(self.ui_background, (0, 0))
         self.manager.draw_ui(self.window_surface)

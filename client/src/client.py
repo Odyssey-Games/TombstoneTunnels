@@ -92,7 +92,8 @@ class Client:
             dt = self.clock.tick() / 1000
             events = [event for event in pygame.event.get()]
             self.tick(events, dt)
-            self.renderer.render(self.state, events, dt)
+            self.renderer.update(self.state, events, dt)  # camera/ui logic etc.
+            self.renderer.render(self.state, dt)
         print("Shutting down...")
 
     def tick(self, events, dt):
