@@ -28,3 +28,6 @@ class MapManager:
                 maps.append(Map(map_name, tiles))
                 print("Loaded map", map_name)
         return maps
+    
+        def generate_map() -> list[map]:
+            pass
