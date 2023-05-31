@@ -62,7 +62,7 @@ class ClientRenderer:
             self.debugger.debug("FPS: ∞")
         self.debugger.render(self.window_surface)
 
-        pygame.display.flip()
+        pygame.display.update()
 
         self.window_surface.fill((0, 0, 0))
 
