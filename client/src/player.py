@@ -24,8 +24,12 @@ class ClientEntity:
     def tick(self, delta_time, events):
         target_position = abs_from_tile_pos(self.tile_position)
         animation_factor = delta_time * self.ANIMATION_SPEED
-        if self.animated_position != target_position and 0 < animation_factor < 1:
-            self.animated_position = self.animated_position.lerp(target_position, delta_time * self.ANIMATION_SPEED)
+        if self.animated_position != target_position:
+            if 0 < animation_factor < 1:
+                self.animated_position = self.animated_position.lerp(target_position, animation_factor)
+            else:
+                # we don't have enough frames to lerp; just move the player instantly
+                self.animated_position = target_position
 
     def render(self, camera):
         pos = self.animated_position - camera.position
