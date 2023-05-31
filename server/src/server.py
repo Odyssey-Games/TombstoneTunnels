@@ -122,6 +122,9 @@ if __name__ == '__main__':
                 if client.last_ping + PING_TIMEOUT < time():
                     print(f"Client {client.name} timed out.")
                     server.clients.remove(client)
+                    player_remove_packet = PlayerRemovePacket(client.uuid)
+                    for other_user in server.clients:
+                        server.send_packet(player_remove_packet, other_user.addr)
 
             client_packet, client_addr = server.rcvfrom(1024)
             if client_packet is None or client_addr is None:
