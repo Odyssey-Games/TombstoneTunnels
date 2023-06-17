@@ -19,7 +19,7 @@ class ClientEntity:
         self.animated_position: Vector2 = abs_from_tile_pos(tile_position)
         self.direction = direction
         self.flip_image = (direction == Dir2.LEFT)
-        self.player_texture = random.randrange(1, 6)
+        self.player_texture = 1#random.randrange(1, 6)
         print("Player texture:", self.player_texture)
         self.textures = pygame.image.load(Assets.get("player", f"player{self.player_texture}.png")).convert_alpha()
         self.idle_sprite = AnimatedSprite(self.textures, width=16, frame_count=4)
