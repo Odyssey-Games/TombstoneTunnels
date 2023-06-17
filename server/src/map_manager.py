@@ -1,7 +1,6 @@
 import os
 
 from common.src.map.map import Map
-from common.src.map.tile import Tile
 
 DATA_PATH = os.path.join(os.path.dirname(__file__), "data")  # for pyinstaller; different data folder loc
 if not os.path.exists(DATA_PATH):

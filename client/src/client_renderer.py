@@ -57,11 +57,11 @@ class ClientRenderer:
         self.tilemap.render(self.camera)
         # render player
         if self.client.player:
-            self.client.player.render(self.camera)
+            self.client.player.render(self.camera, dt)
 
         # render other entities
         for entity in self.client.entities:
-            entity.render(self.camera)
+            entity.render(self.camera, dt)
 
         self.debugger.debug(int(self.client.clock.get_fps()))
 
