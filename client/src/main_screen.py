@@ -72,6 +72,16 @@ class MainScreen:
             anchors={'right': 'right', 'top': 'top', 'right_target': self.quit_button},
         )
 
+        bottom_left = pygame.Rect(0, 0, 200, 50)
+        bottom_left.bottomleft = (0, -45)
+        self.socket_type_dropdown = pygame_gui.elements.UIDropDownMenu(
+            relative_rect=bottom_left,
+            options_list=["UDP", "TCP"],
+            starting_option="UDP",
+            manager=self.manager,
+            anchors={'left': 'left', 'bottom': 'bottom'},
+        )
+
     def tick(self, events, dt):
         for event in events:
             self.manager.process_events(event)
@@ -99,6 +109,12 @@ class MainScreen:
                 elif event.ui_element == self.custom_server_edit:
                     print('Changing custom server address to', event.text)
                     self.renderer.client.set_custom_address(event.text)
+            elif event.type == pygame_gui.UI_DROP_DOWN_MENU_CHANGED:
+                if event.ui_element == self.socket_type_dropdown:
+                    print('Changing server socket type to', event.text)
+                    socket_type = 0 if event.text == "UDP" else 1
+                    from client_networking import ClientNetworking
+                    self.renderer.client.networking = ClientNetworking(self.renderer.client, socket_type)
 
         self.manager.update(dt)
 

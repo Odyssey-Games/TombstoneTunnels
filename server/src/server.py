@@ -29,34 +29,54 @@ class Server:
 
     def __init__(self):
         self.clients = []
-        self.socket = socket(AF_INET, SOCK_DGRAM)
-        self.socket.setblocking(False)
-        self.socket.bind(SERVER_ADDRESS)
+        self.sockets = [socket(AF_INET, SOCK_DGRAM), socket(AF_INET, SOCK_STREAM)]
+        for sock in self.sockets:
+            sock.setblocking(False)
+            sock.bind(SERVER_ADDRESS)
+            try:  # only for tcp sockets
+                sock.listen(5)
+            except OSError:
+                pass
+            print("Bound to", SERVER_ADDRESS)
 
-    def send_packet(self, packet, addr: tuple):
+    def send_packet(self, packet, addr: tuple, socket_type: int):
         data = networking.serialize(packet)
         if len(data) > 1024:
-            print(f"Sending big packet of size {len(data)} to {addr}")
-        self.socket.sendto(data, addr)
+            print(f"Sending big packet of size {len(data)} to {addr} ({socket_type})")
+        self.sockets[socket_type].sendto(data, addr)
+
+    def send_packet_to_user(self, packet, user: User):
+        self.send_packet(packet, user.addr, user.socket_type)
 
     def rcvfrom(self, bufsize: int):
         try:
-            data, addr = self.socket.recvfrom(bufsize)
-            if len(data) > 512:
-                print(f"Received big packet of size {len(data)} from {addr}")
-            packet = networking.deserialize(data)
-            if not isinstance(packet, Packet):
-                print(f"Received invalid packet: {packet}")
-                return None, None
-            if isinstance(packet, AuthorizedPacket):
-                if packet.token is None or packet.token not in [other_client.token for other_client in self.clients]:
-                    print(f"Received packet from unauthorized client: {packet}")
-                    return None, None
-            return packet, addr
+            for sock_type, sock in enumerate(self.sockets):
+                try:
+                    sock.accept()
+                    print("Accepted new tcp connection")
+                except Exception as e:
+                    pass
+                data, addr = sock.recvfrom(bufsize)
+                if len(data) > 512:
+                    print(f"Received big packet of size {len(data)} from {addr}")
+                packet = networking.deserialize(data)
+                if not isinstance(packet, Packet):
+                    print(f"Received invalid packet: {packet}")
+                    return None, None, sock_type
+                if isinstance(packet, AuthorizedPacket):
+                    if packet.token is None or packet.token not in [other_client.token for other_client in
+                                                                    self.clients]:
+                        print(f"Received packet from unauthorized client: {packet}")
+                        return None, None, sock_type
+                return packet, addr, sock_type
         except BlockingIOError:
-            return None, None
+            return None, None, 0
         except ConnectionResetError:
-            return None, None
+            return None, None, 0
+
+    def close(self):
+        for sock in self.sockets:
+            sock.close()
 
 
 if __name__ == '__main__':
@@ -83,7 +103,7 @@ if __name__ == '__main__':
             # maybe pong clients
             if last_pong + PONG_INTERVAL < time():
                 for other_user in server.clients:
-                    server.send_packet(PongPacket(), other_user.addr)
+                    server.send_packet_to_user(PongPacket(), other_user)
                 print(f"Ponged {len(server.clients)} clients.")
                 last_pong = time()
 
@@ -103,7 +123,7 @@ if __name__ == '__main__':
                     user.position = new_position
                     move_packet = EntityMovePacket(user.uuid, (user.position.x, user.position.y))
                     for moving_user in server.clients:
-                        server.send_packet(move_packet, moving_user.addr)
+                        server.send_packet_to_user(move_packet, moving_user)
 
             # check pings
             for client in server.clients:
@@ -112,9 +132,9 @@ if __name__ == '__main__':
                     server.clients.remove(client)
                     player_remove_packet = PlayerRemovePacket(client.uuid)
                     for other_user in server.clients:
-                        server.send_packet(player_remove_packet, other_user.addr)
+                        server.send_packet_to_user(player_remove_packet, other_user)
 
-            client_packet, client_addr = server.rcvfrom(1024)
+            client_packet, client_addr, socket_type = server.rcvfrom(1024)
             if client_packet is None or client_addr is None:
                 continue  # no packet received
 
@@ -125,18 +145,18 @@ if __name__ == '__main__':
                 print(f"Client with name {client_packet.name} connected.")
                 token = secrets.token_hex(16)
                 player_uuid = secrets.token_hex(16)
-                user = User(client_packet.name, client_addr, player_uuid, token, start_pos=Vector2(1, 2))
+                user = User(client_packet.name, client_addr, player_uuid, token, socket_type, start_pos=Vector2(1, 2))
                 server.clients.append(user)
                 reply_packet = HelloReplyPacket(token, player_uuid)
-                server.send_packet(reply_packet, client_addr)
+                server.send_packet_to_user(reply_packet, user)
 
                 # set map for this client
                 map_packet = MapChangePacket(current_map.name, current_map.tiles)
-                server.send_packet(map_packet, client_addr)
+                server.send_packet_to_user(map_packet, user)
 
                 # set own position for this client
                 move_packet = EntityMovePacket(player_uuid, (user.position.x, user.position.y))
-                server.send_packet(move_packet, client_addr)
+                server.send_packet_to_user(move_packet, user)
 
                 # spawn other players for this client
                 for other_user in server.clients:
@@ -144,18 +164,18 @@ if __name__ == '__main__':
                         player_spawn_packet = PlayerSpawnPacket(other_user.name,
                                                                 other_user.uuid,
                                                                 (other_user.position.x, other_user.position.y))
-                        server.send_packet(player_spawn_packet, client_addr)
+                        server.send_packet_to_user(player_spawn_packet, user)
 
                 # spawn player for all clients
                 player_spawn_packet = PlayerSpawnPacket(user.name, player_uuid, (user.position.x, user.position.y))
                 for other_user in server.clients:
-                    server.send_packet(player_spawn_packet, other_user.addr)
+                    server.send_packet_to_user(player_spawn_packet, other_user)
 
             elif isinstance(client_packet, RequestInfoPacket):
                 print(f"Received info request from {client_addr}")
                 player_count = len(server.clients)
                 reply_packet = InfoReplyPacket('Hello World!', player_count, 'lobby')
-                server.send_packet(reply_packet, client_addr)
+                server.send_packet(reply_packet, client_addr, socket_type)
 
             elif isinstance(client_packet, DisconnectPacket):
                 print(f"Received disconnect packet from {client_addr}")
@@ -163,7 +183,7 @@ if __name__ == '__main__':
                 server.clients.remove(client)
                 player_remove_packet = PlayerRemovePacket(client.uuid)
                 for other_user in server.clients:
-                    server.send_packet(player_remove_packet, other_user.addr)
+                    server.send_packet_to_user(player_remove_packet, other_user)
 
             elif isinstance(client_packet, PingPacket):
                 print(f"Received ping from {client_addr}")
@@ -179,13 +199,14 @@ if __name__ == '__main__':
                 direction_packet = EntityDirectionPacket(user.uuid, user.direction.value)
                 for client in server.clients:
                     if client.addr != client_addr:
-                        server.send_packet(direction_packet, client.addr)
+                        server.send_packet_to_user(direction_packet, client)
 
         except KeyboardInterrupt:
-            print("Shutting down...")
             break
         except Exception as e:
             # we don't want to crash the server because of a client
             print("Exception in main loop:")
-            raise e
             print(e)
+
+    print("Shutting down...")
+    server.close()

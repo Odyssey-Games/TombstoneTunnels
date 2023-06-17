@@ -3,7 +3,7 @@ This file contains all the code for the client to communicate with the server,
 like login, packet sending, receiving and handling.
 """
 
-from socket import socket, AF_INET, SOCK_DGRAM
+from socket import socket, AF_INET, SOCK_DGRAM, SOCK_STREAM
 from time import time
 
 import requests as requests
@@ -20,9 +20,10 @@ PONG_TIMEOUT = 5  # we wait 5 seconds for a pong packet before we assume that th
 class ClientNetworking:
     DEFAULT_SERVER_PORT = 5857
 
-    def __init__(self, client):
+    def __init__(self, client, socket_type):
         self.client = client
-        self.socket = socket(AF_INET, SOCK_DGRAM)
+        self.socket = socket(AF_INET, SOCK_DGRAM if socket_type == 0 else SOCK_STREAM)
+        self.socket_type = socket_type
         self.global_address = self.get_public_address()
         self.current_address = self.global_address
         self.socket.setblocking(False)  # don't block the current thread when receiving packets
@@ -44,7 +45,7 @@ class ClientNetworking:
     def try_login(self, custom: bool = False):
         # todo try connect in thread + fix multiple connection tries when clicking fast
         if not self.socket:
-            self.socket = socket(AF_INET, SOCK_DGRAM)
+            self.socket = socket(AF_INET, SOCK_DGRAM if self.socket_type == 0 else SOCK_STREAM)
 
         if custom:
             self.current_address = tuple(self.client.config.custom_server_address)
@@ -52,6 +53,7 @@ class ClientNetworking:
             self.current_address = self.global_address
         print(f"Connecting to address: {self.current_address}")
         try:
+            self.socket.setblocking(True)
             self.socket.connect(self.current_address)
             self.socket.setblocking(False)
 
@@ -157,6 +159,7 @@ class ClientNetworking:
         # Check server connection
         if (time() - self.last_server_pong) > PONG_TIMEOUT:
             print("Connection to server lost.")
+            self.disconnect()
             return False
         # Maybe ping server
         if (time() - self.last_ping) > PING_INTERVAL:
@@ -184,7 +187,6 @@ class ClientNetworking:
             except Exception as e:
                 print(f"Error while receiving packet: {e}. Disconnecting.")
                 self.socket = None
-                raise e
                 return False
 
         return True

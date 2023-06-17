@@ -20,7 +20,7 @@ class Client:
     def __init__(self):
         pygame.init()  # we need to call init() before we can use pygame fonts for rendering
         self.clock = pygame.time.Clock()
-        self.networking = ClientNetworking(self)
+        self.networking = ClientNetworking(self, 0)
         self.config: ClientConfig = self._get_config()
         self.renderer = ClientRenderer(self)
         self.map: Map | None = None
@@ -68,7 +68,7 @@ class Client:
         split = address.split(":")
         if len(split) == 1:
             # we have no port
-            port = self.networking.DEFAULT_SERVER_PORT
+            port = 5857
         else:
             port = split[1]
 
