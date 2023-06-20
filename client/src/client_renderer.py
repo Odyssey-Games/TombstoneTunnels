@@ -50,8 +50,8 @@ class ClientRenderer:
                     self.camera.position.x += 10
                 elif event.key == pygame.K_j:
                     self.camera.position.x -= 10
-                elif event.key == pygame.K_SPACE:
-                    self.camera.screen_shake = not self.camera.screen_shake
+                # elif event.key == pygame.K_SPACE:
+                #     self.camera.screen_shake = not self.camera.screen_shake
 
         # render tilemap
         self.tilemap.render(self.camera)

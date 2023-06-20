@@ -10,7 +10,7 @@ from time import time
 
 from pygame import Vector2
 
-from entities import ServerPlayer, ServerEntity
+from entities import ServerPlayer, ServerEntity, EntityType
 from map_manager import MapManager
 from common.src.direction import Dir2
 from common.src import networking
@@ -21,7 +21,7 @@ SERVER_ADDRESS = ('0.0.0.0', 5857)
 PING_TIMEOUT = 5  # timeout clients after not pinging for 5 seconds
 PONG_INTERVAL = 1  # send a pong packet every second
 MOVE_TIMEOUT = 0.5
-ENTITY_SPAWN_INTERVAL = 5  # spawn entities every 5 seconds
+ENTITY_SPAWN_INTERVAL = 3  # spawn entities every 3 seconds
 
 
 class Server:
@@ -40,6 +40,10 @@ class Server:
         if len(data) > 1024:
             print(f"Sending big packet of size {len(data)} to {addr}")
         self.socket.sendto(data, addr)
+
+    def send_packet_to_all(self, packet):
+        for client1 in self.clients:
+            self.send_packet(packet, client1.addr)
 
     def rcvfrom(self, bufsize: int):
         try:
@@ -85,8 +89,7 @@ if __name__ == '__main__':
         try:
             # maybe pong clients
             if last_pong + PONG_INTERVAL < time():
-                for other_user in server.clients:
-                    server.send_packet(PongPacket(), other_user.addr)
+                server.send_packet_to_all(PongPacket())
                 print(f"Ponged {len(server.clients)} clients.")
                 last_pong = time()
 
@@ -96,8 +99,7 @@ if __name__ == '__main__':
                     # The player can either attack or move every MOVE_TIMEOUT seconds.
                     if user.attacking and user.last_direction != Dir2.ZERO:
                         user.last_move_time = time()
-                        for user2 in server.clients:
-                            server.send_packet(EntityAttackPacket(user.uuid), user2.addr)
+                        server.send_packet_to_all(EntityAttackPacket(user.uuid))
 
                         # TODO multiple different player attacks
                         # get tiles in front of player
@@ -110,6 +112,9 @@ if __name__ == '__main__':
                             for entity in server.entities:
                                 if entity.position == attacked_tile:
                                     print("Attacked entity: ", entity.uuid)
+                                    # Assume the player one-hits the entity for now
+                                    entity.health = 0
+                                    server.send_packet_to_all(EntityRemovePacket(entity.uuid))
                         except IndexError:
                             continue
                     elif user.direction != Dir2.ZERO:
@@ -125,8 +130,7 @@ if __name__ == '__main__':
                                 continue
                         user.position = new_position
                         move_packet = EntityMovePacket(user.uuid, (user.position.x, user.position.y))
-                        for moving_user in server.clients:
-                            server.send_packet(move_packet, moving_user.addr)
+                        server.send_packet_to_all(move_packet)
 
             # maybe spawn/remove entities
             if len(server.clients) == 0:
@@ -138,32 +142,31 @@ if __name__ == '__main__':
                 if time() - last_spawn_time >= ENTITY_SPAWN_INTERVAL:
                     last_spawn_time = time()
                     uuid = secrets.token_hex(16)
-                    random_spawn = Vector2(randint(0, current_map.width - 1), randint(0, current_map.height - 1))
+                    random_spawn = Vector2(randint(1, current_map.width - 1), randint(1, current_map.height - 1))
                     is_near_player = True
                     while Tile.from_name(current_map.tiles[int(random_spawn.y)][int(random_spawn.x)]).is_solid \
                             or is_near_player:
-                        random_spawn = Vector2(randint(0, current_map.width - 1), randint(0, current_map.height - 1))
+                        random_spawn = Vector2(randint(1, current_map.width - 1), randint(1, current_map.height - 1))
                         is_near_player = False
                         for player in server.clients:
                             if (player.position - random_spawn).length_squared() <= 4:
                                 is_near_player = True
                                 break
-                    new_entity = ServerEntity(uuid, random_spawn, difficulty * 10)
+                    new_entity = ServerEntity(uuid, EntityType.GOBLIN, random_spawn, difficulty * 10)
                     server.entities.append(new_entity)
-                    spawn_packet = EntitySpawnPacket(uuid, (new_entity.position.x, new_entity.position.y),
+                    spawn_packet = EntitySpawnPacket(uuid, new_entity.entity_type.value,
+                                                     (new_entity.position.x, new_entity.position.y),
                                                      new_entity.health)
                     print("Spawned entity: ", uuid, "with health", new_entity.health)
-                    for other_user in server.clients:
-                        server.send_packet(spawn_packet, other_user.addr)
+                    server.send_packet_to_all(spawn_packet)
 
             # check pings
             for client in server.clients:
                 if client.last_ping + PING_TIMEOUT < time():
                     print(f"Client {client.name} timed out.")
                     server.entities.remove(client)
-                    player_remove_packet = PlayerRemovePacket(client.uuid)
-                    for other_user in server.clients:
-                        server.send_packet(player_remove_packet, other_user.addr)
+                    player_remove_packet = EntityRemovePacket(client.uuid)
+                    server.send_packet_to_all(player_remove_packet)
 
             client_packet, client_addr = server.rcvfrom(1024)
             if client_packet is None or client_addr is None:
@@ -201,8 +204,7 @@ if __name__ == '__main__':
                 # spawn player for all clients
                 player_spawn_packet = PlayerSpawnPacket(user.name, player_uuid, (user.position.x, user.position.y),
                                                         user.health)
-                for other_user in server.clients:
-                    server.send_packet(player_spawn_packet, other_user.addr)
+                server.send_packet_to_all(player_spawn_packet)
 
             elif isinstance(client_packet, RequestInfoPacket):
                 print(f"Received info request from {client_addr}")
@@ -214,9 +216,8 @@ if __name__ == '__main__':
                 print(f"Received disconnect packet from {client_addr}")
                 client = next((client for client in server.clients if client.token == client_packet.token), None)
                 server.entities.remove(client)
-                player_remove_packet = PlayerRemovePacket(client.uuid)
-                for other_user in server.clients:
-                    server.send_packet(player_remove_packet, other_user.addr)
+                player_remove_packet = EntityRemovePacket(client.uuid)
+                server.send_packet_to_all(player_remove_packet)
 
             elif isinstance(client_packet, PingPacket):
                 print(f"Received ping from {client_addr}")
@@ -228,6 +229,8 @@ if __name__ == '__main__':
             elif isinstance(client_packet, ChangeInputPacket):
                 user = next((client for client in server.clients if client.token == client_packet.token), None)
                 user.direction = Dir2(client_packet.direction)
+                if user.direction != Dir2.ZERO:
+                    user.last_direction = user.direction
                 user.attacking = client_packet.attacking
                 # update direction for other clients
                 direction_packet = EntityDirectionPacket(user.uuid, user.direction.value)

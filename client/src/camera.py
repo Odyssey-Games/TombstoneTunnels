@@ -6,7 +6,7 @@ import random
 import pygame
 from pygame import Vector2
 
-from player import ClientEntity
+from entities import ClientEntity
 
 
 class Camera:

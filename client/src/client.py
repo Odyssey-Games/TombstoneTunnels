@@ -13,7 +13,7 @@ from config import ClientConfig
 from client_networking import ClientNetworking
 from client_renderer import ClientRenderer
 from common.src.map.map import Map
-from player import ClientEntity
+from entities import ClientEntity
 
 
 class Client:

@@ -145,8 +145,8 @@ class MapChangePacket(Packet):
         self.tiles = tiles
 
 
-class PlayerRemovePacket(Packet):
-    """Sent by the server to clients to indicate that a player was removed from the current world / left."""
+class EntityRemovePacket(Packet):
+    """Sent by the server to clients to indicate that a player/entity was removed from the current world / left."""
 
     def __init__(self, uuid):
         self.uuid = uuid  # unique identifier of the player that left
@@ -165,8 +165,9 @@ class PlayerSpawnPacket(Packet):
 class EntitySpawnPacket(Packet):
     """Sent by the server to clients to indicate that a hostile entity spawned at the specified tile position."""
 
-    def __init__(self, uuid: str, tile_position: (int, int), health: int):
+    def __init__(self, uuid: str, entity_type: str, tile_position: (int, int), health: int):
         self.uuid = uuid  # unique identifier of the entity that spawned
+        self.entity_type = entity_type  # type of the entity that spawned
         self.tile_position = tile_position  # position of the entity in tile coordinates
         self.health = health  # health of the entity
 

@@ -11,7 +11,7 @@ import requests as requests
 import client_state
 from common.src import networking
 from common.src.map.map import Map
-from player import *
+from entities import *
 
 PING_INTERVAL = 1  # we send a ping packet every second
 PONG_TIMEOUT = 5  # we wait 5 seconds for a pong packet before we assume that the connection to the server is lost
@@ -117,7 +117,7 @@ class ClientNetworking:
                 self.client.entities.append(ClientPlayer(self, packet.name, packet.uuid, packet.tile_position))
         elif isinstance(packet, EntitySpawnPacket):
             print("Received entity spawn packet.")
-            self.client.entities.append(ClientEntity(packet.uuid, packet.tile_position, packet.health))
+            self.client.entities.append(ClientEntity(packet.uuid, EntityType(packet.entity_type), packet.tile_position, packet.health, hostile=True))
 
         elif isinstance(packet, EntityMovePacket):
             # find entity in entities and update position
@@ -139,7 +139,7 @@ class ClientNetworking:
                     elif entity.direction == Dir2.RIGHT:
                         entity.flip_image = False
                     break
-        elif isinstance(packet, PlayerRemovePacket):
+        elif isinstance(packet, EntityRemovePacket):
             # find player in entities and remove it
             # get entity first to prevent concurrent modification?
             client_entity = next((entity for entity in self.client.entities if entity.uuid == packet.uuid), None)
