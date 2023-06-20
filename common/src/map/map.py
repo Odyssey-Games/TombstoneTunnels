@@ -1,6 +1,3 @@
-from common.src.map.tile import Tile
-
-
 class Map:
     """Represents a map of tiles."""
 

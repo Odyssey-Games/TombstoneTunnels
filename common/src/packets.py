@@ -45,9 +45,10 @@ class AuthorizedPacket(Packet):
 class ChangeInputPacket(AuthorizedPacket):
     """Sent by the client to the server to indicate that the player's input has changed."""
 
-    def __init__(self, direction: int):
+    def __init__(self, direction: int, attacking: bool):
         super().__init__()
         self.direction = direction
+        self.attacking = attacking
 
 
 class DisconnectPacket(AuthorizedPacket):
@@ -96,6 +97,17 @@ class EntityMovePacket(Packet):
     def __init__(self, uuid: str, tile_position: (int, int)):
         self.uuid = uuid  # unique identifier of the player that moved
         self.tile_position = tile_position  # new position of the player in tile coordinates
+
+
+class EntityAttackPacket(Packet):
+    """
+    Sent by the server to clients to indicate that an entity started attacking.
+
+    Currently, there is only one attack method for each entity, so the client will know what animation to play.
+    """
+
+    def __init__(self, uuid: str):
+        self.uuid = uuid  # unique identifier of the entity that is attacking
 
 
 class HelloReplyPacket(Packet):

@@ -9,7 +9,7 @@ from time import time
 
 from pygame import Vector2
 
-from User import User
+from entities import ServerPlayer
 from map_manager import MapManager
 from common.src.direction import Dir2
 from common.src import networking
@@ -23,15 +23,15 @@ MOVE_TIMEOUT = 0.5
 
 
 class Server:
-    """
-    :type clients: list[User]
-    """
-
     def __init__(self):
-        self.clients = []
+        self.entities = []
         self.socket = socket(AF_INET, SOCK_DGRAM)
         self.socket.setblocking(False)
         self.socket.bind(SERVER_ADDRESS)
+
+    @property
+    def clients(self):
+        return [ent for ent in self.entities if isinstance(ent, ServerPlayer)]
 
     def send_packet(self, packet, addr: tuple):
         data = networking.serialize(packet)
@@ -89,27 +89,47 @@ if __name__ == '__main__':
 
             # maybe move clients
             for user in server.clients:
-                if user.direction != Dir2.ZERO and time() - user.last_move_time >= MOVE_TIMEOUT:
-                    user.last_move_time = time()
-                    new_position = user.position + Dir2(user.direction).to_tile_vector()
-                    # collision check
-                    if current_map.tiles is not None:
-                        if new_position.y < 0 or new_position.x < 0 or new_position.y >= len(
-                                current_map.tiles) or new_position.x >= len(current_map.tiles[0]):
+                if time() - user.last_move_time >= MOVE_TIMEOUT:
+                    # The player can either attack or move every MOVE_TIMEOUT seconds.
+                    if user.attacking and user.last_direction != Dir2.ZERO:
+                        user.last_move_time = time()
+                        for user2 in server.clients:
+                            server.send_packet(EntityAttackPacket(user.uuid), user2.addr)
+
+                        # TODO multiple different player attacks
+                        # get tiles in front of player
+                        attacked_tile = user.position + user.last_direction.to_tile_vector()
+                        try:
+                            tile = Tile.from_name(current_map.tiles[int(attacked_tile.y)][int(attacked_tile.x)])
+                            if tile.is_solid:
+                                continue
+                            # damage entities
+                            for entity in server.entities:
+                                if entity.position == attacked_tile:
+                                    print("Attacked entity: ", entity.uuid)
+                        except IndexError:
                             continue
-                        tile = Tile.from_name(current_map.tiles[int(new_position.y)][int(new_position.x)])
-                        if tile.is_solid:
-                            continue
-                    user.position = new_position
-                    move_packet = EntityMovePacket(user.uuid, (user.position.x, user.position.y))
-                    for moving_user in server.clients:
-                        server.send_packet(move_packet, moving_user.addr)
+                    elif user.direction != Dir2.ZERO:
+                        user.last_move_time = time()
+                        new_position = user.position + Dir2(user.direction).to_tile_vector()
+                        # collision check
+                        if current_map.tiles is not None:
+                            if new_position.y < 0 or new_position.x < 0 or new_position.y >= len(
+                                    current_map.tiles) or new_position.x >= len(current_map.tiles[0]):
+                                continue
+                            tile = Tile.from_name(current_map.tiles[int(new_position.y)][int(new_position.x)])
+                            if tile.is_solid:
+                                continue
+                        user.position = new_position
+                        move_packet = EntityMovePacket(user.uuid, (user.position.x, user.position.y))
+                        for moving_user in server.clients:
+                            server.send_packet(move_packet, moving_user.addr)
 
             # check pings
             for client in server.clients:
                 if client.last_ping + PING_TIMEOUT < time():
                     print(f"Client {client.name} timed out.")
-                    server.clients.remove(client)
+                    server.entities.remove(client)
                     player_remove_packet = PlayerRemovePacket(client.uuid)
                     for other_user in server.clients:
                         server.send_packet(player_remove_packet, other_user.addr)
@@ -125,8 +145,8 @@ if __name__ == '__main__':
                 print(f"Client with name {client_packet.name} connected.")
                 token = secrets.token_hex(16)
                 player_uuid = secrets.token_hex(16)
-                user = User(client_packet.name, client_addr, player_uuid, token, start_pos=Vector2(1, 2))
-                server.clients.append(user)
+                user = ServerPlayer(client_packet.name, client_addr, player_uuid, token, position=Vector2(1, 2))
+                server.entities.append(user)
                 reply_packet = HelloReplyPacket(token, player_uuid)
                 server.send_packet(reply_packet, client_addr)
 
@@ -160,7 +180,7 @@ if __name__ == '__main__':
             elif isinstance(client_packet, DisconnectPacket):
                 print(f"Received disconnect packet from {client_addr}")
                 client = next((client for client in server.clients if client.token == client_packet.token), None)
-                server.clients.remove(client)
+                server.entities.remove(client)
                 player_remove_packet = PlayerRemovePacket(client.uuid)
                 for other_user in server.clients:
                     server.send_packet(player_remove_packet, other_user.addr)
@@ -175,6 +195,7 @@ if __name__ == '__main__':
             elif isinstance(client_packet, ChangeInputPacket):
                 user = next((client for client in server.clients if client.token == client_packet.token), None)
                 user.direction = Dir2(client_packet.direction)
+                user.attacking = client_packet.attacking
                 # update direction for other clients
                 direction_packet = EntityDirectionPacket(user.uuid, user.direction.value)
                 for client in server.clients:
@@ -187,5 +208,4 @@ if __name__ == '__main__':
         except Exception as e:
             # we don't want to crash the server because of a client
             print("Exception in main loop:")
-            raise e
             print(e)

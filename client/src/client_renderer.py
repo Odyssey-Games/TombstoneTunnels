@@ -19,7 +19,7 @@ class ClientRenderer:
         screen_size = pygame.Vector2(960, 540)
         self.camera = Camera(
             screen_size=screen_size,
-            virtual_screen_size_scaler=4,
+            virtual_screen_size_scaler=2,
             position=Vector2(0, 0),
             # does pygame.HWACCEL make a difference?
             display_flags=pygame.HWACCEL | pygame.SCALED,

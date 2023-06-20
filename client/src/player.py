@@ -14,10 +14,12 @@ from pos import abs_from_tile_pos
 class ClientEntity:
     ANIMATION_SPEED = 10
 
-    def __init__(self, tile_position: Vector2 = Vector2(), direction=Dir2.ZERO):
+    def __init__(self, uuid: str, tile_position: Vector2 = Vector2(), direction=Dir2.ZERO):
+        self.uuid = uuid
         self.tile_position: Vector2 = tile_position
         self.animated_position: Vector2 = abs_from_tile_pos(tile_position)
         self.direction = direction
+        self.attacking = False
         self.flip_image = (direction == Dir2.LEFT)
         self.player_texture = 1#random.randrange(1, 6)
         print("Player texture:", self.player_texture)
@@ -50,10 +52,9 @@ class ClientEntity:
 
 class ClientPlayer(ClientEntity):
     def __init__(self, client, name, uuid, tile_position: Vector2 = Vector2()):
-        ClientEntity.__init__(self, tile_position)
+        ClientEntity.__init__(self, uuid, tile_position)
         self.client = client
         self.name = name
-        self.uuid = uuid
         self.pressed_keys = set()
 
     def update(self, delta_time, tile_map, pygame_events):
@@ -61,6 +62,7 @@ class ClientPlayer(ClientEntity):
 
     def handle_events(self, pygame_events):
         direction = Dir2.ZERO
+        attacking = False
         for event in pygame_events:
             if event.type == pygame.KEYDOWN:
                 self.pressed_keys.add(event.key)
@@ -75,9 +77,11 @@ class ClientPlayer(ClientEntity):
             direction = Dir2.UP
         elif pygame.K_s in self.pressed_keys or pygame.K_DOWN in self.pressed_keys:
             direction = Dir2.DOWN
+        elif pygame.K_SPACE in self.pressed_keys:
+            attacking = True
 
-        if direction != self.direction:
-            packet = ChangeInputPacket(direction.value)
+        if attacking != self.attacking or direction != self.direction:
+            packet = ChangeInputPacket(direction.value, attacking)
             self.client.send_packet(packet)
 
             # only flip image when necessary, we don't want the texture to flip back when the player stops moving

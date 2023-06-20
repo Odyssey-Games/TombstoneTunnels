@@ -184,7 +184,6 @@ class ClientNetworking:
             except Exception as e:
                 print(f"Error while receiving packet: {e}. Disconnecting.")
                 self.socket = None
-                raise e
                 return False
 
         return True
