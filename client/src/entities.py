@@ -4,7 +4,7 @@ import random
 import pygame
 from pygame import Vector2
 
-from animation import AnimatedSprite
+from sprites import WeaponSprite, EntitySprite
 from common.src.direction import Dir2
 from common.src.entities import EntityType
 from common.src.packets import *
@@ -14,16 +14,19 @@ from pos import abs_from_tile_pos
 class ClientEntity:
     ANIMATION_SPEED = 10
 
-    def __init__(self, uuid: str, entity_type: EntityType, tile_position: Vector2 = Vector2(), health: int = 100, hostile: bool = False):
+    def __init__(self, uuid: str, entity_type: EntityType, tile_position: Vector2 = Vector2(), health: int = 100,
+                 hostile: bool = False):
         self.uuid = uuid
         self.entity_type = entity_type
         self.health = health
         self.tile_position: Vector2 = tile_position
         self.animated_position: Vector2 = abs_from_tile_pos(tile_position)
         self.direction = Dir2.ZERO
+        self.last_direction = Dir2.ZERO
         self.attacking = False
         self.flip_image = (self.direction == Dir2.LEFT)
-        self.sprite = AnimatedSprite(self.entity_type.value)
+        self.sprite = EntitySprite(self.entity_type.value)
+        self.weapon_sprite: WeaponSprite | None = WeaponSprite("knight_sword") if self.entity_type == EntityType.KNIGHT else None
         self.color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
 
     def tick(self, delta_time, events):
@@ -37,13 +40,19 @@ class ClientEntity:
                 self.animated_position = target_position
 
     def render(self, camera, dt):
-        current_sprite, offset = self.sprite.current_sprite(self.direction != Dir2.ZERO)
+        current_sprite, offset = self.sprite.current_sprite(self.direction != Dir2.ZERO, self.attacking)
         pos = self.animated_position - camera.position
         if self.flip_image:
             flipped_image = pygame.transform.flip(current_sprite, True, False)
             camera.renderTexture.blit(flipped_image, (pos.x, pos.y - 16) + offset)
         else:
             camera.renderTexture.blit(current_sprite, (pos.x, pos.y - 16) + offset)
+        if self.weapon_sprite:
+            try:
+                weapon, offset = self.weapon_sprite.current_surface(self.attacking, self.last_direction)
+                camera.renderTexture.blit(weapon, (pos.x, pos.y - 16) + offset)
+            except TypeError:
+                pass
 
 
 class ClientPlayer(ClientEntity):
@@ -85,6 +94,8 @@ class ClientPlayer(ClientEntity):
                 self.flip_image = False
 
             self.direction = direction
+            if self.direction != Dir2.ZERO:
+                self.last_direction = self.direction
             self.attacking = attacking
 
     def render(self, camera, dt):

@@ -134,6 +134,8 @@ class ClientNetworking:
                     continue
                 if entity.uuid == packet.uuid:
                     entity.direction = Dir2(packet.direction)
+                    if entity.direction != Dir2.ZERO:
+                        entity.last_direction = entity.direction
                     if entity.direction == Dir2.LEFT:
                         entity.flip_image = True
                     elif entity.direction == Dir2.RIGHT:
