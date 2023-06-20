@@ -155,10 +155,20 @@ class PlayerRemovePacket(Packet):
 class PlayerSpawnPacket(Packet):
     """Sent by the server to clients to indicate that a player spawned at the specified tile position."""
 
-    def __init__(self, name: str, uuid: str, tile_position: (int, int)):
+    def __init__(self, name: str, uuid: str, tile_position: (int, int), health: int):
         self.name = name  # name of the player that spawned
         self.uuid = uuid  # unique identifier of the player that spawned
         self.tile_position = tile_position  # position of the player in tile coordinates
+        self.health = health  # health of the player
+
+
+class EntitySpawnPacket(Packet):
+    """Sent by the server to clients to indicate that a hostile entity spawned at the specified tile position."""
+
+    def __init__(self, uuid: str, tile_position: (int, int), health: int):
+        self.uuid = uuid  # unique identifier of the entity that spawned
+        self.tile_position = tile_position  # position of the entity in tile coordinates
+        self.health = health  # health of the entity
 
 
 class PongPacket(Packet):

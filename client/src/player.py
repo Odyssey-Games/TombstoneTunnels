@@ -14,14 +14,15 @@ from pos import abs_from_tile_pos
 class ClientEntity:
     ANIMATION_SPEED = 10
 
-    def __init__(self, uuid: str, tile_position: Vector2 = Vector2(), direction=Dir2.ZERO):
+    def __init__(self, uuid: str, tile_position: Vector2 = Vector2(), health: int = 100):
         self.uuid = uuid
+        self.health = health
         self.tile_position: Vector2 = tile_position
         self.animated_position: Vector2 = abs_from_tile_pos(tile_position)
-        self.direction = direction
+        self.direction = Dir2.ZERO
         self.attacking = False
-        self.flip_image = (direction == Dir2.LEFT)
-        self.player_texture = 1#random.randrange(1, 6)
+        self.flip_image = (self.direction == Dir2.LEFT)
+        self.player_texture = 1  # random.randrange(1, 6)
         print("Player texture:", self.player_texture)
         self.textures = pygame.image.load(Assets.get("player", f"player{self.player_texture}.png")).convert_alpha()
         self.idle_sprite = AnimatedSprite(self.textures, width=16, frame_count=4)
@@ -51,8 +52,8 @@ class ClientEntity:
 
 
 class ClientPlayer(ClientEntity):
-    def __init__(self, client, name, uuid, tile_position: Vector2 = Vector2()):
-        ClientEntity.__init__(self, uuid, tile_position)
+    def __init__(self, client, name, uuid, tile_position: Vector2 = Vector2(), health: int = 100):
+        ClientEntity.__init__(self, uuid, tile_position, health)
         self.client = client
         self.name = name
         self.pressed_keys = set()

@@ -115,6 +115,10 @@ class ClientNetworking:
             else:
                 # this is another player, add to entities
                 self.client.entities.append(ClientPlayer(self, packet.name, packet.uuid, packet.tile_position))
+        elif isinstance(packet, EntitySpawnPacket):
+            print("Received entity spawn packet.")
+            self.client.entities.append(ClientEntity(packet.uuid, packet.tile_position, packet.health))
+
         elif isinstance(packet, EntityMovePacket):
             # find entity in entities and update position
             for entity in (self.client.entities + [self.client.player]):

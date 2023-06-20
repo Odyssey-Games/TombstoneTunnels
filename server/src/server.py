@@ -1,5 +1,6 @@
 import os
 import sys
+from random import randint
 
 sys.path.insert(1, os.path.join(sys.path[0], '..', '..'))
 
@@ -9,7 +10,7 @@ from time import time
 
 from pygame import Vector2
 
-from entities import ServerPlayer
+from entities import ServerPlayer, ServerEntity
 from map_manager import MapManager
 from common.src.direction import Dir2
 from common.src import networking
@@ -20,6 +21,7 @@ SERVER_ADDRESS = ('0.0.0.0', 5857)
 PING_TIMEOUT = 5  # timeout clients after not pinging for 5 seconds
 PONG_INTERVAL = 1  # send a pong packet every second
 MOVE_TIMEOUT = 0.5
+ENTITY_SPAWN_INTERVAL = 5  # spawn entities every 5 seconds
 
 
 class Server:
@@ -78,6 +80,7 @@ if __name__ == '__main__':
     current_map = map_manager.maps[0]
 
     last_pong = time()
+    last_spawn_time = time()
     while True:
         try:
             # maybe pong clients
@@ -125,6 +128,34 @@ if __name__ == '__main__':
                         for moving_user in server.clients:
                             server.send_packet(move_packet, moving_user.addr)
 
+            # maybe spawn/remove entities
+            if len(server.clients) == 0:
+                # remove all entities when all players have left
+                server.entities.clear()
+            else:
+                # difficulty scales with player count
+                difficulty = len(server.clients)
+                if time() - last_spawn_time >= ENTITY_SPAWN_INTERVAL:
+                    last_spawn_time = time()
+                    uuid = secrets.token_hex(16)
+                    random_spawn = Vector2(randint(0, current_map.width - 1), randint(0, current_map.height - 1))
+                    is_near_player = True
+                    while Tile.from_name(current_map.tiles[int(random_spawn.y)][int(random_spawn.x)]).is_solid \
+                            or is_near_player:
+                        random_spawn = Vector2(randint(0, current_map.width - 1), randint(0, current_map.height - 1))
+                        is_near_player = False
+                        for player in server.clients:
+                            if (player.position - random_spawn).length_squared() <= 4:
+                                is_near_player = True
+                                break
+                    new_entity = ServerEntity(uuid, random_spawn, difficulty * 10)
+                    server.entities.append(new_entity)
+                    spawn_packet = EntitySpawnPacket(uuid, (new_entity.position.x, new_entity.position.y),
+                                                     new_entity.health)
+                    print("Spawned entity: ", uuid, "with health", new_entity.health)
+                    for other_user in server.clients:
+                        server.send_packet(spawn_packet, other_user.addr)
+
             # check pings
             for client in server.clients:
                 if client.last_ping + PING_TIMEOUT < time():
@@ -163,11 +194,13 @@ if __name__ == '__main__':
                     if other_user.addr != client_addr:
                         player_spawn_packet = PlayerSpawnPacket(other_user.name,
                                                                 other_user.uuid,
-                                                                (other_user.position.x, other_user.position.y))
+                                                                (other_user.position.x, other_user.position.y),
+                                                                other_user.health)
                         server.send_packet(player_spawn_packet, client_addr)
 
                 # spawn player for all clients
-                player_spawn_packet = PlayerSpawnPacket(user.name, player_uuid, (user.position.x, user.position.y))
+                player_spawn_packet = PlayerSpawnPacket(user.name, player_uuid, (user.position.x, user.position.y),
+                                                        user.health)
                 for other_user in server.clients:
                     server.send_packet(player_spawn_packet, other_user.addr)
 
