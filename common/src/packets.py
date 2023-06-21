@@ -45,9 +45,10 @@ class AuthorizedPacket(Packet):
 class ChangeInputPacket(AuthorizedPacket):
     """Sent by the client to the server to indicate that the player's input has changed."""
 
-    def __init__(self, direction: int):
+    def __init__(self, direction: int, attacking: bool):
         super().__init__()
         self.direction = direction
+        self.attacking = attacking
 
 
 class DisconnectPacket(AuthorizedPacket):
@@ -72,12 +73,6 @@ class PingPacket(Packet):
     pass
 
 
-class RequestInfoPacket(Packet):
-    """Sent by the client to the server to request info about the game, like player count, state, etc.
-    """
-    pass
-
-
 # Server to client
 class EntityDirectionPacket(Packet):
     """
@@ -96,6 +91,25 @@ class EntityMovePacket(Packet):
     def __init__(self, uuid: str, tile_position: (int, int)):
         self.uuid = uuid  # unique identifier of the player that moved
         self.tile_position = tile_position  # new position of the player in tile coordinates
+
+
+class EntityHealthPacket(Packet):
+    """Sent by the server to clients to indicate that an entity's health changed."""
+
+    def __init__(self, uuid: str, health: int):
+        self.uuid = uuid  # unique identifier of the player that moved
+        self.health = health  # new health of the player
+
+
+class EntityAttackPacket(Packet):
+    """
+    Sent by the server to clients to indicate that an entity started attacking.
+
+    Currently, there is only one attack method for each entity, so the client will know what animation to play.
+    """
+
+    def __init__(self, uuid: str):
+        self.uuid = uuid  # unique identifier of the entity that is attacking
 
 
 class HelloReplyPacket(Packet):
@@ -133,8 +147,8 @@ class MapChangePacket(Packet):
         self.tiles = tiles
 
 
-class PlayerRemovePacket(Packet):
-    """Sent by the server to clients to indicate that a player was removed from the current world / left."""
+class EntityRemovePacket(Packet):
+    """Sent by the server to clients to indicate that a player/entity was removed from the current world / left."""
 
     def __init__(self, uuid):
         self.uuid = uuid  # unique identifier of the player that left
@@ -143,10 +157,21 @@ class PlayerRemovePacket(Packet):
 class PlayerSpawnPacket(Packet):
     """Sent by the server to clients to indicate that a player spawned at the specified tile position."""
 
-    def __init__(self, name: str, uuid: str, tile_position: (int, int)):
+    def __init__(self, name: str, uuid: str, tile_position: (int, int), health: int):
         self.name = name  # name of the player that spawned
         self.uuid = uuid  # unique identifier of the player that spawned
         self.tile_position = tile_position  # position of the player in tile coordinates
+        self.health = health  # health of the player
+
+
+class EntitySpawnPacket(Packet):
+    """Sent by the server to clients to indicate that a hostile entity spawned at the specified tile position."""
+
+    def __init__(self, uuid: str, entity_type: str, tile_position: (int, int), health: int):
+        self.uuid = uuid  # unique identifier of the entity that spawned
+        self.entity_type = entity_type  # type of the entity that spawned
+        self.tile_position = tile_position  # position of the entity in tile coordinates
+        self.health = health  # health of the entity
 
 
 class PongPacket(Packet):

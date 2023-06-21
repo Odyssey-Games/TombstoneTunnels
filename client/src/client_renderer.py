@@ -5,6 +5,7 @@ import client_state
 from camera import *
 from client_tiles import ClientTileMap
 from connecting_screen import ConnectingScreen
+from hud import Hud
 from debug import *
 from main_screen import MainScreen
 
@@ -18,8 +19,9 @@ class ClientRenderer:
         # set camera before tilemap (pygame image mode has to be set for loading images in tilemap)
         screen_size = pygame.Vector2(960, 540)
         self.camera = Camera(
+            self,
             screen_size=screen_size,
-            virtual_screen_size_scaler=4,
+            virtual_screen_size_scaler=2,
             position=Vector2(0, 0),
             # does pygame.HWACCEL make a difference?
             display_flags=pygame.HWACCEL | pygame.SCALED,
@@ -28,6 +30,7 @@ class ClientRenderer:
         self.camera.mode = self.camera.FOLLOW_TARGET
         self.main_screen = MainScreen(self, self.camera.display, screen_size)
         self.connecting_screen = ConnectingScreen(self, self.camera.display, screen_size)
+        self.hud = Hud(self.client, screen_size)
         self.debugger = Debugger()
         self.pressed_keys = set()
 
@@ -50,14 +53,16 @@ class ClientRenderer:
                     self.camera.position.x += 10
                 elif event.key == pygame.K_j:
                     self.camera.position.x -= 10
-                elif event.key == pygame.K_SPACE:
-                    self.camera.screen_shake = not self.camera.screen_shake
+                # elif event.key == pygame.K_SPACE:
+                #     self.camera.screen_shake = not self.camera.screen_shake
 
         # render tilemap
         self.tilemap.render(self.camera)
         # render player
         if self.client.player:
             self.client.player.render(self.camera, dt)
+
+        self.hud.render(self.camera)
 
         # render other entities
         for entity in self.client.entities:

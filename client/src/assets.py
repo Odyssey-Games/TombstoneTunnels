@@ -7,5 +7,5 @@ if not os.path.exists(ASSETS_PATH):  # for pyinstaller; different data folder lo
 
 class Assets:
     @staticmethod
-    def get(*path: str):
+    def get(*path: str) -> str:
         return os.path.join(ASSETS_PATH, *path)

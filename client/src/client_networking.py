@@ -11,7 +11,7 @@ import requests as requests
 import client_state
 from common.src import networking
 from common.src.map.map import Map
-from player import *
+from entities import *
 
 PING_INTERVAL = 1  # we send a ping packet every second
 PONG_TIMEOUT = 5  # we wait 5 seconds for a pong packet before we assume that the connection to the server is lost
@@ -115,6 +115,10 @@ class ClientNetworking:
             else:
                 # this is another player, add to entities
                 self.client.entities.append(ClientPlayer(self, packet.name, packet.uuid, packet.tile_position))
+        elif isinstance(packet, EntitySpawnPacket):
+            print("Received entity spawn packet.")
+            self.client.entities.append(ClientEntity(packet.uuid, EntityType(packet.entity_type), packet.tile_position, packet.health, hostile=True))
+
         elif isinstance(packet, EntityMovePacket):
             # find entity in entities and update position
             for entity in (self.client.entities + [self.client.player]):
@@ -130,17 +134,33 @@ class ClientNetworking:
                     continue
                 if entity.uuid == packet.uuid:
                     entity.direction = Dir2(packet.direction)
+                    if entity.direction != Dir2.ZERO:
+                        entity.last_direction = entity.direction
                     if entity.direction == Dir2.LEFT:
                         entity.flip_image = True
                     elif entity.direction == Dir2.RIGHT:
                         entity.flip_image = False
                     break
-        elif isinstance(packet, PlayerRemovePacket):
+        elif isinstance(packet, EntityRemovePacket):
             # find player in entities and remove it
             # get entity first to prevent concurrent modification?
             client_entity = next((entity for entity in self.client.entities if entity.uuid == packet.uuid), None)
             if client_entity:
                 self.client.entities.remove(client_entity)
+        elif isinstance(packet, EntityHealthPacket):
+            # find entity in entities and update health
+            for entity in (self.client.entities + [self.client.player]):
+                if not entity:
+                    continue
+                if entity.uuid == packet.uuid:
+                    if entity.health > packet.health:
+                        # damage animation
+                        entity.damage_animation_time = time()
+                        print("DAMAGE ANIMATION")
+                        pass
+                    entity.health = packet.health
+                    break
+
         elif isinstance(packet, MapChangePacket):
             new_map = Map(packet.name, packet.tiles)
             print(f"Received map change packet with map {new_map}.")
@@ -184,7 +204,6 @@ class ClientNetworking:
             except Exception as e:
                 print(f"Error while receiving packet: {e}. Disconnecting.")
                 self.socket = None
-                raise e
                 return False
 
         return True
