@@ -156,7 +156,6 @@ class ClientNetworking:
                     if entity.health > packet.health:
                         # damage animation
                         entity.damage_animation_time = time()
-                        print("DAMAGE ANIMATION")
                         pass
                     entity.health = packet.health
                     break

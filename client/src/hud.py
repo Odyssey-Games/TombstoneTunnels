@@ -12,10 +12,11 @@ class Hud:
         self.empty_heart_image = pygame.image.load(Assets.get("hud", "ui_heart_empty.png")).convert_alpha()
 
     def render(self, camera):
-        for i in range(0, self.client.player.max_health // 10):
-            if self.client.player.health >= (i + 1) * 10:
-                camera.renderTexture.blit(self.heart_image, (5 + 15 * i, 5))
-            elif self.client.player.health >= i * 10 + 5:
-                camera.renderTexture.blit(self.half_heart_image, (5 + 15 * i, 5))
-            else:
-                camera.renderTexture.blit(self.empty_heart_image, (5 + 15 * i, 5))
+        if self.client.player:
+            for i in range(0, self.client.player.max_health // 10):
+                if self.client.player.health >= (i + 1) * 10:
+                    camera.renderTexture.blit(self.heart_image, (5 + 15 * i, 5))
+                elif self.client.player.health >= i * 10 + 5:
+                    camera.renderTexture.blit(self.half_heart_image, (5 + 15 * i, 5))
+                else:
+                    camera.renderTexture.blit(self.empty_heart_image, (5 + 15 * i, 5))
