@@ -147,6 +147,20 @@ class ClientNetworking:
             client_entity = next((entity for entity in self.client.entities if entity.uuid == packet.uuid), None)
             if client_entity:
                 self.client.entities.remove(client_entity)
+        elif isinstance(packet, EntityHealthPacket):
+            # find entity in entities and update health
+            for entity in (self.client.entities + [self.client.player]):
+                if not entity:
+                    continue
+                if entity.uuid == packet.uuid:
+                    if entity.health > packet.health:
+                        # damage animation
+                        entity.damage_animation_time = time()
+                        print("DAMAGE ANIMATION")
+                        pass
+                    entity.health = packet.health
+                    break
+
         elif isinstance(packet, MapChangePacket):
             new_map = Map(packet.name, packet.tiles)
             print(f"Received map change packet with map {new_map}.")

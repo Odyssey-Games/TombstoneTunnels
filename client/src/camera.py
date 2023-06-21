@@ -14,8 +14,9 @@ class Camera:
     FREE = 0
     FOLLOW_TARGET = 1
 
-    def __init__(self, screen_size: Vector2, virtual_screen_size_scaler: int,
+    def __init__(self, renderer, screen_size: Vector2, virtual_screen_size_scaler: int,
                  position: Vector2 = Vector2(), display_flags=0, vsync=0):
+        self.renderer = renderer
         self.position = position
         self.display = pygame.display.set_mode(screen_size, display_flags, vsync=vsync)
         pygame.display.set_caption("Tombstone Tunnels")
@@ -45,6 +46,7 @@ class Camera:
     def draw(self, debugger=None):
         dpx = self.display.get_size()[0]
         dpy = self.display.get_size()[1]
+        self.screen_shake = self.renderer.client.player.health <= 5
 
         if self.screen_shake:  # Increase zoom to a minimum of 1.1 to avoid black borders when applying screen shake
             self.zoom = max(self.zoom, 1.1)

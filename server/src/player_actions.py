@@ -35,9 +35,10 @@ class PlayerActions(Mechanics):
                         for entity in self.server.entities:
                             if entity.position == attacked_tile:
                                 print("Attacked entity: ", entity.uuid)
-                                # Assume the player one-hits the entity for now
-                                entity.health = 0
-                                self.server.send_packet_to_all(EntityRemovePacket(entity.uuid))
+                                entity.health -= 10
+                                self.server.send_packet_to_all(EntityHealthPacket(entity.uuid, entity.health))
+                                if entity.health <= 0:
+                                    self.server.send_packet_to_all(EntityRemovePacket(entity.uuid))
                     except IndexError:
                         continue
                 elif user.direction != Dir2.ZERO:

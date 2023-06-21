@@ -129,6 +129,9 @@ class Client:
 
 if __name__ == "__main__":
     client = Client()
-    client.run()
+    try:
+        client.run()
+    except KeyboardInterrupt:
+        pass
     client.save_config()
     print("Saved config.")

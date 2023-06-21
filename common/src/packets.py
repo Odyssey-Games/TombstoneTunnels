@@ -93,6 +93,14 @@ class EntityMovePacket(Packet):
         self.tile_position = tile_position  # new position of the player in tile coordinates
 
 
+class EntityHealthPacket(Packet):
+    """Sent by the server to clients to indicate that an entity's health changed."""
+
+    def __init__(self, uuid: str, health: int):
+        self.uuid = uuid  # unique identifier of the player that moved
+        self.health = health  # new health of the player
+
+
 class EntityAttackPacket(Packet):
     """
     Sent by the server to clients to indicate that an entity started attacking.

@@ -46,7 +46,7 @@ class EntityManager(Mechanics):
                             is_near_player = True
                             break
                 entity_type = EntityType.GOBLIN if randint(0, 1) == 1 else EntityType.SKELETON
-                new_entity = ServerEntity(uuid, entity_type, random_spawn, difficulty * 10)
+                new_entity = ServerEntity(uuid, entity_type, random_spawn, difficulty * 20)
                 self.server.entities.append(new_entity)
                 spawn_packet = EntitySpawnPacket(uuid, new_entity.entity_type.value,
                                                  (new_entity.position.x, new_entity.position.y),

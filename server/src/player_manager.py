@@ -55,6 +55,10 @@ class PlayerManager(Mechanics):
             move_packet = EntityMovePacket(player_uuid, (user.position.x, user.position.y))
             self.server.send_packet(move_packet, client_addr)
 
+            # set own health for this client
+            health_packet = EntityHealthPacket(player_uuid, user.health)
+            self.server.send_packet(health_packet, client_addr)
+
             # spawn other players for this client
             for other_user in self.server.clients:
                 if other_user.addr != client_addr:
