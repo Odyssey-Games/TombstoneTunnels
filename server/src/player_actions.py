@@ -38,6 +38,7 @@ class PlayerActions(Mechanics):
                                 entity.health -= 10
                                 self.server.send_packet_to_all(EntityHealthPacket(entity.uuid, entity.health))
                                 if entity.health <= 0:
+                                    self.server.entities.remove(entity)
                                     self.server.send_packet_to_all(EntityRemovePacket(entity.uuid))
                     except IndexError:
                         continue
