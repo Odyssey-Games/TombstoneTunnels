@@ -72,7 +72,7 @@ class EntityManager(Mechanics):
                                 # death?
                                 if nearest_player.health <= 0:
                                     print("Player died!")
-                                    nearest_player.health = 100
+                                    nearest_player.health = 50
                                     nearest_player.position = Vector2(1, 2)
                                     packet = EntityHealthPacket(nearest_player.uuid, nearest_player.health)
                                     self.server.send_packet_to_all(packet)
