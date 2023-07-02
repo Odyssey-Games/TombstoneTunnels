@@ -1,4 +1,3 @@
-import copy
 import random
 
 def fill_walls(gmap, size):
@@ -38,8 +37,47 @@ def fill_walls(gmap, size):
     
 
 
-def wfc_fill(gmap: list(list()), tiletypes):
-    pass
+def wfc_fill(gmap, size):
+    structures={
+        0:[["swall_full_left_end", "swall_full_right_end"]],
+        1:[["swall_full_left_end", "swall_full_right_end"],
+           ["swall_bottom_left_end","swall_bottom_right_end"]],
+        2:[["swall_edge_corner_left_down", None],
+           ["swall_full_left_end", "swall_full_right_end"]]
+    }
+    for rowIndex, row in enumerate(gmap):
+        for tileIndex, tile in enumerate(row):
+            if tile == "floor_clear":
+                if random.randint(0,7) == 1:
+                    gmap[rowIndex][tileIndex] = random.choice(["floor_cracked_"+str(x) for x in range(1,6)] + ["floor_ladder"])
+                
+                if random.randint(0,24) == 1:
+                    gmap[rowIndex][tileIndex] = "sfloor_pillar"
+
+            elif tile == "swall_bottom_middle":
+                if random.randint(0,12) == 1:
+                    gmap[rowIndex][tileIndex] = random.choice(["swall_bottom_missing_brick", "swall_bottom_hole", "swall_bottom_flag_red"])
+
+    # add structures
+
+    for x in range(3): # amount of structures
+        structure = random.choice(list(structures.values()))
+
+        placed = False
+        while not placed:
+            randomOriginX = random.randint(2, size-2)
+            randomOriginY = random.randint(2, size-2)
+
+            for Yoffset, row in enumerate(structure):
+                for Xoffset, tile in enumerate(row): 
+                    if tile:
+                        gmap[randomOriginY+Yoffset][randomOriginX + Xoffset] = tile
+            placed = True
+
+        
+    
+
+    return gmap
 '''
 class Cell:
     def __init__(self, x, y, rez, options):

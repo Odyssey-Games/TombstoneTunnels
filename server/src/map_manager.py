@@ -32,11 +32,13 @@ class MapManager:
                 print("Loaded map", map_name)
         return maps
 
-    def generate_map(self, size:int = 16):
+    def generate_map(self, size:int = 20):
         # generate the client side of the map
         genMap = t = [ ["floor_clear"]*size for i in range(size)]
         
         genMap = wfc.fill_walls(genMap, size)
+
+        wfc.wfc_fill(genMap, size)
         
         
         # begin filling the map using wfc

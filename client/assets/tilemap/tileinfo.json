@@ -71,6 +71,14 @@
         "allowed_Neighbours_d":["floor_clear", "floor_acid"]
     },
 
+    "sfloor_pillar" : {
+        "isSolid": 1,
+        "allowed_Neighbours_w":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_s":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_a":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_d":["floor_clear", "floor_acid"]
+    },
+
     "floor_stairs" : {
         "isSolid": 0,
         "allowed_Neighbours_w":["floor_clear", "floor_acid"],
