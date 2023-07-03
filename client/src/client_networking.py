@@ -4,7 +4,6 @@ like login, packet sending, receiving and handling.
 """
 
 from socket import socket, AF_INET, SOCK_DGRAM
-from time import time
 
 import requests as requests
 
@@ -109,11 +108,13 @@ class ClientNetworking:
         self.socket.sendto(data, self.current_address)
 
     def _handle_packet(self, packet: Packet):
-        """Handle a packet that was received from the server.
+        """
+        Handle a packet that was received from the server.
 
         This method is called by the try_receive method for each packet that was received.
         """
         if isinstance(packet, HelloReplyPacket):
+            # after we sent the HelloPacket, the server can reply with a HelloReplyPacket when it accepts the login
             if packet.token is None:
                 print("Server rejected our login.")
                 self.disconnect()
@@ -124,9 +125,13 @@ class ClientNetworking:
                 self.client.player_uuid = packet.player_uuid
                 self.client.state = client_state.IN_GAME
         elif isinstance(packet, PongPacket):
+            # pong packet should be sent by the server every second; after 5 seconds without a pong packet, we assume
+            # that the connection to the server is lost
             print("Received pong packet.")
             self.last_server_pong = time()
         elif isinstance(packet, PlayerSpawnPacket):
+            # the server sends us a PlayerSpawnPacket when a new player joins the game or when we join the game. When
+            # the latter is the case we can update our player object with the data (position) from the packet.
             print("Received player spawn packet.")
             if self.client.player_uuid == packet.uuid:
                 # this is our player
@@ -135,6 +140,8 @@ class ClientNetworking:
                 # this is another player, add to entities
                 self.client.entities.append(ClientPlayer(self, packet.name, packet.uuid, packet.tile_position))
         elif isinstance(packet, EntitySpawnPacket):
+            # the server sends us an EntitySpawnPacket when a new entity is spawned in the game. We can add this entity
+            # to our entities list. The entities list contains all entities including the players.
             print("Received entity spawn packet.")
             self.client.entities.append(ClientEntity(packet.uuid, EntityType(packet.entity_type), packet.tile_position, packet.health, hostile=True))
 
