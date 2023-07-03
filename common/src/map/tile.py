@@ -13,4 +13,7 @@ class Tile:
 
     @staticmethod
     def from_coords(server, vec: Vector2):
-        return Tile.from_name(server.current_map.tiles[int(vec.y)][int(vec.x)])
+        try:
+            return Tile.from_name(server.current_map.tiles[int(vec.y)][int(vec.x)])
+        except IndexError:
+            return Tile.from_name('s')
