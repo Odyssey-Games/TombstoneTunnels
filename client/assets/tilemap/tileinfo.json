@@ -1,0 +1,290 @@
+{
+    "floor_acid" : {
+        "isSolid": 0,
+        "allowed_Neighbours_w":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_s":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_a":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_d":["floor_clear", "floor_acid"]
+    },
+
+    "floor_clear" : {
+        "isSolid": 0,
+        "allowed_Neighbours_w":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_s":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_a":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_d":["floor_clear", "floor_acid"]
+    },
+
+    "floor_cracked_1" : {
+        "isSolid": 0,
+        "allowed_Neighbours_w":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_s":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_a":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_d":["floor_clear", "floor_acid"]
+    },
+
+    "floor_cracked_2" : {
+        "isSolid": 0,
+        "allowed_Neighbours_w":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_s":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_a":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_d":["floor_clear", "floor_acid"]
+    },
+
+    "floor_cracked_3" : {
+        "isSolid": 0,
+        "allowed_Neighbours_w":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_s":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_a":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_d":["floor_clear", "floor_acid"]
+    },
+
+    "floor_cracked_4" : {
+        "isSolid": 0,
+        "allowed_Neighbours_w":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_s":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_a":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_d":["floor_clear", "floor_acid"]
+    },
+
+    "floor_cracked_5" : {
+        "isSolid": 0,
+        "allowed_Neighbours_w":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_s":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_a":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_d":["floor_clear", "floor_acid"]
+    },
+
+    "floor_cracked_6" : {
+        "isSolid": 0,
+        "allowed_Neighbours_w":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_s":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_a":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_d":["floor_clear", "floor_acid"]
+    },
+
+    "floor_ladder" : {
+        "isSolid": 0,
+        "allowed_Neighbours_w":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_s":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_a":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_d":["floor_clear", "floor_acid"]
+    },
+
+    "sfloor_pillar" : {
+        "isSolid": 1,
+        "allowed_Neighbours_w":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_s":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_a":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_d":["floor_clear", "floor_acid"]
+    },
+
+    "floor_stairs" : {
+        "isSolid": 0,
+        "allowed_Neighbours_w":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_s":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_a":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_d":["floor_clear", "floor_acid"]
+    },
+
+    "wall_bottom_acid" : {
+        "isSolid": 1,
+        "allowed_Neighbours_w":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_s":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_a":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_d":["floor_clear", "floor_acid"]
+    },
+
+    "wall_bottom_flag_blue" : {
+        "isSolid": 1,
+        "allowed_Neighbours_w":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_s":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_a":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_d":["floor_clear", "floor_acid"]
+    },
+
+    "wall_bottom_flag_green" : {
+        "isSolid": 1,
+        "allowed_Neighbours_w":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_s":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_a":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_d":["floor_clear", "floor_acid"]
+    },
+
+    "wall_bottom_flag_red" : {
+        "isSolid": 1,
+        "allowed_Neighbours_w":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_s":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_a":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_d":["floor_clear", "floor_acid"]
+    },
+
+    "wall_bottom_flag_yellow" : {
+        "isSolid": 1,
+        "allowed_Neighbours_w":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_s":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_a":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_d":["floor_clear", "floor_acid"]
+    },
+
+    "wall_bottom_hole" : {
+        "isSolid": 1,
+        "allowed_Neighbours_w":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_s":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_a":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_d":["floor_clear", "floor_acid"]
+    },
+
+    "wall_bottom_left_end" : {
+        "isSolid": 1,
+        "allowed_Neighbours_w":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_s":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_a":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_d":["floor_clear", "floor_acid"]
+    },
+
+    "wall_bottom_middle" : {
+        "isSolid": 1,
+        "allowed_Neighbours_w":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_s":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_a":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_d":["floor_clear", "floor_acid"]
+    },
+
+    "wall_bottom_missing_brick" : {
+        "isSolid": 1,
+        "allowed_Neighbours_w":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_s":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_a":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_d":["floor_clear", "floor_acid"]
+    },
+
+    "wall_bottom_right_end" : {
+        "isSolid": 1,
+        "allowed_Neighbours_w":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_s":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_a":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_d":["floor_clear", "floor_acid"]
+    },
+
+    "wall_edge_corner_down_left" : {
+        "isSolid": 1,
+        "allowed_Neighbours_w":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_s":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_a":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_d":["floor_clear", "floor_acid"]
+    },
+
+    "wall_edge_corner_down_right" : {
+        "isSolid": 1,
+        "allowed_Neighbours_w":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_s":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_a":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_d":["floor_clear", "floor_acid"]
+    },
+
+    "wall_edge_corner_left_down" : {
+        "isSolid": 1,
+        "allowed_Neighbours_w":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_s":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_a":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_d":["floor_clear", "floor_acid"]
+    },
+
+    "wall_edge_corner_right_down" : {
+        "isSolid": 1,
+        "allowed_Neighbours_w":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_s":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_a":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_d":["floor_clear", "floor_acid"]
+    },
+
+    "wall_edge_left_straight" : {
+        "isSolid": 1,
+        "allowed_Neighbours_w":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_s":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_a":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_d":["floor_clear", "floor_acid"]
+    },
+
+    "wall_edge_right_straight" : {
+        "isSolid": 1,
+        "allowed_Neighbours_w":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_s":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_a":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_d":["floor_clear", "floor_acid"]
+    },
+
+    "wall_full_left_end" : {
+        "isSolid": 1,
+        "allowed_Neighbours_w":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_s":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_a":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_d":["floor_clear", "floor_acid"]
+    },
+
+    "wall_full_right_end" : {
+        "isSolid": 1,
+        "allowed_Neighbours_w":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_s":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_a":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_d":["floor_clear", "floor_acid"]
+    },
+
+    "wall_corner_left_end" : {
+        "isSolid": 0,
+        "allowed_Neighbours_w":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_s":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_a":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_d":["floor_clear", "floor_acid"]
+    },
+    
+    "wall_edge_right_end" : { 
+        "isSolid": 0,
+        "allowed_Neighbours_w":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_s":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_a":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_d":["floor_clear", "floor_acid"]
+    },
+
+    "wall_edge_top_left_end" : { 
+        "isSolid": 0,
+        "allowed_Neighbours_w":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_s":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_a":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_d":["floor_clear", "floor_acid"]
+    },
+
+    "wall_edge_top_left" : { 
+        "isSolid": 0,
+        "allowed_Neighbours_w":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_s":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_a":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_d":["floor_clear", "floor_acid"]
+    },
+
+    "wall_edge_top_middle" : { 
+        "isSolid": 0,
+        "allowed_Neighbours_w":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_s":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_a":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_d":["floor_clear", "floor_acid"]
+    },
+
+    "wall_edge_top_right_end" : { 
+        "isSolid": 0,
+        "allowed_Neighbours_w":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_s":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_a":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_d":["floor_clear", "floor_acid"]
+    },
+
+    "wall_edge_top_right" : { 
+        "isSolid": 0,
+        "allowed_Neighbours_w":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_s":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_a":["floor_clear", "floor_acid"],
+        "allowed_Neighbours_d":["floor_clear", "floor_acid"]
+    }
+
+}
