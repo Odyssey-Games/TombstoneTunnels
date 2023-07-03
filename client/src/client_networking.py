@@ -18,6 +18,13 @@ PONG_TIMEOUT = 5  # we wait 5 seconds for a pong packet before we assume that th
 
 
 class ClientNetworking:
+    """
+    Class for handling all the networking logic on the client side. This includes sending and receiving packets,
+    logging in, disconnecting, etc. This class is used by the Client class. Every tick we check if we have received
+    any packets from the server and handle them accordingly. We also send a ping packet every second to the server
+    and wait for a pong packet. If we don't receive a pong packet within 5 seconds, we assume that the connection
+    to the server is lost and disconnect.
+    """
     DEFAULT_SERVER_PORT = 5857
 
     def __init__(self, client):
@@ -32,7 +39,10 @@ class ClientNetworking:
 
     @staticmethod
     def get_public_address():
-        """Gets the address of the public server."""
+        """
+        Gets the address of the public server. Currently, this is saved in a file on the server which we can access
+        via the api.odysseygames.de website.
+        """
         try:
             address = requests.get("https://api.odysseygames.de/server").text
             return address.split(":")[0], int(address.split(":")[1])
@@ -42,6 +52,14 @@ class ClientNetworking:
             return "localhost"
 
     def try_login(self, custom: bool = False):
+        """
+        Try to connect/authorize to the server. This sends a HelloPacket to the server. If the server accepts our login,
+        it will send us a HelloReplyPacket with our auth token. We save this token and use it for all future packets
+        where we need to be authorized, e.g. when we send a PlayerMovePacket.
+
+        :param custom: If True, we try to connect to the custom server address that the user has entered on the main
+        menu (e.g. "localhost"). If False, we try to connect to the public server address.
+        """
         # todo try connect in thread + fix multiple connection tries when clicking fast
         if not self.socket:
             self.socket = socket(AF_INET, SOCK_DGRAM)
@@ -55,12 +73,13 @@ class ClientNetworking:
             self.socket.connect(self.current_address)
             self.socket.setblocking(False)
 
-            """Try to send a HelloPacket to the server."""
+            # Try to send a HelloPacket to the server.
             packet = HelloPacket(self.client.config.player_name)
             self.send_packet(packet)
             self.last_server_pong = time()
             print("Sent login packet.")
         except Exception as e:
+            # we could not connect to the server; go back to main menu
             print("Could not connect to server:")
             print(e)
             self.client.state = client_state.MAIN_MENU

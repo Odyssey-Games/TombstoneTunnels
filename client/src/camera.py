@@ -1,5 +1,7 @@
-# This file contains the camera. The camera is mainly a data structure storing an offset that can be applied while
-# rendering. The camera also offers features to track a target, scale the rendered texture or add screen shake.
+"""
+This file contains the camera. The camera is mainly a data structure storing an offset that can be applied while
+rendering. The camera also offers features to track a target, scale the rendered texture or add screen shake.
+"""
 
 import random
 
@@ -10,40 +12,55 @@ from entities import ClientEntity
 
 
 class Camera:
-    # camera modes
+    # camera modes. FREE means the camera is not tracking any entity. FOLLOW_TARGET means the camera is tracking
+    # the target entity
     FREE = 0
     FOLLOW_TARGET = 1
 
     def __init__(self, renderer, screen_size: Vector2, virtual_screen_size_scaler: int,
                  position: Vector2 = Vector2(), display_flags=0, vsync=0):
-        self.renderer = renderer
-        self.position = position
-        self.display = pygame.display.set_mode(screen_size, display_flags, vsync=vsync)
-        pygame.display.set_caption("Tombstone Tunnels")
+        self.renderer = renderer  # renderer instance
+        self.position = position  # camera position
+        self.display = pygame.display.set_mode(screen_size, display_flags, vsync=vsync)  # display surface
+        pygame.display.set_caption("Tombstone Tunnels")  # set window title
         self.renderTexture = pygame.Surface((
             int(screen_size.x / virtual_screen_size_scaler + 1),
             int(screen_size.y / virtual_screen_size_scaler + 1)
         ))
-        self.zoom = 1
+        self.zoom = 1  # zoom factor
         self.screen_shake = False  # apply a random screen shake effect every
-        self.target: ClientEntity = None  # entity with .position member var (entity that the camera will follow)
-        self.tracking_speed = .999
-        self.mode = self.FREE
+        self.target: ClientEntity | None = None  # entity with .position member var (entity that the camera will follow)
+        self.tracking_speed = .999   # tracking speed (0-1) (1 = instant tracking) (0 = no tracking)
+        self.mode = self.FREE  # camera mode (FREE or FOLLOW_TARGET; see above)
 
     def update(self, delta_time, debugger=None):
+        """
+        Updates the camera position and draws the render texture to the display surface.
+        """
         self.draw(debugger)
         self.update_position(delta_time)
 
     def update_position(self, delta_time):
+        """
+        Updates the camera position based on the current mode and target.
+        Additionally, a tracking speed is applied to make the camera follow the target smoothly.
+        """
         if not self.target:
+            # no target, nothing to do
             return
         if self.mode == self.FREE:
+            # don't move the camera, we are in free mode
             pass
         elif self.mode == self.FOLLOW_TARGET:
+            # move the camera towards the target
             self.position.x += (self.target.animated_position.x - self.position.x - self.renderTexture.get_width() / 2) * self.tracking_speed * delta_time
             self.position.y += (self.target.animated_position.y - self.position.y - self.renderTexture.get_height() / 2) * self.tracking_speed * delta_time
 
     def draw(self, debugger=None):
+        """
+        Draws the render texture to the display surface. If a debugger is passed, it will be drawn on top of the render
+        texture. The render texture is then cleared. This method also applies screen shake if the camera is shaking.
+        """
         dpx = self.display.get_size()[0]
         dpy = self.display.get_size()[1]
         self.screen_shake = False

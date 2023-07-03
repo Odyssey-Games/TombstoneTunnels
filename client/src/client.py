@@ -28,6 +28,7 @@ class Client:
         self.player = None  # gets assigned when we "get" our player from the server
         self.player_uuid = None
         self.entities: list[ClientEntity] = []  # other entities, can also be other players
+        # State of the client. See client_state.py for more info.
         self.state = client_state.MAIN_MENU
 
     @staticmethod
@@ -97,15 +98,23 @@ class Client:
             self.renderer.tick(self.state, events, dt)
 
     def tick(self, events, dt):
+        """
+        Called every frame. Updates the player and entities, and handles events.
+        """
         for event in events:
             if event.type == pygame.QUIT:
+                # quit the game
+                print("Exiting...")
                 self.running = False
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_F11:
+                    # toggle fullscreen
                     pygame.display.toggle_fullscreen()
                 elif event.key == pygame.K_F3:
+                    # toggle debugger
                     self.renderer.debugger.enabled = not self.renderer.debugger.enabled
                 elif event.key == pygame.K_ESCAPE:
+                    # escape key pressed; either disconnect from server or exit the game
                     if self.state == client_state.MAIN_MENU:
                         print("Exiting...")
                         self.running = False
@@ -115,6 +124,7 @@ class Client:
                         self._disconnect()
 
         if self.player:
+            # update the player
             self.player.update(dt, self.renderer.tilemap, events)
 
         for entity in (self.entities + [self.player]):
@@ -128,6 +138,9 @@ class Client:
 
 
 if __name__ == "__main__":
+    """
+    Main entry point of the program. This is where we create the client and run it.
+    """
     client = Client()
     try:
         client.run()
