@@ -7,6 +7,7 @@ from common.src.direction import Dir2
 from common.src.map.tile import Tile
 from common.src.packets import *
 from mechanics import Mechanics
+from server.src.entities import ServerPlayer
 
 
 class PlayerActions(Mechanics):
@@ -34,6 +35,8 @@ class PlayerActions(Mechanics):
                             continue
                         # damage entities on the attacked tile
                         for entity in self.server.entities:
+                            if isinstance(entity, ServerPlayer):
+                                continue  # no friendly fire
                             if entity.position == attacked_tile:
                                 print("Attacked entity: ", entity.uuid)
                                 entity.health -= 10
