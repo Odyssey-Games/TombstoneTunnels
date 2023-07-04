@@ -25,7 +25,7 @@ class EntityManager(Mechanics):
         self.last_move_time = time()
 
     ENTITY_SPAWN_INTERVAL = 3  # spawn entities every 3 seconds
-    HEART_SPAWN_INTERVAL = 2  # spawn hearts every 15 seconds
+    HEART_SPAWN_INTERVAL = 15  # spawn hearts every 15 seconds
     ENTITY_MOVE_INTERVAL = 1.5  # move entities every 1 second
 
     def _get_random_spawn(self):
