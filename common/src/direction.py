@@ -16,6 +16,9 @@ class Dir2(Enum):
         return self.name
 
     def to_tile_vector(self) -> pygame.Vector2:
+        """
+        :return: the tile vector (pygame.Vector2D) for the direction
+        """
         return {
             Dir2.UP: Vector2(0, -1),
             Dir2.DOWN: Vector2(0, 1),

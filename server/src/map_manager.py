@@ -12,10 +12,10 @@ class MapManager:
     def __init__(self):
         self.maps = []
         # commented out because map generation was implemented; we don't need to load maps from files anymore
-        #self.maps: list[Map] = self._load_maps()
-        self.generate_map()  # adds the generated map to self.maps
+        # self.maps: list[Map] = self._load_maps()
+        self.maps.append(self.generate_map())  # adds the generated map to self.maps
         pass
- 
+
     @staticmethod
     def _load_maps() -> list[Map]:
         """
@@ -24,6 +24,7 @@ class MapManager:
         """
         maps = []
         for filename in os.listdir(os.path.join(DATA_PATH, "maps")):
+            # load all .csv files in the server-side maps folder
             if filename.endswith(".csv"):
                 tiles: list[list[str]] = []
                 with open(os.path.join(DATA_PATH, "maps", filename)) as f:
@@ -37,7 +38,8 @@ class MapManager:
                 print("Loaded map", map_name)
         return maps
 
-    def generate_map(self, size:int = 20) -> Map:
+    @staticmethod
+    def generate_map(size: int = 20) -> Map:
         """
         Method to generate a map using our wfc (wave function collapse) utilities. As wfc does not make that much sense
         for our project, we will probably use our own (simpler) method in the future.
@@ -50,5 +52,5 @@ class MapManager:
         # generate structures with wfc
         gen_map = wfc.fill_walls(gen_map, size)
         wfc.wfc_fill(gen_map, size)
-        
+
         return Map("generated", gen_map)

@@ -156,7 +156,7 @@ class Client:
 
 if __name__ == "__main__":
     """
-    Main entry point of the program. This is where we create the client and run it.
+    Main entry point of the program. This is where we create the client instance and run it.
     """
     client = Client()
     try:

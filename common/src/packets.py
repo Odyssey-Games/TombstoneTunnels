@@ -180,4 +180,5 @@ class PongPacket(Packet):
 
 
 # Used for deserialization so that we don't have to hardcode the packet types
+# list of tuples (name, class) for each packet
 packet_classes = [(key, value) for key, value in locals().copy().items() if key.endswith("Packet") and key != "Packet"]

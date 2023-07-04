@@ -9,6 +9,10 @@ from common.src.common import VERSION
 
 
 class MainScreen:
+    """
+    Class for managing the main menu screen, containing the logo, play button. Additionally the player can change
+    his name or choose a custom server address.
+    """
     def __init__(self, renderer, window_surface, screen_size):
         self.renderer = renderer  # ClientRenderer instance
         self.window_surface = window_surface

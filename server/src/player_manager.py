@@ -12,6 +12,9 @@ from mechanics import Mechanics
 
 
 class PlayerManager(Mechanics):
+    """
+    Mechanics for managing simple player stuff like connecting, disconnecting, pinging, timing out.
+    """
     def __init__(self, server):
         super().__init__(server)
         self.last_pong = time()

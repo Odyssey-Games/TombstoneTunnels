@@ -16,6 +16,9 @@ from mechanics import Mechanics
 
 
 class EntityManager(Mechanics):
+    """
+    Handles spawning/removing entities and their movement/attacking logic.
+    """
     def __init__(self, server):
         super().__init__(server)
         self.last_spawn_time = time()
@@ -29,6 +32,9 @@ class EntityManager(Mechanics):
 
     @staticmethod
     def get_sign(value):
+        """
+        :return: 0 for 0, 1 for positive values, -1 for negative values
+        """
         if value > 0:
             return 1
         elif value < 0:
@@ -37,6 +43,9 @@ class EntityManager(Mechanics):
             return 0
 
     def tick(self, _, __):
+        """
+        Called every tick. Handles entity spawning/removing and movement.
+        """
         # maybe spawn/remove entities
         if len(self.server.clients) == 0:
             # remove all entities when all players have left
@@ -62,6 +71,7 @@ class EntityManager(Mechanics):
                         new_position = entity.position + direction
                         if not Tile.from_coords(self.server, new_position).is_solid:
                             entity.position = new_position
+                            # send entity move packet to all clients
                             packet = EntityMovePacket(entity.uuid, entity.position)
                             self.server.send_packet_to_all(packet)
                             if nearest_player.position == new_position:
@@ -71,9 +81,11 @@ class EntityManager(Mechanics):
                                 self.server.send_packet_to_all(packet)
                                 # death?
                                 if nearest_player.health <= 0:
+                                    # when the player dies, we reset their health and position
                                     print("Player died!")
                                     nearest_player.health = 50
                                     nearest_player.position = Vector2(1, 2)
+                                    # send health and position packets to all clients
                                     packet = EntityHealthPacket(nearest_player.uuid, nearest_player.health)
                                     self.server.send_packet_to_all(packet)
                                     packet = EntityMovePacket(nearest_player.uuid, nearest_player.position)
@@ -86,7 +98,7 @@ class EntityManager(Mechanics):
                 uuid = secrets.token_hex(16)
                 random_spawn = self._get_random_spawn()
                 is_near_player = True
-                # Find a valid spawn position
+                # Find a valid spawn position that is not near a player
                 while Tile.from_coords(self.server, random_spawn).is_solid or is_near_player:
                     random_spawn = self._get_random_spawn()
                     is_near_player = False
@@ -94,9 +106,11 @@ class EntityManager(Mechanics):
                         if (player.position - random_spawn).length_squared() <= 4:
                             is_near_player = True
                             break
+                # Spawn a random hostile entity
                 entity_type = EntityType.GOBLIN if randint(0, 1) == 1 else EntityType.SKELETON
                 new_entity = ServerEntity(uuid, entity_type, random_spawn, difficulty * 20)
                 self.server.entities.append(new_entity)
+                # Send spawn packet to all clients
                 spawn_packet = EntitySpawnPacket(uuid, new_entity.entity_type.value,
                                                  (new_entity.position.x, new_entity.position.y),
                                                  new_entity.health)

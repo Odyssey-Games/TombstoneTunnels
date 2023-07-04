@@ -8,7 +8,14 @@ from common.src.direction import Dir2
 
 
 class EntitySprite:
+    """
+    Helper class for managing the different sprites (textures) for one entity type and thereby creating
+    the animation, based on the current state and direction of the entity.
+    """
     def _get_sprites(self, my_type: str):
+        """
+        :return: a list of pygame surfaces (sprites/images) for the specified entity type
+        """
         sprites = []
         try:
             for i in range(0, 4):
@@ -20,6 +27,10 @@ class EntitySprite:
         return sprites
 
     def _get_offset(self):
+        """
+        Load the offset from the assets folder, if it exists.
+        :return: the offset parsed as a Vector2
+        """
         try:
             with open(Assets.get("entities", f"{self.name}_offset.txt"), "r") as f:
                 split = f.readline().split(" ")
@@ -29,29 +40,33 @@ class EntitySprite:
 
     def __init__(self, name: str, frame_duration: float = 0.2):
         self.name = name
-        self.frame_duration = frame_duration
-        self.last_frame_time = time()
-        self.current_frame = 0
-        self.idle_sprites = self._get_sprites("idle")
-        self.run_sprites = self._get_sprites("run")
-        self.hit_sprites = self._get_sprites("hit")
-        self.offset = self._get_offset()
+        self.frame_duration = frame_duration  # duration of one frame in seconds
+        self.last_frame_time = time()  # time of the last frame change
+        self.current_frame = 0  # current frame index
+        self.idle_sprites = self._get_sprites("idle")  # list of idle sprites
+        self.run_sprites = self._get_sprites("run")  # list of running sprites
+        self.hit_sprites = self._get_sprites("hit")  # list of hit sprites
+        self.offset = self._get_offset()  # offset of the sprite
 
     def current_sprite(self, running: bool = False, attacking: bool = False) -> (Surface, Vector2):
         if attacking:
+            # if the entity is attacking, we use the hit sprites if they exist, otherwise the idle sprites
             if len(self.hit_sprites) > 0:
                 sprites = self.hit_sprites
             else:
                 sprites = self.idle_sprites
         else:
+            # if the entity is not attacking, we use the running sprites if they are running, otherwise the idle sprites
             sprites = self.run_sprites if running else self.idle_sprites
         if (time() - self.last_frame_time) >= self.frame_duration:
+            # if the time since the last frame change is greater than the frame duration, we change the frame
             self.last_frame_time = time()
             self.current_frame += 1
             if self.current_frame >= len(sprites):
                 self.current_frame = 0
 
         try:
+            # try to return the current frame, extra check so that we don't crash because we have no sprites
             return sprites[self.current_frame], self.offset
         except IndexError:
             return sprites[0], self.offset
