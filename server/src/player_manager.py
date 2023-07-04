@@ -65,7 +65,7 @@ class PlayerManager(Mechanics):
             # spawn other entities for this client
             for entity in self.server.entities:
                 if entity.uuid != player_uuid:
-                    entity_spawn_packet = EntitySpawnPacket(entity.uuid, entity.name,
+                    entity_spawn_packet = EntitySpawnPacket(entity.uuid, entity.entity_type.value,
                                                             (entity.position.x, entity.position.y),
                                                             entity.health)
                     if isinstance(entity, ServerPlayer):

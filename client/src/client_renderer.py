@@ -64,11 +64,11 @@ class ClientRenderer:
         # handle key events
         for event in events:
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_q:
-                    self.camera.zoom += .1
-                elif event.key == pygame.K_e:
-                    self.camera.zoom = max(self.camera.zoom - .1, 1)
-                elif event.key == pygame.K_l:
+                # if event.key == pygame.K_q:
+                #     self.camera.zoom += .1
+                # elif event.key == pygame.K_e:
+                #     self.camera.zoom = max(self.camera.zoom - .1, 1)
+                if event.key == pygame.K_l:
                     self.camera.position.x += 10
                 elif event.key == pygame.K_j:
                     self.camera.position.x -= 10
@@ -81,11 +81,12 @@ class ClientRenderer:
         if self.client.player:
             self.client.player.render(self.camera, dt)
 
-        self.hud.render(self.camera)
-
         # render other entities
         for entity in self.client.entities:
             entity.render(self.camera, dt)
+
+        # render hud
+        self.hud.render(self.camera)
 
         # if debug is enabled print the current frame count to the screen
         self.debugger.debug(int(self.client.clock.get_fps()))

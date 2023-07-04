@@ -198,7 +198,7 @@ class ClientNetworking:
                 if not entity:
                     continue
                 if entity.uuid == packet.uuid:
-                    entity.attack_animation_time = time()
+                    entity.attacking = packet.attacking
                     break
 
     def tick(self, events, dt) -> bool:

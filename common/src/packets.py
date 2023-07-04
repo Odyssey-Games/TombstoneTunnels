@@ -103,13 +103,14 @@ class EntityHealthPacket(Packet):
 
 class EntityAttackPacket(Packet):
     """
-    Sent by the server to clients to indicate that an entity started attacking.
+    Sent by the server to clients to indicate the attacking state of an entity changed.
 
     Currently, there is only one attack method for each entity, so the client will know what animation to play.
     """
 
-    def __init__(self, uuid: str):
+    def __init__(self, uuid: str, attacking: bool):
         self.uuid = uuid  # unique identifier of the entity that is attacking
+        self.attacking = attacking  # new attacking state of the entity
 
 
 class HelloReplyPacket(Packet):

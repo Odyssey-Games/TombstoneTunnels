@@ -107,7 +107,7 @@ class EntityManager(Mechanics):
                             break
                 # Spawn a random hostile entity
                 entity_type = EntityType.GOBLIN if randint(0, 1) == 1 else EntityType.SKELETON
-                new_entity = ServerEntity(uuid, entity_type, random_spawn, difficulty * 20)
+                new_entity = ServerEntity(uuid, entity_type, random_spawn, 10 + difficulty * 10)
                 self.server.entities.append(new_entity)
                 # Send spawn packet to all clients
                 spawn_packet = EntitySpawnPacket(uuid, new_entity.entity_type.value,

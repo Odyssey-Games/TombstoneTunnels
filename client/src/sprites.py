@@ -118,18 +118,17 @@ class WeaponSprite:
             animation_offset = math.cos((2*math.pi/0.5)*(time()))
 
             # animate sprite based on the time since the last action (move sprite forward and back)
-            base_offset += last_direction.to_tile_vector() * animation_offset * 3 + last_direction.to_tile_vector() * 5
-            rotation_offset = animation_offset * 5
+            base_offset += last_direction.to_tile_vector() * animation_offset * 2 + last_direction.to_tile_vector() * 2
 
             if last_direction == Dir2.UP:
-                return pygame.transform.rotate(self.sprite, rotation_offset), base_offset
+                return self.sprite, base_offset
             elif last_direction == Dir2.DOWN:
-                return pygame.transform.rotate(self.sprite, 180 + rotation_offset), base_offset + Vector2(0, 16)
+                return pygame.transform.rotate(self.sprite, 180), base_offset + Vector2(0, 16)
             elif last_direction == Dir2.LEFT:
-                return pygame.transform.rotate(self.sprite, 90 + rotation_offset), base_offset + Vector2(-16, 16)
+                return pygame.transform.rotate(self.sprite, 90), base_offset + Vector2(-16, 16)
             elif last_direction == Dir2.RIGHT:
-                return pygame.transform.rotate(self.sprite, 270 + rotation_offset), base_offset + Vector2(0, 16)
+                return pygame.transform.rotate(self.sprite, 270), base_offset + Vector2(0, 16)
             else:
-                return self.sprite, self.base_offset
+                return self.sprite, base_offset
         else:
             return None, self.base_offset

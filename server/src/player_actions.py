@@ -23,7 +23,6 @@ class PlayerActions(Mechanics):
                 # The player can either attack or move every MOVE_TIMEOUT seconds.
                 if user.attacking and user.last_direction != Dir2.ZERO:
                     user.last_move_time = time()
-                    self.server.send_packet_to_all(EntityAttackPacket(user.uuid))
 
                     # TODO multiple different player attacks
                     # get tiles in front of player (currently, we only have one attack type: sword - 1 tile in front)
@@ -77,7 +76,9 @@ class PlayerActions(Mechanics):
             user.attacking = packet.attacking
             # update direction of player for other clients (purely visual)
             direction_packet = EntityDirectionPacket(user.uuid, user.direction.value)
+            attack_packet = EntityAttackPacket(user.uuid, user.attacking)
             for client in self.server.clients:
                 # only send direction packet to other clients; the player that changed direction knows it
                 if client.addr != client_addr:
                     self.server.send_packet(direction_packet, client.addr)
+                    self.server.send_packet(attack_packet, client.addr)

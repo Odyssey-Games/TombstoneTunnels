@@ -63,9 +63,10 @@ class Camera:
         """
         dpx = self.display.get_size()[0]
         dpy = self.display.get_size()[1]
-        self.screen_shake = False
+        self.screen_shake = False  # disable screen shake for now
         if self.renderer.client.player:
-            self.screen_shake = self.renderer.client.player.health <= 5
+            # self.screen_shake = self.renderer.client.player.health <= 10
+            pass
 
         if self.screen_shake:  # Increase zoom to a minimum of 1.1 to avoid black borders when applying screen shake
             self.zoom = max(self.zoom, 1.1)
