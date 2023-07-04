@@ -58,10 +58,21 @@ class EntitySprite:
 
 
 class WeaponSprite:
+    """
+    Helper class for managing weapon sprites and returning the correctly applied rotation.
+    Loads the weapon sprite and offset from the assets folder.
+    """
     def _get_sprite(self) -> Surface:
+        """
+        :return: the unrotated pygame image for our weapon sprite
+        """
         return pygame.image.load(Assets.get("weapons", f"weapon_{self.name}.png")).convert_alpha()
 
     def _get_offset(self):
+        """
+        Load the offset from the assets folder, if it exists.
+        :return: the offset parsed as a Vector2
+        """
         try:
             with open(Assets.get("weapons", f"{self.name}_offset.txt"), "r") as f:
                 split = f.readline().split(" ")
@@ -70,11 +81,17 @@ class WeaponSprite:
             return Vector2(0, 0)
 
     def __init__(self, name: str):
-        self.name = name
+        self.name = name  # name of the weapon; used to load the correct image
         self.sprite = self._get_sprite()
         self.base_offset = self._get_offset()
 
     def current_surface(self, attacking: bool = False, last_direction: Dir2 = Dir2.ZERO) -> (Surface, Vector2):
+        """
+        Get the current pygame surface (image) for the weapon sprite.
+        :param attacking: whether the entity (currently player) is attacking
+        :param last_direction: the last direction in which the entity faced
+        :return: the current image based on the last entity direction
+        """
         if attacking:
             if last_direction == Dir2.UP:
                 return self.sprite, self.base_offset

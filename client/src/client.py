@@ -115,7 +115,7 @@ class Client:
 
     def tick(self, events, dt):
         """
-        Called every frame. Updates the player and entities, and handles events.
+        Called every frame. Calls the update() functions on the player and entities, and handles events.
         """
         for event in events:
             if event.type == pygame.QUIT:

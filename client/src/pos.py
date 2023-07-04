@@ -1,6 +1,6 @@
 from pygame import Vector2
 
-TILE_SIZE = 16
+TILE_SIZE = 16  # width and height of the quadratic tiles
 
 
 def abs_from_tile_pos(tile_pos: Vector2) -> Vector2:

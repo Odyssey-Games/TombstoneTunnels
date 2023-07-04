@@ -225,10 +225,10 @@ class ClientNetworking:
                     continue
                 self._handle_packet(packet)
             except BlockingIOError:
-                break  # no more packets to receive
+                break  # no more packets to receive; return
             except Exception as e:
                 print(f"Error while receiving packet: {e}. Disconnecting.")
                 self.socket = None
-                return False
+                return False  # return false to indicate that the connection was lost
 
         return True

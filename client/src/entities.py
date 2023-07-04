@@ -5,11 +5,11 @@ from time import time
 import pygame
 from pygame import Vector2
 
-from sprites import WeaponSprite, EntitySprite
 from common.src.direction import Dir2
 from common.src.entities import EntityType
 from common.src.packets import *
 from pos import abs_from_tile_pos
+from sprites import WeaponSprite, EntitySprite
 
 
 class ClientEntity:
@@ -67,16 +67,19 @@ class ClientEntity:
         if time() - self.damage_animation_time <= self.DAMAGE_ANIMATION_DURATION:
             sprite = pygame.transform.laplacian(sprite)
         pos = self.animated_position - camera.position
-        if self.flip_image:
+        if self.flip_image:  # entity is facing left
             flipped_image = pygame.transform.flip(sprite, True, False)
             camera.renderTexture.blit(flipped_image, (pos.x, pos.y - 16) + offset)
         else:
+            # entity is facing right
             camera.renderTexture.blit(sprite, (pos.x, pos.y - 16) + offset)
         if self.weapon_sprite:
+            # entity has a weapon that should be rendered
             try:
                 weapon, offset = self.weapon_sprite.current_surface(self.attacking, self.last_direction)
                 camera.renderTexture.blit(weapon, (pos.x, pos.y - 16) + offset)
             except TypeError:
+                # weapon sprite doesn't want to render any surface
                 pass
 
 

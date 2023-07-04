@@ -1,3 +1,10 @@
+"""
+Main server (entrypoint) file.
+The server logic is divided into the following mechanics:
+- PlayerManager: Handles player connections and disconnections.
+- PlayerActions: Handles player actions (e.g. movement, attacking, etc.).
+- EntityManager: Handles all entities (players and hostile creatures) and their logic.
+"""
 import os
 import sys
 

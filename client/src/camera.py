@@ -70,6 +70,8 @@ class Camera:
         if self.screen_shake:  # Increase zoom to a minimum of 1.1 to avoid black borders when applying screen shake
             self.zoom = max(self.zoom, 1.1)
 
+        # Draw the texture to the display surface. To simulate the camera, apply the current offset.
+        # Additionally, when camera shake is enabled, apply an extra random offset to the texture.
         self.display.blit(
             pygame.transform.scale(
                 self.renderTexture,
@@ -81,9 +83,12 @@ class Camera:
             )
         )
 
+        # When the user enabled debugging by pressing F3, draw some debug text on top of the render texture
         if debugger:
             debugger.renderDebug()
+        # Call flip() on the display surface to make the changes visible
         pygame.display.flip()
+        # Fill the render texture to clear it for the next frame
         self.renderTexture.fill((0, 0, 0))
         self.display.fill((255, 0, 0))
 
