@@ -6,6 +6,7 @@ class EntityType(Enum):
 
     # FRIENDLY
     KNIGHT = "knight_m"  # player
+    HEART = "heart"  # floating heart that heals players
     # HOSTILE
     GOBLIN = "goblin"
     SKELETON = "skelet"

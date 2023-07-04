@@ -21,13 +21,28 @@ class EntityManager(Mechanics):
     def __init__(self, server):
         super().__init__(server)
         self.last_spawn_time = time()
+        self.last_heart_spawn_time = time()
         self.last_move_time = time()
 
     ENTITY_SPAWN_INTERVAL = 3  # spawn entities every 3 seconds
+    HEART_SPAWN_INTERVAL = 2  # spawn hearts every 15 seconds
     ENTITY_MOVE_INTERVAL = 1.5  # move entities every 1 second
 
     def _get_random_spawn(self):
         return Vector2(randint(1, self.server.current_map.width - 1), randint(1, self.server.current_map.height - 1))
+
+    def _get_random_entity_spawn(self):
+        random_spawn = self._get_random_spawn()
+        is_near_player = True
+        # Find a valid spawn position that is not near a player
+        while Tile.from_coords(self.server, random_spawn).is_solid or is_near_player:
+            random_spawn = self._get_random_spawn()
+            is_near_player = False
+            for player in self.server.clients:
+                if (player.position - random_spawn).length_squared() <= 4:
+                    is_near_player = True
+                    break
+        return random_spawn
 
     @staticmethod
     def get_sign(value):
@@ -56,6 +71,9 @@ class EntityManager(Mechanics):
                 for entity in self.server.entities:
                     if entity.entity_type == EntityType.KNIGHT:
                         # don't move players
+                        continue
+                    if entity.entity_type == EntityType.HEART:
+                        # don't move hearts
                         continue
                     # find nearest player
                     nearest_player = None
@@ -95,16 +113,7 @@ class EntityManager(Mechanics):
             if time() - self.last_spawn_time >= self.ENTITY_SPAWN_INTERVAL:
                 self.last_spawn_time = time()
                 uuid = secrets.token_hex(16)
-                random_spawn = self._get_random_spawn()
-                is_near_player = True
-                # Find a valid spawn position that is not near a player
-                while Tile.from_coords(self.server, random_spawn).is_solid or is_near_player:
-                    random_spawn = self._get_random_spawn()
-                    is_near_player = False
-                    for player in self.server.clients:
-                        if (player.position - random_spawn).length_squared() <= 4:
-                            is_near_player = True
-                            break
+                random_spawn = self._get_random_entity_spawn()
                 # Spawn a random hostile entity
                 entity_type = EntityType.GOBLIN if randint(0, 1) == 1 else EntityType.SKELETON
                 new_entity = ServerEntity(uuid, entity_type, random_spawn, 10 + difficulty * 10)
@@ -115,3 +124,18 @@ class EntityManager(Mechanics):
                                                  new_entity.health)
                 print("Spawned entity: ", uuid, "with health", new_entity.health)
                 self.server.send_packet_to_all(spawn_packet)
+
+            if time() - self.last_heart_spawn_time >= self.HEART_SPAWN_INTERVAL:
+                self.last_heart_spawn_time = time()
+                uuid = secrets.token_hex(16)
+                random_spawn = self._get_random_entity_spawn()
+                # Spawn a floating heart
+                new_entity = ServerEntity(uuid, EntityType.HEART, random_spawn, 10)
+                self.server.entities.append(new_entity)
+                # Send spawn packet to all clients
+                spawn_packet = EntitySpawnPacket(uuid, new_entity.entity_type.value,
+                                                 (new_entity.position.x, new_entity.position.y),
+                                                 new_entity.health)
+                print("Spawned heart entity: ", uuid, "with health", new_entity.health)
+                self.server.send_packet_to_all(spawn_packet)
+

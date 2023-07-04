@@ -4,10 +4,10 @@ Mechanics for simple player logic like connecting, disconnecting, pinging, timin
 from time import time
 
 from common.src.direction import Dir2
+from common.src.entities import EntityType
 from common.src.map.tile import Tile
 from common.src.packets import *
 from mechanics import Mechanics
-from server.src.entities import ServerPlayer
 
 
 class PlayerActions(Mechanics):
@@ -35,6 +35,7 @@ class PlayerActions(Mechanics):
                             continue
                         # damage entities on the attacked tile
                         for entity in self.server.entities:
+                            from entities import ServerPlayer
                             if isinstance(entity, ServerPlayer):
                                 continue  # no friendly fire
                             if entity.position == attacked_tile:
@@ -68,6 +69,18 @@ class PlayerActions(Mechanics):
                     # send new position to clients
                     move_packet = EntityMovePacket(user.uuid, (user.position.x, user.position.y))
                     self.server.send_packet_to_all(move_packet)
+
+            # check collision with hearts
+            for heart in self.server.entities:
+                if heart.entity_type == EntityType.HEART:
+                    if user.position == heart.position:
+                        # player collided with heart; remove it on the server and clients
+                        self.server.entities.remove(heart)
+                        self.server.send_packet_to_all(EntityRemovePacket(heart.uuid))
+                        # update player health on the server and clients
+                        user.health = min(user.health + 10, user.max_health)
+                        self.server.send_packet_to_all(EntityHealthPacket(user.uuid, user.health))
+
 
         # handle incoming packets from clients affecting player movement (ChangeInputPacket)
         if isinstance(packet, ChangeInputPacket):

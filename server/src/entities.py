@@ -17,6 +17,7 @@ class ServerEntity:
         self.entity_type = entity_type  # type of entity -> used for sprites, animations etc.
         self.position = position  # tile position of entity
         self.health = health  # health points of entity
+        self.max_health = health  # the maximum health of the entity
         self.direction = Dir2.ZERO  # direction of entity input (facing direction)
         self.last_direction = Dir2.ZERO  # last direction of entity input, only ZERO at start
         self.attacking: bool = False  # whether the entity is attacking

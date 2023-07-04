@@ -1,4 +1,5 @@
 # This file contains the client-side entity/player classes with methods for rendering
+import math
 import random
 from time import time
 
