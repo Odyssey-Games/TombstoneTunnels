@@ -1,3 +1,4 @@
+import math
 from time import time
 
 import pygame.image
@@ -12,6 +13,7 @@ class EntitySprite:
     Helper class for managing the different sprites (textures) for one entity type and thereby creating
     the animation, based on the current state and direction of the entity.
     """
+
     def _get_sprites(self, my_type: str):
         """
         :return: a list of pygame surfaces (sprites/images) for the specified entity type
@@ -77,6 +79,7 @@ class WeaponSprite:
     Helper class for managing weapon sprites and returning the correctly applied rotation.
     Loads the weapon sprite and offset from the assets folder.
     """
+
     def _get_sprite(self) -> Surface:
         """
         :return: the unrotated pygame image for our weapon sprite
@@ -100,22 +103,32 @@ class WeaponSprite:
         self.sprite = self._get_sprite()
         self.base_offset = self._get_offset()
 
-    def current_surface(self, attacking: bool = False, last_direction: Dir2 = Dir2.ZERO) -> (Surface, Vector2):
+    def current_surface(self, attacking: bool = False, attack_animation_time=0, last_direction: Dir2 = Dir2.ZERO) -> (Surface, Vector2):
         """
         Get the current pygame surface (image) for the weapon sprite.
         :param attacking: whether the entity (currently player) is attacking
         :param last_direction: the last direction in which the entity faced
+        :param attack_animation_time: the time of the last attack, used for animating the sword
         :return: the current image based on the last entity direction
         """
         if attacking:
+            base_offset = self.base_offset.copy()
+
+            # cosine function for animating the sword
+            animation_offset = math.cos((2*math.pi/0.5)*(time()))
+
+            # animate sprite based on the time since the last action (move sprite forward and back)
+            base_offset += last_direction.to_tile_vector() * animation_offset * 3 + last_direction.to_tile_vector() * 5
+            rotation_offset = animation_offset * 5
+
             if last_direction == Dir2.UP:
-                return self.sprite, self.base_offset
+                return pygame.transform.rotate(self.sprite, rotation_offset), base_offset
             elif last_direction == Dir2.DOWN:
-                return pygame.transform.rotate(self.sprite, 180), self.base_offset + Vector2(0, 16)
+                return pygame.transform.rotate(self.sprite, 180 + rotation_offset), base_offset + Vector2(0, 16)
             elif last_direction == Dir2.LEFT:
-                return pygame.transform.rotate(self.sprite, 90), self.base_offset + Vector2(-16, 16)
+                return pygame.transform.rotate(self.sprite, 90 + rotation_offset), base_offset + Vector2(-16, 16)
             elif last_direction == Dir2.RIGHT:
-                return pygame.transform.rotate(self.sprite, 270), self.base_offset + Vector2(0, 16)
+                return pygame.transform.rotate(self.sprite, 270 + rotation_offset), base_offset + Vector2(0, 16)
             else:
                 return self.sprite, self.base_offset
         else:

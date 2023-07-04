@@ -6,10 +6,10 @@ The packets are divided into two main categories:
     Client packets are further divided into two categories:
     - Authorized (AuthorizedPacket)
         Packets that are sent when the client is already authorized.
-        Example: PlayerMovePacket, PlayerAttackEntityPacket, etc.
+        Example: PlayerMovePacket, ChangeInputPacket, etc.
     - Unauthorized
         Packets that are sent when the client is not yet authorized.
-        Example: HelloPacket, RequestInfoPacket, etc.
+        Example: HelloPacket, RequestInfoPacket (currently not implemented), etc.
 - Server to client (s2c)
 
 Serialization works using json due to pickle being unsafe (possible arbitrary code execution). This means that

@@ -41,6 +41,9 @@ class ClientEntity:
         self.hostile = hostile  # whether the entity is hostile (e.g. a skeleton)
         self.max_health = health  # the maximum health of the entity; currently used for the health bar
         self.damage_animation_time = 0  # the time the damage animation was started
+        self.attack_animation_time = 0  # the time the attack animation was started
+        self.spawn_time = time()  # the time the entity was spawned (used for fade-in animation)
+        print("RESET SPAWN TIME")
 
     def tick(self, delta_time, events):
         """
@@ -63,7 +66,10 @@ class ClientEntity:
         simple laplacian filter applied to the sprite for a short duration.
         """
         current_sprite, offset = self.sprite.current_sprite(self.direction != Dir2.ZERO, self.attacking)
-        sprite = current_sprite
+        sprite = current_sprite.copy()  # we don't want to modify the original sprite for fade-in animations
+        if time() - self.spawn_time <= 1:
+            # fade-in animation
+            sprite.set_alpha(int(255 * (time() - self.spawn_time)))
         if time() - self.damage_animation_time <= self.DAMAGE_ANIMATION_DURATION:
             sprite = pygame.transform.laplacian(sprite)
         pos = self.animated_position - camera.position
@@ -76,9 +82,9 @@ class ClientEntity:
         if self.weapon_sprite:
             # entity has a weapon that should be rendered
             try:
-                weapon, offset = self.weapon_sprite.current_surface(self.attacking, self.last_direction)
+                weapon, offset = self.weapon_sprite.current_surface(self.attacking, self.attack_animation_time, self.last_direction)
                 camera.renderTexture.blit(weapon, (pos.x, pos.y - 16) + offset)
-            except TypeError:
+            except TypeError as e:
                 # weapon sprite doesn't want to render any surface
                 pass
 

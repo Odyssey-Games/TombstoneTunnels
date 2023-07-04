@@ -192,6 +192,14 @@ class ClientNetworking:
             print(f"Received map change packet with map {new_map}.")
             self.client.map = new_map
             # todo animate map change
+        elif isinstance(packet, EntityAttackPacket):
+            # attack animation
+            for entity in (self.client.entities + [self.client.player]):
+                if not entity:
+                    continue
+                if entity.uuid == packet.uuid:
+                    entity.attack_animation_time = time()
+                    break
 
     def tick(self, events, dt) -> bool:
         """Handle incoming packets and send ping packet.
