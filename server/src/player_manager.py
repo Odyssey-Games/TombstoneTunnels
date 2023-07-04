@@ -62,14 +62,18 @@ class PlayerManager(Mechanics):
             health_packet = EntityHealthPacket(player_uuid, user.health)
             self.server.send_packet(health_packet, client_addr)
 
-            # spawn other players for this client
-            for other_user in self.server.clients:
-                if other_user.addr != client_addr:
-                    player_spawn_packet = PlayerSpawnPacket(other_user.name,
-                                                            other_user.uuid,
-                                                            (other_user.position.x, other_user.position.y),
-                                                            other_user.health)
-                    self.server.send_packet(player_spawn_packet, client_addr)
+            # spawn other entities for this client
+            for entity in self.server.entities:
+                if entity.uuid != player_uuid:
+                    entity_spawn_packet = EntitySpawnPacket(entity.uuid, entity.name,
+                                                            (entity.position.x, entity.position.y),
+                                                            entity.health)
+                    if isinstance(entity, ServerPlayer):
+                        # entity is player; send player spawn packet
+                        entity_spawn_packet = PlayerSpawnPacket(entity.name, entity.uuid,
+                                                                (entity.position.x, entity.position.y),
+                                                                entity.health)
+                    self.server.send_packet(entity_spawn_packet, client_addr)
 
             # spawn player for all clients
             player_spawn_packet = PlayerSpawnPacket(user.name, player_uuid, (user.position.x, user.position.y),
