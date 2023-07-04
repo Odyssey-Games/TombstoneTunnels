@@ -19,6 +19,6 @@ class Mechanics:
         Called every tick by the server.
 
         :param packet: The packet sent by the client or None if no packet was sent.
-        :param addr: The address of the client or None if packet is None.
+        :param addr: The network address of the client (address, port) or None if packet is None.
         """
         pass

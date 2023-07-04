@@ -1,4 +1,6 @@
-# Server-side entity classes
+"""
+Server-side entity classes. For rendering etc. see client/src/entities.py.
+"""
 from time import time
 
 from pygame import Vector2

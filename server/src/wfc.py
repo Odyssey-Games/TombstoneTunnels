@@ -1,83 +1,98 @@
+"""
+Helper file containing functions for generating maps with the Wave Function Collapse algorithm.
+
+In our case, we create a rectangle of tiles with a given size and then fill the map with
+randomly generated walls and structures.
+"""
 import random
 
+
 def fill_walls(gmap, size):
-    wallTiles = {
-            "top":"wall_edge_top_middle",
-            "top2":"swall_bottom_middle", # second row middle
-            "left":"swall_edge_left_straight",
-            "right":"swall_edge_right_straight",
-            "bottom":"swall_full_middle",
-            "edges":{
-                "topLeft":"wall_edge_top_left_end",
-                "topRight":"wall_edge_top_right_end",
-                "bottomLeft":"wall_corner_left_end",
-                "bottomRight":"wall_edge_right_end",
-            }
+    wall_tiles = {
+        "top": "wall_edge_top_middle",
+        "top2": "swall_bottom_middle",  # second row middle
+        "left": "swall_edge_left_straight",
+        "right": "swall_edge_right_straight",
+        "bottom": "swall_full_middle",
+        "edges": {
+            "topLeft": "wall_edge_top_left_end",
+            "topRight": "wall_edge_top_right_end",
+            "bottomLeft": "wall_corner_left_end",
+            "bottomRight": "wall_edge_right_end",
         }
-        
+    }
+
     # replace map boundary with walls
-    gmap[1] = [wallTiles["top2"]] * size
+    gmap[1] = [wall_tiles["top2"]] * size
 
     for row in gmap:
-        row[0] = wallTiles["left"]
-        row[-1] = wallTiles["right"]
+        row[0] = wall_tiles["left"]
+        row[-1] = wall_tiles["right"]
 
-    gmap[0] = [wallTiles["top"]] * size
-    gmap[-1] = [wallTiles["bottom"]] * size
+    gmap[0] = [wall_tiles["top"]] * size
+    gmap[-1] = [wall_tiles["bottom"]] * size
 
     # edges:
 
-    gmap[0][0] = wallTiles["edges"]["topLeft"]
-    gmap[0][-1] = wallTiles["edges"]["topRight"]
+    gmap[0][0] = wall_tiles["edges"]["topLeft"]
+    gmap[0][-1] = wall_tiles["edges"]["topRight"]
 
-    gmap[-1][0] = wallTiles["edges"]["bottomLeft"]
-    gmap[-1][-1] = wallTiles["edges"]["bottomRight"]
+    gmap[-1][0] = wall_tiles["edges"]["bottomLeft"]
+    gmap[-1][-1] = wall_tiles["edges"]["bottomRight"]
 
     return gmap
-    
 
 
 def wfc_fill(gmap, size):
-    structures={
-        0:[["swall_full_left_end", "swall_full_right_end"]],
-        1:[["swall_full_left_end", "swall_full_right_end"],
-           ["swall_bottom_left_end","swall_bottom_right_end"]],
-        2:[["swall_edge_corner_left_down", None],
-           ["swall_full_left_end", "swall_full_right_end"]]
+    """
+    Helper function to fill the map with randomly generated structures. Here we assume the map already consists of a
+    basic rectangle platform. "s" at the beginning of a tile name stands for "solid".
+    :param gmap: map to fill
+    :param size: size of basic platform
+    :return: the filled map
+    """
+    structures = {
+        0: [["swall_full_left_end", "swall_full_right_end"]],
+        1: [["swall_full_left_end", "swall_full_right_end"],
+            ["swall_bottom_left_end", "swall_bottom_right_end"]],
+        2: [["swall_edge_corner_left_down", None],
+            ["swall_full_left_end", "swall_full_right_end"]]
     }
     for rowIndex, row in enumerate(gmap):
         for tileIndex, tile in enumerate(row):
             if tile == "floor_clear":
-                if random.randint(0,7) == 1:
-                    gmap[rowIndex][tileIndex] = random.choice(["floor_cracked_"+str(x) for x in range(1,6)] + ["floor_ladder"])
-                
-                if random.randint(0,24) == 1:
+                if random.randint(0, 7) == 1:
+                    gmap[rowIndex][tileIndex] = random.choice(
+                        ["floor_cracked_" + str(x) for x in range(1, 6)] + ["floor_ladder"])
+
+                if random.randint(0, 24) == 1:
                     gmap[rowIndex][tileIndex] = "sfloor_pillar"
 
             elif tile == "swall_bottom_middle":
-                if random.randint(0,12) == 1:
-                    gmap[rowIndex][tileIndex] = random.choice(["swall_bottom_missing_brick", "swall_bottom_hole", "swall_bottom_flag_red"])
+                if random.randint(0, 12) == 1:
+                    gmap[rowIndex][tileIndex] = random.choice(
+                        ["swall_bottom_missing_brick", "swall_bottom_hole", "swall_bottom_flag_red"])
 
     # add structures
 
-    for x in range(3): # amount of structures
+    for x in range(3):  # amount of structures
         structure = random.choice(list(structures.values()))
 
         placed = False
         while not placed:
-            randomOriginX = random.randint(2, size-2)
-            randomOriginY = random.randint(2, size-2)
+            random_origin_x = random.randint(2, size - 2)
+            random_origin_y = random.randint(2, size - 2)
 
-            for Yoffset, row in enumerate(structure):
-                for Xoffset, tile in enumerate(row): 
+            for y_offset, row in enumerate(structure):
+                for x_offset, tile in enumerate(row):
                     if tile:
-                        gmap[randomOriginY+Yoffset][randomOriginX + Xoffset] = tile
+                        gmap[random_origin_y + y_offset][random_origin_x + x_offset] = tile
             placed = True
 
-        
-    
-
     return gmap
+
+
+# old code for wfc we didn't use in the end but are keeping for reference
 '''
 class Cell:
     def __init__(self, x, y, rez, options):
