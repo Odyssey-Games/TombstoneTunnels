@@ -3,12 +3,18 @@ import os
 import wfc
 from common.src.map.map import Map
 
-DATA_PATH = os.path.join(os.path.dirname(__file__), "data")  # for pyinstaller; different data folder loc
+# When using pyinstaller, the data folder is in the root location; otherwise it's in server/src/data
+DATA_PATH = os.path.join(os.path.dirname(__file__), "data")  # check pyinstaller path
 if not os.path.exists(DATA_PATH):
+    # not using pyinstaller
     DATA_PATH = os.path.join(os.path.dirname(__file__), "..", "data")
 
 
 class MapManager:
+    """
+    Class to generate and manage maps. Additionally, there is a method for loading maps from files (see _load_maps()),
+    but this is currently not used.
+    """
     def __init__(self):
         self.maps = []
         # commented out because map generation was implemented; we don't need to load maps from files anymore

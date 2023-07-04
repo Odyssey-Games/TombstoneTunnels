@@ -1,7 +1,6 @@
 """
 Spawn/remove entities based on player count.
 """
-import math
 import secrets
 from random import randint
 from time import time

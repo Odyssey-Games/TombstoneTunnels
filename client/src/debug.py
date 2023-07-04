@@ -1,9 +1,10 @@
-# This file contains a class that allow you to render debug text on the screen
-
 import pygame
 
 
 class Debugger:
+    """
+    Class that allow you to render debug text on the screen. The debugger is toggled with F3.
+    """
     def __init__(self):
         self.pos = (5, 5)  # small offset from top left of screen
         self.content = []  # list of debug content

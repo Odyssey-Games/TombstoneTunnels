@@ -94,7 +94,8 @@ class ClientNetworking:
         self.socket = None
 
     def send_packet(self, packet: Packet):
-        """Sends a packet to the server.
+        """
+        Sends a packet to the server.
 
         Here we check if the packet is of type AuthorizedPacket. If this is the case,
         we require the token variable to be set and add it to the packet.

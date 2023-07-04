@@ -8,6 +8,10 @@ import random
 
 
 def fill_walls(gmap, size):
+    """
+    Helper function to fill the map with randomly distributed walls.
+    Here we assume the map already consists of a basic rectangle platform.
+    """
     wall_tiles = {
         "top": "wall_edge_top_middle",
         "top2": "swall_bottom_middle",  # second row middle
@@ -46,7 +50,7 @@ def fill_walls(gmap, size):
 def wfc_fill(gmap, size):
     """
     Helper function to fill the map with randomly generated structures. Here we assume the map already consists of a
-    basic rectangle platform. "s" at the beginning of a tile name stands for "solid".
+    basic rectangle platform. The letter "s" at the beginning of a tile name stands for "solid".
     :param gmap: map to fill
     :param size: size of basic platform
     :return: the filled map
