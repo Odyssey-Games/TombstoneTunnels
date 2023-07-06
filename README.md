@@ -14,6 +14,7 @@
 - close-range/melee combat
 
 ## Testing
+We tested this project using Python 3.10 and 3.11, any newer python version should also work. The [pip3](https://docs.python.org/3/installing/index.html) dependencies are listed in the [requirements.txt](https://github.com/Odyssey-Games/TombstoneTunnels/blob/main/requirements.txt) file.
 
 <details>
 
